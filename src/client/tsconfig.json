@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2019",
+    "moduleResolution": "node",
+    "module": "ESNext",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "outDir": "../../dist/client",
+    "lib": ["ES2019", "DOM"],
+    "types": [],
+    "jsx": "react",
+    "composite": true
+  },
+  "include": ["**/*.ts", "**/*.tsx", "tailwind.config.cjs"],
+  "exclude": ["**/*.test.ts", "**/*.test.tsx"],
+  "references": [{ "path": "../shared" }],
+  "typeRoots": ["./node_modules/phaser/types"],
+  "types": ["Phaser"]
+}
