@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import Main from "./Main";
+import Main from "./game/scenes/Main";
 // import FpsCounter from "./utils/FpsCounter";
 
 const PHASER_GAME_CONFIG = {

@@ -1,15 +1,12 @@
 import { Engine } from "../../shared/ecs";
 import System from "../../shared/ecs/System";
-import Writer from "../../shared/messages/schema/Writer";
-import { QuerySet } from "../../shared/ecs/types";
 import OutMessage from "../../shared/components/OutMessage";
+import WebSocket from "../components/WebSocket";
+import Writer from "../../shared/messages/schema/Writer";
 
 class Broadcaster extends System {
-  private _webSocket: WebSocket;
-
-  constructor(engine: Engine, webSocket: WebSocket) {
+  constructor(engine: Engine) {
     super(engine);
-    this._webSocket = webSocket;
   }
 
   start(): void {}
@@ -25,10 +22,10 @@ class Broadcaster extends System {
 
   destroy(): void {}
 
-  private broadcast = (querySet: QuerySet) => {
-    const [outMessage] = querySet as [OutMessage<any>];
+  private broadcast = ([outMessage]: [OutMessage<any>]) => {
+    const recipientWebSocket = this.engine.getComponentById(outMessage.recipient, WebSocket);
     const binaryMessage = Writer.messageComponentToBinary(outMessage);
-    this._webSocket.send(binaryMessage);
+    recipientWebSocket.websocket.send(binaryMessage, true);
     this.engine.removeComponent(outMessage);
   };
 

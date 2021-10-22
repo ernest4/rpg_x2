@@ -11,7 +11,7 @@ import Room from "../components/Room";
 import Speed from "../components/Speed";
 import PhysicsBody from "../components/PhysicsBody";
 import Transform from "../../shared/components/Transform";
-import { DEFAULT_ROOM_NAME } from "../game/State";
+import { DEFAULT_ROOM_NAME } from "../../client/game/State";
 import Drifter from "../../shared/components/characterTypes/Drfiter";
 
 class CharacterDeserializer extends System {

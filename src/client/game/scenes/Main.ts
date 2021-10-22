@@ -1,17 +1,17 @@
-import { Engine } from "../shared/ecs";
-import { DeltaTime } from "../shared/ecs/types";
+import { Engine } from "../../../shared/ecs";
+import { DeltaTime } from "../../../shared/ecs/types";
 import MessageDeserializer from "../shared/systems/MessageDeserializer";
-import { DEVELOPMENT } from "../shared/utils/environment";
-import ConnectionListener from "./systems/ConnectionListener";
-import DisconnectionListener from "./systems/DisconnectionListener";
-import InputListener from "./systems/InputListener";
-import Manager from "./systems/Manager";
-import MessageListener from "./systems/MessageListener";
-import SpriteRender from "./systems/SpriteRender";
-import Broadcaster from "./systems/Broadcaster";
-import MovementControlPublisher from "./systems/MovementControlPublisher";
-import SpriteLoader from "./systems/SpriteLoader";
-import NetworkedComponentsSynchronizer from "./systems/NetworkedComponentsSynchronizer";
+import { DEVELOPMENT } from "../../../shared/utils/environment";
+import ConnectionListener from "../../systems/ConnectionListener";
+import DisconnectionListener from "../../systems/DisconnectionListener";
+import InputListener from "../../systems/InputListener";
+import Manager from "../../systems/Manager";
+import MessageListener from "../../systems/MessageListener";
+import SpriteRender from "../../systems/SpriteRender";
+import Broadcaster from "../../systems/Broadcaster";
+import MovementControlPublisher from "../../systems/MovementControlPublisher";
+import SpriteLoader from "../../systems/SpriteLoader";
+import NetworkedComponentsSynchronizer from "../../systems/NetworkedComponentsSynchronizer";
 import {
   CharacterMessage,
   DrifterMessage,
@@ -26,7 +26,7 @@ import HitPoints from "../shared/components/HitPoints";
 import Character from "../shared/components/Character";
 import Drifter from "../shared/components/characterTypes/Drfiter";
 import Name from "../shared/components/Name";
-import DrifterMessageToSpriteLoadEvent from "./systems/DrifterMessageToSpriteLoadEvent";
+import DrifterMessageToSpriteLoadEvent from "../../systems/DrifterMessageToSpriteLoadEvent";
 import Phaser from "phaser";
 // import FpsCounter from "./utils/FpsCounter";
 

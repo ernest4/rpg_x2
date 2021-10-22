@@ -2,7 +2,6 @@ import path from "path";
 import url from "url";
 import fs from "fs";
 import uWS from "uWebSockets.js";
-import Game from "./Game";
 import os from "os";
 import { PORT } from "../shared/utils/environment";
 import { pipeStreamOverResponse } from "./utils/uwsHelpers";
@@ -51,14 +50,9 @@ server.get("/statics/*", (response: uWS.HttpResponse, request: uWS.HttpRequest) 
   pipeStreamOverResponse(response, readStream, totalSize);
 });
 
-// TODO: hide it behind admin auth
 server.get("/server/stats/", (response: uWS.HttpResponse, request: uWS.HttpRequest) => {
-  // response.write(request); // testing, inspecting request
   response.end(`os CPUs: ${os.cpus().length}`);
 });
-
-const game = new Game(server);
-game.run();
 
 server.listen(PORT, (listenSocket: any) => {
   if (listenSocket) console.log(`Listening to port ${PORT}`);

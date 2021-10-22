@@ -1,38 +1,44 @@
 import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
-import { QuerySet } from "../../shared/ecs/types";
 import Buffer from "../../shared/ecs/utils/Buffer";
+import System from "../../shared/ecs/System";
+import uWS from "uWebSockets.js";
+import { EntityId } from "../../shared/ecs/types";
+import WebSocketInitEvent from "../components/WebSocketInitEvent";
 import DisconnectionEvent from "../components/DisconnectionEvent";
 
 class DisconnectionListener extends System {
-  private _webSocket: WebSocket;
-  private _disconnectionsBuffer: Buffer<boolean>;
+  private _disconnectionsBuffer: Buffer<EntityId>;
 
-  constructor(engine: Engine, webSocket: WebSocket) {
+  constructor(engine: Engine) {
     super(engine);
-    this._webSocket = webSocket;
-    this._disconnectionsBuffer = new Buffer<boolean>();
+    this._disconnectionsBuffer = new Buffer<EntityId>();
   }
 
-  start(): void {
-    this._webSocket.onclose = this.onClose;
-  }
+  start(): void {}
 
   update(): void {
+    this.engine.query(this.registerDisconnectionListener, WebSocketInitEvent);
     this.engine.removeComponentsOfClass(DisconnectionEvent);
     this.createDisconnectionEvents();
   }
 
   destroy(): void {}
 
-  private onClose = (event: Event) => this._disconnectionsBuffer.push(true);
+  private registerDisconnectionListener = ([{ behaviour, id }]: [WebSocketInitEvent]) => {
+    behaviour.close = this.onClose(id);
+  };
+
+  private onClose = (entityId: EntityId) => {
+    return (webSocket: uWS.WebSocket, code: number, message: ArrayBuffer) => {
+      this._disconnectionsBuffer.push(entityId);
+      console.log("WebSocket closed"); // TODO: remove
+    };
+  };
 
   private createDisconnectionEvents = () => {
-    this._disconnectionsBuffer.process(isDisconnected => {
-      const entityId = this.newEntityId();
+    this._disconnectionsBuffer.process(entityId => {
       const disconnectionEvent = new DisconnectionEvent(entityId);
-      this.engine.addComponent(disconnectionEvent);
-      // this.engine.generateComponent(DisconnectionEvent) // could do all 3 steps above (and return component) // TODO
+      this.engine.addComponents(disconnectionEvent);
     });
   };
 }
