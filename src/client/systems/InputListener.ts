@@ -3,6 +3,7 @@ import System from "../../shared/ecs/System";
 import Buffer from "../../shared/ecs/utils/Buffer";
 import InputEvent from "../components/InputEvent";
 import Phaser from "phaser";
+import { Player } from "../components";
 
 export const INPUT_KEYS = {
   UP: "UP",
@@ -46,6 +47,7 @@ const DEFAULT_INPUTS: InputEventObject[] = [
   [INPUT_EVENT_TYPES.KEYUP, INPUT_KEYS.D],
 ];
 
+// TODO: jests
 class InputListener extends System {
   private _inputs: InputEventObject[];
   private _inputsBuffer: Buffer<InputEventObject>;
@@ -64,7 +66,8 @@ class InputListener extends System {
 
   update(): void {
     this.engine.removeComponentsOfClass(InputEvent);
-    this.createInputEvents();
+    // this.createInputEvents();
+    this.engine.query(this.createInputEvents, Player);
   }
 
   destroy(): void {}
@@ -77,12 +80,19 @@ class InputListener extends System {
     );
   };
 
-  private createInputEvents = () => {
+  private createInputEvents = ([{ entityId: playerEntityId }]: [Player]) => {
     this._inputsBuffer.process(([type, key]) => {
-      const inputEvent = new InputEvent(this.newEntityId(), type, key);
+      const inputEvent = new InputEvent(this.newEntityId(), type, key, playerEntityId);
       this.engine.addComponent(inputEvent);
     });
   };
+
+  // private createInputEvents = () => {
+  //   this._inputsBuffer.process(([type, key]) => {
+  //     const inputEvent = new InputEvent(this.newEntityId(), type, key);
+  //     this.engine.addComponent(inputEvent);
+  //   });
+  // };
 }
 
 export default InputListener;

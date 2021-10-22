@@ -9,7 +9,7 @@ import Manager from "../../systems/Manager";
 import MessageListener from "../../systems/MessageListener";
 import SpriteRender from "../../systems/SpriteRender";
 import Broadcaster from "../../systems/Broadcaster";
-import MovementControlPublisher from "../../systems/MovementControlPublisher";
+import MovementController from "../../systems/MovementController";
 import SpriteLoader from "../../systems/SpriteLoader";
 import NetworkedComponentsSynchronizer from "../../systems/NetworkedComponentsSynchronizer";
 import {
@@ -28,6 +28,7 @@ import Drifter from "../shared/components/characterTypes/Drfiter";
 import Name from "../shared/components/Name";
 import DrifterMessageToSpriteLoadEvent from "../../systems/DrifterMessageToSpriteLoadEvent";
 import Phaser from "phaser";
+import Movement from "../../systems/Movement";
 // import FpsCounter from "./utils/FpsCounter";
 
 export default class Main extends Phaser.Scene {
@@ -46,8 +47,6 @@ export default class Main extends Phaser.Scene {
   // preload() {}
 
   create(data) {
-    this._webSocket = new WebSocket(this.webSocketURL());
-    this._webSocket.binaryType = "arraybuffer"; // TODO: move this to MessageListener init?
     this.initECS();
   }
 
@@ -60,54 +59,23 @@ export default class Main extends Phaser.Scene {
     // TODO: test all systems.
     this._engine.addSystems(
       new Manager(this._engine),
-      new ConnectionListener(this._engine, this._webSocket),
-      new MessageListener(this._engine, this._webSocket),
-      new MessageDeserializer(this._engine),
-      new DisconnectionListener(this._engine, this._webSocket),
-      new InputListener(this._engine, this),
 
-      new MovementControlPublisher(this._engine),
-
-      new NetworkedComponentsSynchronizer<MESSAGE_TYPE.CHARACTER>(
-        this._engine,
-        Character,
-        CharacterMessage
-      ),
-      new NetworkedComponentsSynchronizer<MESSAGE_TYPE.NAME>(this._engine, Name, NameMessage),
-      new NetworkedComponentsSynchronizer<MESSAGE_TYPE.TRANSFORM>(
-        this._engine,
-        Transform,
-        TransformMessage
-      ),
-      new NetworkedComponentsSynchronizer<MESSAGE_TYPE.HITPOINTS>(
-        this._engine,
-        HitPoints,
-        HitPointsMessage
-      ),
-
-      // CharacterTypes ==>
-      new NetworkedComponentsSynchronizer<MESSAGE_TYPE.DRIFTER>(
-        this._engine,
-        Drifter,
-        DrifterMessage
-      ),
-      // NOTE: need to explicit template type like above or get bugs like this below...
-      // new NetComponentsSyncer(this._engine, Drifter, CharacterMessage)); // BUGGY!!!
-      // new NetComponentsSyncer(this._engine, Hunter, HunterMessage));
-      // new ApplyParsedMessages(this._engine, Hacker, HackerMessage));
-      // <== CharacterTypes
-      // ... REST ...
-
-      // TODO: something needs to pull in the room data and trigger loading assets for that
-      // new RoomSynchronizer(this._engine), // TODO: split into room init + update systems ?
-      // TODO: something needs to trigger character sprite to load, Hunter component for now?
-      new DrifterMessageToSpriteLoadEvent(this._engine),
+      // TODO: clean up and add back SERIALIZATION. Serialization will detect Sprite/Sounds etc and remove them, creating loadEvents for them...
+      // TODO: get rid of this after applying it to serialization
       // NEED TO PRODUCE LoadSpriteEvent !
+      // new DrifterMessageToSpriteLoadEvent(this._engine),
+
+      // TODO: clean up and add back SCENE_EDITOR
+
+
+      new InputListener(this._engine, this),
+      new MovementController(this._engine),
+      new Movement(this._engine),
+
 
       // new AssetLoader(this._engine), // TODO: async load in sprites / textures /sounds etc
       new SpriteLoader(this._engine, this), // TODO: refactor into asset loader?
-      new SpriteRender(this._engine),
-      new Broadcaster(this._engine, this._webSocket) // NOTE: always last
+      new SpriteRender(this._engine) // NOTE: always last
     );
 
     // new Serialization(this._engine, this));
@@ -133,10 +101,4 @@ export default class Main extends Phaser.Scene {
   };
 
   private updateEngine = (deltaTime: DeltaTime) => this._engine.update(deltaTime);
-
-  private webSocketURL = (): string => {
-    let wsEndpoint = window.location.origin.replace("http", "ws");
-    if (wsEndpoint.includes("localhost")) wsEndpoint = wsEndpoint.replace("8085", "3001");
-    return wsEndpoint;
-  };
 }

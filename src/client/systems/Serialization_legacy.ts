@@ -86,7 +86,7 @@ class Serialization extends System {
     };
   };
 
-  private serializeEntities = (querySet: QuerySet) => {
+  private xserializeEntities = (querySet: QuerySet) => {
     const [transform] = querySet as [Transform];
 
     // NOTE: serialize https://web.dev/file-system-access/#read-a-file-from-the-file-system

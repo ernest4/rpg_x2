@@ -13,6 +13,7 @@ type LoadEvent = {
   targetEntityId: EntityId;
 };
 
+// TODO: jests
 class SpriteLoader extends System {
   private _scene: Phaser.Scene;
   private _loadEventsBuffer: Buffer<LoadEvent>;

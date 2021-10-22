@@ -1,9 +1,10 @@
-import Transform from "../../shared/components/Transform";
 import { Engine } from "../../shared/ecs";
 import System from "../../shared/ecs/System";
 import { QuerySet } from "../../shared/ecs/types";
 import Sprite from "../components/Sprite";
+import Transform from "../components/Transform";
 
+// TODO: jests
 class SpriteRender extends System {
   constructor(engine: Engine) {
     super(engine);
@@ -22,7 +23,6 @@ class SpriteRender extends System {
 
     phaserSprite.x = position.x;
     phaserSprite.y = position.y;
-    this.log(phaserSprite.x); // TODO: remove
 
     phaserSprite.angle = rotation.z;
 

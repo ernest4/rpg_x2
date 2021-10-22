@@ -1,7 +1,7 @@
-import Transform from "../../shared/components/Transform";
 import { Engine } from "../../shared/ecs";
 import System from "../../shared/ecs/System";
 import PhysicsBody from "../components/PhysicsBody";
+import Transform from "../components/Transform";
 
 class Movement extends System {
   constructor(engine: Engine) {
