@@ -1,8 +1,8 @@
 import { context } from "../../../../tests/jestHelpers";
-import Transform from "../../shared/components/Transform";
+import Transform from "../../components/Transform";
 import { Engine } from "../../../shared/ecs";
-import PhysicsBody from "../components/PhysicsBody";
-import Movement from "../systems/Movement";
+import PhysicsBody from "../../components/PhysicsBody";
+import Movement from "../Movement";
 
 describe(Movement, () => {
   let engine: Engine;

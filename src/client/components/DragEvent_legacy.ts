@@ -1,11 +1,13 @@
 import Component from "../../shared/ecs/Component";
 import { EntityId } from "../../shared/ecs/types";
 
-// TODO: optimize with ArrayBuffers ??
-class Tag extends Component {
+class DragEvent extends Component {
+  dragX!: number;
+  dragY!: number;
+
   constructor(entityId: EntityId) {
-    super(entityId, true);
+    super(entityId);
   }
 }
 
-export default Tag;
+export default DragEvent;

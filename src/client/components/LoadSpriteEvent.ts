@@ -1,5 +1,5 @@
-import Event from "../../shared/components/interfaces/Event";
 import Component from "../../shared/ecs/Component";
+import Event from "../../shared/ecs/component/interfaces/Event";
 import { EntityId } from "../../shared/ecs/types";
 import Phaser from "phaser";
 

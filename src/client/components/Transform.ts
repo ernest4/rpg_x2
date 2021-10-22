@@ -1,12 +1,10 @@
+import Component from "../../shared/ecs/Component";
+import Serializable from "../../shared/ecs/component/interfaces/Serializable";
 import { EntityId } from "../../shared/ecs/types";
 import Vector3BufferView, { Vector3Hash } from "../../shared/ecs/utils/Vector3BufferView";
-import Component from "../ecs/Component";
-import { FIELD_TYPE, FIELD_TYPES, MESSAGE_TYPE, ParsedMessage } from "../messages/schema";
-import Networked from "./interfaces/Networked";
 
-const FLOAT_32_BYTES = FIELD_TYPES[FIELD_TYPE.FLOAT_32].bytes;
-
-class Transform extends Component implements Networked<MESSAGE_TYPE.TRANSFORM> {
+const FLOAT_32_BYTES = 4;
+class Transform extends Component implements Serializable {
   private _values: Float32Array;
   position: Vector3BufferView;
   rotation: Vector3BufferView;
@@ -30,13 +28,13 @@ class Transform extends Component implements Networked<MESSAGE_TYPE.TRANSFORM> {
     // this._children = entityId[]; ???
   }
 
-  parsedMessage = (): ParsedMessage<MESSAGE_TYPE.TRANSFORM> => {
-    return { messageType: MESSAGE_TYPE.TRANSFORM, ...this.position.xyz, entityId: this.entityId };
-  };
+  serialize(): { [key: string]: any; entityId: EntityId } {
+    return { ...this.position.xyz, entityId: this.entityId };
+  }
 
-  synchronizeFrom = ({ x, y, z }: ParsedMessage<MESSAGE_TYPE.TRANSFORM>): void => {
+  deserialize({ x, y, z }: { [key: string]: any }): void {
     this.position.xyz = { x, y, z };
-  };
+  }
 }
 
 export default Transform;

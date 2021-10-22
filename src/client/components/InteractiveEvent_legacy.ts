@@ -1,7 +1,6 @@
 import Component from "../../shared/ecs/Component";
 import { EntityId, InteractiveEventType } from "../../shared/ecs/types";
 
-// TODO: optimize with ArrayBuffers ??
 class InteractiveEvent extends Component {
   type!: InteractiveEventType;
 

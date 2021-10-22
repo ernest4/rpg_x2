@@ -11,7 +11,7 @@ class Sprite extends Component {
   phaserSpriteRef: Phaser.GameObjects.Sprite | undefined; // NOTE: this should be ignored / discarded by any serializer
 
   constructor(entityId: EntityId) {
-    super(entityId, true);
+    super(entityId);
     this.frame = 0;
     this.loaded = false;
     this._textureUrl = "";

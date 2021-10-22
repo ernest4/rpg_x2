@@ -1,5 +1,6 @@
 import { ComponentClass, EntityId } from "./types";
 import { SparseSetItem } from "./utils/SparseSet";
+import Serializable from "./component/interfaces/Serializable";
 
 // NOTE: custom components will extend this.
 // NOTE: NO OTHER METHODS ON COMPONENTS (except getters/setters) !!!
@@ -17,6 +18,17 @@ abstract class Component extends SparseSetItem {
   static createNull<T extends Component>(entityId: EntityId, componentClass: ComponentClass<T>): T {
     return new componentClass(entityId);
   }
+
+  // TODO: jests !!
+  static deserialize = <T extends Component & Serializable>(
+    entityId: EntityId,
+    componentClass: ComponentClass<T>,
+    params: { [key: string]: any }
+  ): T => {
+    const component = Component.createNull(entityId, componentClass);
+    component.deserialize(params);
+    return component;
+  };
 
   // // TODO: wip use Proxy ??
   // trackChanges = (...fields: string[]) => {

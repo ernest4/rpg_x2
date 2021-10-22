@@ -10,9 +10,8 @@
 import { EntityId } from "../../shared/ecs/types";
 import Component from "../../shared/ecs/Component";
 import Vector3BufferView, { Vector3Hash } from "../../shared/ecs/utils/Vector3BufferView";
-import { FIELD_TYPE, FIELD_TYPES } from "../../shared/messages/schema";
 
-const FLOAT_32_BYTES = FIELD_TYPES[FIELD_TYPE.FLOAT_32].bytes;
+const FLOAT_32_BYTES = 4;
 
 // TODO: optimize with ArrayBuffers
 class PhysicsBody extends Component {
