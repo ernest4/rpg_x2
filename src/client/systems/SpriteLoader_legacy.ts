@@ -32,6 +32,7 @@ class SpriteLoader extends System {
     this.engine.query(this.queueLoadEvents, LoadSpriteEvent);
     // start loading (can call this over and over, even when already loading...no harm)
     this._scene.load.start();
+    this.createSpriteComponents();
   }
 
   destroy(): void {}
@@ -39,12 +40,18 @@ class SpriteLoader extends System {
   private queueLoadEvents = (querySet: QuerySet) => {
     const [{ url, frameConfig, targetEntityId, id }] = querySet as [LoadSpriteEvent];
 
-    this.engine.removeComponentById(id, LoadSpriteEvent);
     // NOTE: don't re-request to load something loading/loaded already
-    if (this.isTextureLoading(url) || this.isTextureLoaded(url)) return;
+    if (this.isTextureLoading(url)) return; // keep loading event, check back another cycle...
+    if (this.isTextureLoaded(url)) {
+      // texture ready, use now
+      this.addSpriteComponent(url, targetEntityId);
+      this.engine.removeComponentById(id, LoadSpriteEvent);
+      return;
+    }
 
     // texture not loaded or loading, request one now.
     this.queueTextureLoad(url, frameConfig, targetEntityId);
+    this.engine.removeComponentById(id, LoadSpriteEvent);
   };
 
   private isTextureLoading = (url: string) => {
@@ -81,6 +88,18 @@ class SpriteLoader extends System {
     targetEntityId: EntityId
   ) => {
     this._loadEventsBuffer.push({ key, type, texture, targetEntityId });
+  };
+
+  private createSpriteComponents = () => {
+    this._loadEventsBuffer.process(({ key, type, texture, targetEntityId }) => {
+      this.addSpriteComponent(key, targetEntityId);
+    });
+  };
+
+  private addSpriteComponent = (key: string, targetEntityId: EntityId) => {
+    const phaserSprite = this._scene.add.sprite(0, 0, key);
+    const sprite = new Sprite(targetEntityId, phaserSprite);
+    this.engine.addComponent(sprite);
   };
 }
 

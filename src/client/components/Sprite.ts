@@ -5,11 +5,18 @@ import Phaser from "phaser";
 // TODO: when removing sprite, make sure to destroy the phaserSprite gameObject or it will leak memory!
 class Sprite extends Component {
   phaserSprite: Phaser.GameObjects.Sprite;
+  url: string;
+  frameConfig: Phaser.Types.Loader.FileTypes.ImageFrameConfig;
 
-  constructor(entityId: EntityId, phaserSprite: Phaser.GameObjects.Sprite) {
+  constructor(
+    entityId: EntityId,
+    url: string,
+    frameConfig: Phaser.Types.Loader.FileTypes.ImageFrameConfig
+  ) {
     super(entityId);
     // this.frame = 0;
-    this.phaserSprite = phaserSprite;
+    this.url = url;
+    this.frameConfig = frameConfig;
   }
 }
 

@@ -86,7 +86,7 @@ export default class Main extends Phaser.Scene {
 
       // new AssetLoader(this._engine), // TODO: async load in sprites / textures /sounds etc
       new SpriteLoader(this._engine, this), // TODO: refactor into asset loader?
-      new SpriteRender(this._engine) // NOTE: always last
+      new SpriteRender(this._engine, this) // NOTE: always last
     );
 
     // new Serialization(this._engine, this));
