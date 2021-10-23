@@ -14,7 +14,7 @@ class Transform extends Component implements Serializable {
     entityId: EntityId,
     position?: Vector3Hash,
     rotation?: Vector3Hash,
-    scale?: Vector3Hash
+    scale: Vector3Hash = { x: 1, y: 1, z: 1 }
   ) {
     super(entityId);
     this._values = new Float32Array(9);
@@ -29,11 +29,18 @@ class Transform extends Component implements Serializable {
   }
 
   serialize(): { [key: string]: any; entityId: EntityId } {
-    return { ...this.position.xyz, entityId: this.entityId };
+    return {
+      ...this.position.xyz,
+      ...this.rotation.xyz,
+      ...this.scale.xyz,
+      entityId: this.entityId,
+    };
   }
 
-  deserialize({ x, y, z }: { [key: string]: any }): void {
-    this.position.xyz = { x, y, z };
+  deserialize({ position, rotation, scale }: { [key: string]: any }): void {
+    this.position.xyz = position;
+    this.position.xyz = rotation;
+    this.position.xyz = scale;
   }
 }
 

@@ -13,7 +13,7 @@ class Manager extends System {
     this.engine.addComponents(
       new Player(entityId),
       new Speed(entityId, 100),
-      new Transform(entityId, { x: 100, y: 100, z: 0 }, null, { x: 1, y: 1, z: 1 }),
+      new Transform(entityId, { x: 100, y: 100, z: 0 }),
       new PhysicsBody(entityId),
       new LoadSpriteEvent(
         this.newEntityId(),
