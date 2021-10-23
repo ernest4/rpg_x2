@@ -29,6 +29,7 @@ import Name from "../shared/components/Name";
 import DrifterMessageToSpriteLoadEvent from "../../systems/DrifterMessageToSpriteLoadEvent";
 import Phaser from "phaser";
 import Movement from "../../systems/Movement";
+import FpsCounter from "../../utils/FpsCounter";
 // import FpsCounter from "./utils/FpsCounter";
 
 export default class Main extends Phaser.Scene {
@@ -38,6 +39,7 @@ export default class Main extends Phaser.Scene {
   // fpsCounter!: FpsCounter;
   private _engine!: Engine;
   private _webSocket: WebSocket;
+  fpsCounter: FpsCounter;
 
   constructor(config) {
     super(config);
@@ -48,10 +50,12 @@ export default class Main extends Phaser.Scene {
 
   create(data) {
     this.initECS();
+    this.fpsCounter = new FpsCounter();
   }
 
   update(time, delta) {
     this.updateEngine(delta);
+    this.fpsCounter.update(delta);
   }
 
   private initECS = () => {
@@ -76,6 +80,9 @@ export default class Main extends Phaser.Scene {
       new MovementController(this._engine),
       new Movement(this._engine),
 
+
+      // TODO: once you have camera
+      // this.cameras.main.setBackgroundColor(0xffffff);
 
       // new AssetLoader(this._engine), // TODO: async load in sprites / textures /sounds etc
       new SpriteLoader(this._engine, this), // TODO: refactor into asset loader?
