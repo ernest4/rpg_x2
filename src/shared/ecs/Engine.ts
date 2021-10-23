@@ -147,6 +147,16 @@ class Engine {
     return this._componentLists[componentClass.name]?.get(entityId) as T | null;
   };
 
+  // TODO: jests
+  withComponent = <T extends Component>(
+    callback: (component: T) => void,
+    entityId: EntityId,
+    componentClass: ComponentClass<T>
+  ): void => {
+    const component = this.getComponentById(entityId, componentClass);
+    if (component) callback(component);
+  };
+
   getComponentsById = (
     entityId: EntityId,
     ...componentClasses: ComponentClass<any>[]
@@ -157,6 +167,17 @@ class Engine {
     };
     componentClasses.forEach(callback);
     return components;
+  };
+
+  // TODO: jests
+  withComponents = (
+    callback: (components: Component[]) => void,
+    entityId: EntityId,
+    ...componentClasses: ComponentClass<any>[]
+  ): void => {
+    const components = this.getComponentsById(entityId, ...componentClasses);
+    if (components.filter(component => component).length !== components.length) return;
+    callback(components);
   };
 
   getAllComponentsOfId = (entityId: EntityId) => {

@@ -23,10 +23,12 @@ class MovementControl extends System {
   private filterInputEvents = (querySet: QuerySet) => {
     const [inputEvent] = querySet as [InputEvent];
 
-    const [physicsBody, speed] = <[PhysicsBody, Speed]>(
-      this.engine.getComponentsById(inputEvent.targetEntityId, PhysicsBody, Speed)
+    this.engine.withComponents(
+      (components: [PhysicsBody, Speed]) => this.applyInputEvent(inputEvent, ...components),
+      inputEvent.targetEntityId,
+      PhysicsBody,
+      Speed
     );
-    this.applyInputEvent(inputEvent, physicsBody, speed);
   };
 
   private applyInputEvent = (

@@ -2,6 +2,7 @@ import Component from "../../shared/ecs/Component";
 import { EntityId } from "../../shared/ecs/types";
 import Phaser from "phaser";
 
+// TODO: when removing sprite, make sure to destroy the phaserSprite gameObject or it will leak memory!
 class Sprite extends Component {
   phaserSprite: Phaser.GameObjects.Sprite;
 

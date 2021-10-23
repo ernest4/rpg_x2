@@ -65,6 +65,10 @@ export default class Main extends Phaser.Scene {
       // NEED TO PRODUCE LoadSpriteEvent !
       // new DrifterMessageToSpriteLoadEvent(this._engine),
 
+      // OR !!! maybe just add straight sprite components and renderer can check if loaded and if not
+      // create load event component and remove the sprite component...
+      // simpler??!?!
+
       // TODO: clean up and add back SCENE_EDITOR
 
 
