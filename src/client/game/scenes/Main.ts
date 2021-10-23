@@ -50,7 +50,7 @@ export default class Main extends Phaser.Scene {
 
   create(data) {
     this.initECS();
-    this.fpsCounter = new FpsCounter();
+    this.fpsCounter = new FpsCounter(); // if DEVELOPMENT ?
   }
 
   update(time, delta) {

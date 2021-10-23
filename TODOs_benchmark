@@ -1,0 +1,15 @@
+TODO: 1
+expose benchmark to systems
+
+e.g.
+
+this.benchmark('name', () => {
+  // ...
+}) => will print out benchmark name with system e.g. [engine][system][name]
+
+TODO: 2
+when engine is set to DEBUG (DEVELOPMENT), auto benchmark the update() of each system
+print it out in dynamically created benchmark debug widget
+At the bottom widget list the frame budget in ms and %
+Frame budget is calculated from engine FPS
+(For each system that has different frame rate, show their own budget)
