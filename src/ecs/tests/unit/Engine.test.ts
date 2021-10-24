@@ -433,6 +433,34 @@ describe(Engine, () => {
     });
   });
 
+  describe("#withComponent", () => {
+    beforeEach(() => {
+      entityId = engine.newEntityId();
+      component = new NumberComponent(entityId);
+      engine.addComponent(component);
+    });
+
+    context("when entity has component", () => {
+      it("returns component", () => {
+        engine.withComponent(
+          presentComponent => expect(presentComponent).toEqual(component),
+          entityId,
+          NumberComponent
+        );
+      });
+    });
+
+    context("when entity does not have the component", () => {
+      beforeEach(() => {
+        engine.withComponent(queryCallBackFunction, entityId, StringComponent);
+      });
+
+      it("doesn't call back", () => {
+        expect(queryCallBackFunction).not.toBeCalled();
+      });
+    });
+  });
+
   describe("#getComponentsById", () => {
     beforeEach(() => {
       entityId = engine.newEntityId();
@@ -473,6 +501,42 @@ describe(Engine, () => {
           null,
           null,
         ]);
+      });
+    });
+  });
+
+  describe("#withComponents", () => {
+    beforeEach(() => {
+      entityId = engine.newEntityId();
+      component = new NumberComponent(entityId);
+      component2 = new StringComponent(entityId);
+      engine.addComponents(component, component2);
+    });
+
+    context("when entity has all components", () => {
+      it("returns components", () => {
+        engine.withComponents(
+          ([presentComponent1, presentComponent2]) => {
+            expect(presentComponent1).toEqual(component);
+            expect(presentComponent2).toEqual(component2);
+          },
+          entityId,
+          NumberComponent,
+          StringComponent
+        );
+      });
+    });
+
+    context("when entity does not have one or more components", () => {
+      beforeEach(() => {
+        entityId2 = engine.newEntityId();
+        component3 = new StringComponent(entityId2);
+        engine.addComponent(component3);
+        engine.withComponents(queryCallBackFunction, entityId2, NumberComponent, StringComponent);
+      });
+
+      it("doesn't call back", () => {
+        expect(queryCallBackFunction).not.toBeCalled();
       });
     });
   });
@@ -757,7 +821,6 @@ describe(Engine, () => {
     context("when no components exist in one of the lists", () => {
       beforeEach(() => {
         engine.addComponent(new NumberComponent(entityId));
-
         engine.query(queryCallBackFunction, NumberComponent, StringComponent);
       });
 

@@ -150,7 +150,6 @@ class Engine {
     return this._componentLists[componentClass.className()]?.get(entityId) as T | null;
   };
 
-  // TODO: jests
   withComponent = <T extends Component>(
     callback: (component: T) => void,
     entityId: EntityId,
@@ -172,7 +171,6 @@ class Engine {
     return components;
   };
 
-  // TODO: jests
   withComponents = (
     callback: (components: Component[]) => void,
     entityId: EntityId,
