@@ -1,22 +1,32 @@
+import { DeltaTime } from "../types";
 import { benchmark as benchmarkRunner } from "./benchmark";
+import Buffer from "./Buffer";
+import { round } from "./Number";
 
+// TODO: jests
 export class Stats {
   private parentDiv: HTMLDivElement;
-  private _data: { [datum: string]: { value: string | number; element: any } } = {};
+  private _data: { [datum: string]: { values: Buffer<number>; element: HTMLDivElement } } = {};
+  private _statsTickLengthMS: number;
+  private _currentTicketLengthMS: number = 0;
 
-  constructor(fps: number = 1) {
+  constructor(fps: number = 2) {
+    this._statsTickLengthMS = 1000 / fps;
     this.domInit();
   }
 
   benchmark = (subject: string, callback: Function) => {
-    if (!this._data[subject]) this.datumInit(subject);
-    this._data[subject].value = benchmarkRunner(callback);
+    if (!this._data[subject]) this.dataSubjectInit(subject);
+    this._data[subject].values.push(benchmarkRunner(callback));
   };
 
-  update = () => {
-    Object.entries(this._data).forEach(([subject, { value, element }]) => {
-      element.innerHTML = `${subject}: ${value}ms`;
-    });
+  update = (deltaTime: DeltaTime) => {
+    this._currentTicketLengthMS += deltaTime;
+
+    if (this._statsTickLengthMS <= this._currentTicketLengthMS) {
+      this._currentTicketLengthMS = 0;
+      this.renderData();
+    }
   };
 
   private domInit = () => {
@@ -29,14 +39,14 @@ export class Stats {
     document.body.appendChild(this.parentDiv);
   };
 
-  private datumInit = (subject: string) => {
+  private dataSubjectInit = (subject: string) => {
     this._data[subject] = {
-      value: null,
-      element: this.datumDivInit(subject),
+      values: new Buffer<number>(),
+      element: this.dataSubjectDivInit(subject),
     };
   };
 
-  private datumDivInit = (subject: string) => {
+  private dataSubjectDivInit = (subject: string) => {
     const datumDiv = document.createElement("div");
     datumDiv.innerHTML = `${subject}: 0ms`;
     // datumDiv.style.cssText = `
@@ -47,6 +57,16 @@ export class Stats {
     this.parentDiv.appendChild(datumDiv);
 
     return datumDiv;
+  };
+
+  private renderData = () => Object.entries(this._data).forEach(this.renderDataSubject);
+
+  private renderDataSubject = ([subject, { values, element }]) => {
+    let sum = 0;
+    const valueCount = values.size();
+    values.process(value => (sum += value));
+    const average = sum / valueCount;
+    element.innerHTML = `${subject}: ${round(average, 4)}ms`;
   };
 }
 

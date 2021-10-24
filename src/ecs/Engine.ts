@@ -259,7 +259,7 @@ class Engine {
     this._updating = true;
     // this._systemUpdateFunctions.forEach(this.callSystemUpdateFunction);
     this._systems.forEach(this.updateSystem);
-    if (this._debug) this._stats.update();
+    if (this._debug) this._stats.update(deltaTime);
     this._updating = false;
     // this.updateComplete.dispatch(); // TODO: signals??
   };

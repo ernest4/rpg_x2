@@ -34,6 +34,8 @@ class Buffer<T> {
     this._secondaryBuffer = [];
   };
 
+  size = () => this._activeBuffer.length;
+
   each = (callback: (item: T) => void) => this._secondaryBuffer.forEach(callback);
 }
 
