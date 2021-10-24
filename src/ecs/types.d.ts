@@ -16,8 +16,8 @@ import Component from "./Component";
 // https://stackoverflow.com/questions/43831683/can-i-declare-custom-number-types-in-typescript
 // type DeltaTime = number; // ms
 // type EntityId = number;
-enum DeltaTime {} // ms
-enum EntityId {}
+export enum DeltaTime {} // ms
+export enum EntityId {}
 type QuerySet = Component[];
 type QueryCallback = (querySet: QuerySet) => void;
 // type ComponentClass = {
@@ -27,7 +27,9 @@ type QueryCallback = (querySet: QuerySet) => void;
 // };
 
 type ComponentClass<T extends Component> = {
-  name: string;
+  // name: string;
+  // readonly className: string;
+  className: () => string;
   prototype: T;
   new (entityId: EntityId, ...arguments: any[]): T;
 };

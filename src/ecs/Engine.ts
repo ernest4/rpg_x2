@@ -65,6 +65,7 @@ class Engine {
     this._systems.push(system);
     system.start();
 
+    // NOTE: constructor.name only works in development, which is where we want to print this anyway
     if (this._debug) console.log(`[Engine]: Started system: ${system.constructor.name}`);
   };
 
@@ -79,10 +80,9 @@ class Engine {
   // removeAllSystems
 
   addComponent = <T extends Component>(component: T) => {
-    console.log("component.constructor.name");
-    console.log(component.constructor.name); // NOW YOU TELL ME THIS DOESNT WORK :D https://stackoverflow.com/questions/50267543/class-name-always-e-for-every-class-after-uglify-webpack-for-production
     // NOTE: indexing using component class name
-    const componentClassName = component.constructor.name;
+    // @ts-ignore
+    const componentClassName = component.constructor.className();
     let componentList = this._componentLists[componentClassName];
 
     if (!componentList) {
@@ -104,7 +104,8 @@ class Engine {
 
   removeComponent = (component: Component) => {
     // NOTE: indexing using component class name
-    const componentClassName = component.constructor.name;
+    // @ts-ignore
+    const componentClassName = component.constructor.className();
     const componentList = this._componentLists[componentClassName];
     if (!componentList) return;
 
@@ -120,7 +121,7 @@ class Engine {
     entityId: EntityId,
     componentClass: ComponentClass<T>
   ) => {
-    const componentList = this._componentLists[componentClass.name];
+    const componentList = this._componentLists[componentClass.className()];
     if (!componentList) return;
 
     componentList.remove(entityId);
@@ -135,7 +136,7 @@ class Engine {
   };
 
   removeComponentsOfClass = <T extends Component>(componentClass: ComponentClass<T>) => {
-    this._componentLists[componentClass.name]?.stream(this.removeComponent);
+    this._componentLists[componentClass.className()]?.stream(this.removeComponent);
   };
 
   removeComponentsOfClasses = (...componentClasses: ComponentClass<any>[]) => {
@@ -146,7 +147,7 @@ class Engine {
     entityId: EntityId,
     componentClass: ComponentClass<T>
   ) => {
-    return this._componentLists[componentClass.name]?.get(entityId) as T | null;
+    return this._componentLists[componentClass.className()]?.get(entityId) as T | null;
   };
 
   // TODO: jests
@@ -268,12 +269,12 @@ class Engine {
     let shortestComponentListIndex = 0;
 
     let shortestComponentList =
-      this._componentLists[componentClasses[shortestComponentListIndex].name];
+      this._componentLists[componentClasses[shortestComponentListIndex].className()];
 
     if (!shortestComponentList) return;
 
     componentClasses.forEach((componentClass, index) => {
-      const nextShortestComponentList = this._componentLists[componentClass.name];
+      const nextShortestComponentList = this._componentLists[componentClass.className()];
 
       if (nextShortestComponentList && shortestComponentList) {
         if (nextShortestComponentList.size < shortestComponentList.size) {
@@ -297,7 +298,7 @@ class Engine {
 
       const componentClassesLength = componentClasses.length;
       for (let i = 0; i < componentClassesLength; i++) {
-        const componentClassName = componentClasses[i].name;
+        const componentClassName = componentClasses[i].className();
         const anotherComponent = this._componentLists[componentClassName]?.get(entityId);
 
         if (anotherComponent) querySet.push(anotherComponent as Component);

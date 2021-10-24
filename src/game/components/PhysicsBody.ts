@@ -15,6 +15,8 @@ const FLOAT_32_BYTES = 4;
 
 // TODO: optimize with ArrayBuffers
 class PhysicsBody extends Component {
+  static className = () => "PhysicsBody";
+
   private _values: Float32Array;
   linearVelocity: Vector3BufferView;
   angularVelocity: Vector3BufferView;

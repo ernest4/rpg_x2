@@ -3,6 +3,8 @@ import { EntityId } from "../../../types";
 import SparseSet, { SparseSetItem } from "../../../utils/SparseSet";
 
 class StrictNumberComponent extends Component {
+  static className = () => "StrictNumberComponent";
+
   testNumber: number;
   sparseSet: SparseSet<SparseSetItem>;
 

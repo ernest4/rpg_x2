@@ -4,6 +4,7 @@ import { EntityId } from "../../ecs/types";
 import Phaser from "phaser";
 
 class LoadSpriteEvent extends Component implements Event {
+  static className = () => "LoadSpriteEvent";
   url: string;
   private _frameConfig: Phaser.Types.Loader.FileTypes.ImageFrameConfig;
   targetEntityId: EntityId;

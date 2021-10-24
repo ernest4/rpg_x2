@@ -4,7 +4,10 @@ import { EntityId } from "../../ecs/types";
 import Vector3BufferView, { Vector3Hash } from "../../ecs/utils/Vector3BufferView";
 
 const FLOAT_32_BYTES = 4;
+
 class Transform extends Component implements Serializable {
+  static className = () => "Transform";
+
   private _values: Float32Array;
   position: Vector3BufferView;
   rotation: Vector3BufferView;
@@ -45,3 +48,11 @@ class Transform extends Component implements Serializable {
 }
 
 export default Transform;
+
+export enum Components {
+  Transform = "Transform",
+}
+
+Transform.className;
+
+// ???

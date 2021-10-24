@@ -1,7 +1,7 @@
 import { Engine } from "../../ecs";
 import System from "../../ecs/System";
 import { QuerySet } from "../../ecs/types";
-import InputEvent from "../../components/InputEvent";
+import InputEvent from "../components/InputEvent";
 import PhysicsBody from "../components/PhysicsBody";
 import Speed from "../components/Speed";
 import { INPUT_EVENT_TYPES } from "./InputListener";

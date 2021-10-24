@@ -2,6 +2,8 @@ import Component from "../../ecs/Component";
 import { EntityId } from "../../ecs/types";
 
 class Player extends Component {
+  static className = () => "Player";
+
   constructor(entityId: EntityId) {
     super(entityId);
   }

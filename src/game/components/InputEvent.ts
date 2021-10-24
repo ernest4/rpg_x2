@@ -4,6 +4,8 @@ import { EntityId } from "../../ecs/types";
 import { INPUT_EVENT_TYPE, INPUT_KEY } from "../systems/InputListener";
 
 class InputEvent extends Component implements Event {
+  static className = () => "InputEvent";
+  
   targetEntityId: EntityId;
   type: INPUT_EVENT_TYPE;
   key: INPUT_KEY;
