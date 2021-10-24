@@ -48,11 +48,3 @@ class Transform extends Component implements Serializable {
 }
 
 export default Transform;
-
-export enum Components {
-  Transform = "Transform",
-}
-
-Transform.className;
-
-// ???
