@@ -11,10 +11,10 @@ import { assetsPath } from "../../utils/environment";
 class Manager extends System {
   start(): void {
     // TODO: remove, testing
-    Array.from(Array(30000).keys()).forEach((i) => {
+    Array.from(Array(30000).keys()).forEach(i => {
       const entityId = this.newEntityId();
+      if (i === 1) this.engine.addComponent(new Player(entityId));
       this.engine.addComponents(
-        new Player(entityId),
         new Speed(entityId, 100 + i),
         new Transform(entityId, { x: 200 + i, y: 200 + i, z: 0 }),
         new PhysicsBody(entityId),

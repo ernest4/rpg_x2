@@ -21,11 +21,13 @@ abstract class System {
   newEntityId = () => this._engine.newEntityId();
 
   log = (object: any) => {
-    console.log(`[Engine]:[${this.constructor.name}]:${JSON.stringify(object)}`);
+    // console.log(`[Engine]:[${this.constructor.name}]:${JSON.stringify(object)}`);
+    console.log(this.logTag(JSON.stringify(object)));
   };
 
   benchmarkSubject = (subject: string, callback: Function) => {
-    this.log(benchmarkSubject(subject, callback));
+    // this.log(benchmarkSubject(subject, callback));
+    this.engine.stats.benchmark(this.logTag(subject), callback);
   };
 
   get engine() {
@@ -35,6 +37,8 @@ abstract class System {
   get deltaTime() {
     return this.engine.deltaTime;
   }
+
+  private logTag = (subject: string) => `[Engine]:[${this.constructor.name}]:${subject}`;
 }
 
 export default System;

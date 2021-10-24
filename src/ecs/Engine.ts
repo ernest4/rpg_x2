@@ -317,6 +317,11 @@ class Engine {
     return this._deltaTime;
   }
 
+  // TODO: jests
+  get stats() {
+    return this._stats;
+  }
+
   private updateSystem = (system: System) => {
     if (this._debug) return this._stats.benchmark(system.constructor.name, () => system.update());
 
