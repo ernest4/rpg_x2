@@ -7,9 +7,9 @@
 // gravityFactor: number
 // }
 
-import { EntityId } from "../../shared/ecs/types";
-import Component from "../../shared/ecs/Component";
-import Vector3BufferView, { Vector3Hash } from "../../shared/ecs/utils/Vector3BufferView";
+import { EntityId } from "../../ecs/types";
+import Component from "../../ecs/Component";
+import Vector3BufferView, { Vector3Hash } from "../../ecs/utils/Vector3BufferView";
 
 const FLOAT_32_BYTES = 4;
 

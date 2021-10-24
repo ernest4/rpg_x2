@@ -1,8 +1,8 @@
-import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
-import { EntityId, QuerySet } from "../../shared/ecs/types";
+import { Engine } from "../../ecs";
+import System from "../../ecs/System";
+import { EntityId, QuerySet } from "../../ecs/types";
 import LoadSpriteEvent from "../components/LoadSpriteEvent";
-import Buffer from "../../shared/ecs/utils/Buffer";
+import Buffer from "../../ecs/utils/Buffer";
 import { Sprite } from "../components";
 import Phaser from "phaser";
 import PhaserSystem from "./abstract/PhaserSystem";

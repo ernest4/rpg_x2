@@ -1,9 +1,9 @@
 import { Scene } from "phaser";
-import { Engine } from "../../shared/ecs";
-import Component from "../../shared/ecs/Component";
-import System from "../../shared/ecs/System";
-import { InteractiveEventType, QuerySet } from "../../shared/ecs/types";
-import SparseSet from "../../shared/ecs/utils/SparseSet";
+import { Engine } from "../../ecs";
+import Component from "../../ecs/Component";
+import System from "../../ecs/System";
+import { InteractiveEventType, QuerySet } from "../../ecs/types";
+import SparseSet from "../../ecs/utils/SparseSet";
 import Sprite from "../components/Sprite";
 import Transform from "../components/Transform";
 import SceneItem from "./render/SceneItem";

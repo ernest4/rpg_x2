@@ -1,4 +1,4 @@
-import System from "../../shared/ecs/System";
+import System from "../../ecs/System";
 import { Player, Sprite } from "../components";
 import PhysicsBody from "../components/PhysicsBody";
 import Speed from "../components/Speed";
@@ -14,7 +14,7 @@ class Manager extends System {
       new Speed(entityId, 100),
       new Transform(entityId, { x: 100, y: 100, z: 0 }),
       new PhysicsBody(entityId),
-      new Sprite(entityId, "assets/images/unit_T.png", { frameWidth: 32 })
+      new Sprite(entityId, "statics/assets/images/unit_T.png", { frameWidth: 32 })
     );
   }
 

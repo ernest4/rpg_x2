@@ -1,5 +1,5 @@
-import System from "../../../shared/ecs/System";
-import { Engine } from "../../../shared/ecs";
+import System from "../../../ecs/System";
+import { Engine } from "../../../ecs";
 import Phaser from "phaser";
 
 // TODO: jests

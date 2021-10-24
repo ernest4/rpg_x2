@@ -1,8 +1,8 @@
 import ConnectionEvent from "../../shared/components/ConnectionEvent";
-import { Engine } from "../../shared/ecs";
+import { Engine } from "../../ecs";
 import Publisher from "../../shared/systems/Publisher";
-import { QuerySet } from "../../shared/ecs/types";
-import { SparseSetItem } from "../../shared/ecs/utils/SparseSet";
+import { QuerySet } from "../../ecs/types";
+import { SparseSetItem } from "../../ecs/utils/SparseSet";
 import NearbyCharacters from "../components/NearbyCharacters";
 import Room from "../components/Room";
 import State from "../game/State";

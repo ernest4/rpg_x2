@@ -1,5 +1,5 @@
-import System from "../ecs/System";
-import { EntityId } from "../ecs/types";
+import System from "../../ecs/System";
+import { EntityId } from "../../ecs/types";
 import OutMessage from "../components/OutMessage";
 import { MESSAGE_TYPE, ParsedMessage } from "../messages/schema";
 import NetworkedComponent from "../components/interfaces/Networked";

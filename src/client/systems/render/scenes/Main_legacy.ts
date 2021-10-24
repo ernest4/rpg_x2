@@ -1,12 +1,11 @@
 import { Scene } from "phaser";
 import FpsCounter from "../../../utils/FpsCounter";
-import { Engine } from "../../../../shared/ecs";
+import { Engine } from "../../../../ecs";
 import Manager from "../../Manager";
 import SpriteRender from "../../SpriteRender";
 import InputListener from "../../InputListener";
 import Movement from "../../Movement";
 import MovementController from "../../MovementController";
-import { DEVELOPMENT } from "../../../../shared/utils/environment";
 import SceneEditor from "../../SceneEditor";
 import Interaction from "../../Interaction";
 import Dragging from "../../Dragging";

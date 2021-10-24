@@ -1,5 +1,5 @@
-import { EntityId } from "../../../../shared/ecs/types";
-import SparseSet, { SparseSetItem } from "../../../../shared/ecs/utils/SparseSet";
+import { EntityId } from "../../../../ecs/types";
+import SparseSet, { SparseSetItem } from "../../../../ecs/utils/SparseSet";
 
 // TODO: jests
 class Cell {

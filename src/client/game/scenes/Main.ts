@@ -1,35 +1,14 @@
-import { Engine } from "../../../shared/ecs";
-import { DeltaTime } from "../../../shared/ecs/types";
-import MessageDeserializer from "../shared/systems/MessageDeserializer";
-import { DEVELOPMENT } from "../../../shared/utils/environment";
-import ConnectionListener from "../../systems/ConnectionListener";
-import DisconnectionListener from "../../systems/DisconnectionListener";
+import { DeltaTime } from "../../../ecs/types";
 import InputListener from "../../systems/InputListener";
 import Manager from "../../systems/Manager";
-import MessageListener from "../../systems/MessageListener";
 import SpriteRender from "../../systems/SpriteRender";
-import Broadcaster from "../../systems/Broadcaster";
 import MovementController from "../../systems/MovementController";
 import SpriteLoader from "../../systems/SpriteLoader";
-import NetworkedComponentsSynchronizer from "../../systems/NetworkedComponentsSynchronizer";
-import {
-  CharacterMessage,
-  DrifterMessage,
-  HitPointsMessage,
-  HunterMessage,
-  MESSAGE_TYPE,
-  NameMessage,
-  TransformMessage,
-} from "../shared/messages/schema";
-import Transform from "../shared/components/Transform";
-import HitPoints from "../shared/components/HitPoints";
-import Character from "../shared/components/Character";
-import Drifter from "../shared/components/characterTypes/Drfiter";
-import Name from "../shared/components/Name";
-import DrifterMessageToSpriteLoadEvent from "../../systems/DrifterMessageToSpriteLoadEvent";
 import Phaser from "phaser";
 import Movement from "../../systems/Movement";
 import FpsCounter from "../../utils/FpsCounter";
+import { DEVELOPMENT } from "../../utils/environment";
+import { Engine } from "../../../ecs";
 // import FpsCounter from "./utils/FpsCounter";
 
 export default class Main extends Phaser.Scene {
@@ -75,11 +54,9 @@ export default class Main extends Phaser.Scene {
 
       // TODO: clean up and add back SCENE_EDITOR
 
-
       new InputListener(this._engine, this),
       new MovementController(this._engine),
       new Movement(this._engine),
-
 
       // TODO: once you have camera
       // this.cameras.main.setBackgroundColor(0xffffff);

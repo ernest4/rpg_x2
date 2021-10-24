@@ -1,6 +1,6 @@
-import Component from "../../shared/ecs/Component";
-import Event from "../../shared/ecs/component/interfaces/Event";
-import { EntityId } from "../../shared/ecs/types";
+import Component from "../../ecs/Component";
+import Event from "../../ecs/component/interfaces/Event";
+import { EntityId } from "../../ecs/types";
 import Phaser from "phaser";
 
 class LoadSpriteEvent extends Component implements Event {

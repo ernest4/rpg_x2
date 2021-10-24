@@ -1,5 +1,5 @@
-import Component from "../../shared/ecs/Component";
-import { EntityId } from "../../shared/ecs/types";
+import Component from "../../ecs/Component";
+import { EntityId } from "../../ecs/types";
 import Phaser from "phaser";
 
 // TODO: when removing sprite, make sure to destroy the phaserSprite gameObject or it will leak memory!

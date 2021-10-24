@@ -1,16 +1,16 @@
-import System from "../../shared/ecs/System";
+import System from "../../ecs/System";
 import initSceneEditor from "./sceneEditor/index"; // NOTE: importing this will run the editor app
 import store from "../store";
 import * as sceneEditorActions from "../store/actions/sceneEditor";
-import { EntityId, QuerySet } from "../../shared/ecs/types";
+import { EntityId, QuerySet } from "../../ecs/types";
 import InteractiveEvent from "../components/InteractiveEvent_legacy";
 import Sprite from "../components/Sprite";
 import Interactive from "../components/Interactive";
 import DragEvent from "../components/DragEvent";
 import Transform from "../components/Transform";
 import SerializeEvent from "../components/SerializeEvent";
-import { isNumber } from "../../shared/ecs/utils/Number";
-import Component from "../../shared/ecs/Component";
+import { isNumber } from "../../ecs/utils/Number";
+import Component from "../../ecs/Component";
 import * as availableComponents from "../components";
 
 // const NON_EDITOR_COMPONENTS = [DragEvent, InputEvent, InteractiveEvent].map(({ name }) => name);

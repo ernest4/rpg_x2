@@ -1,9 +1,9 @@
-import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
+import { Engine } from "../../ecs";
+import System from "../../ecs/System";
 import WebSocket, { GUEST_UID_PREFIX } from "../components/WebSocket";
 import ConnectionEvent from "../../shared/components/ConnectionEvent";
-import { EntityId } from "../../shared/ecs/types";
-import Component from "../../shared/ecs/Component";
+import { EntityId } from "../../ecs/types";
+import Component from "../../ecs/Component";
 import Character from "../../shared/components/Character";
 import Name from "../../shared/components/Name";
 import HitPoints from "../../shared/components/HitPoints";

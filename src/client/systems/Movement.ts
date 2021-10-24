@@ -1,5 +1,5 @@
-import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
+import { Engine } from "../../ecs";
+import System from "../../ecs/System";
 import PhysicsBody from "../components/PhysicsBody";
 import Transform from "../components/Transform";
 

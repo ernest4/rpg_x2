@@ -1,7 +1,7 @@
 // TODO: jests
 
 import { Component } from "react";
-import { EntityId } from "../../../shared/ecs/types";
+import { EntityId } from "../../../ecs/types";
 
 // TODO: sketches ...
 abstract class PhaserComponent<

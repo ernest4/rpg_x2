@@ -1,7 +1,7 @@
-import Component from "../../shared/ecs/Component";
-import Serializable from "../../shared/ecs/component/interfaces/Serializable";
-import { EntityId } from "../../shared/ecs/types";
-import Vector3BufferView, { Vector3Hash } from "../../shared/ecs/utils/Vector3BufferView";
+import Component from "../../ecs/Component";
+import Serializable from "../../ecs/component/interfaces/Serializable";
+import { EntityId } from "../../ecs/types";
+import Vector3BufferView, { Vector3Hash } from "../../ecs/utils/Vector3BufferView";
 
 const FLOAT_32_BYTES = 4;
 class Transform extends Component implements Serializable {

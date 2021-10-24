@@ -1,11 +1,11 @@
-import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
+import { Engine } from "../../ecs";
+import System from "../../ecs/System";
 import Drifter from "../../shared/components/characterTypes/Drfiter";
 import { DrifterMessage } from "../../shared/messages/schema";
-import { QuerySet } from "../../shared/ecs/types";
+import { QuerySet } from "../../ecs/types";
 import { Sprite } from "../components";
 import LoadSpriteEvent from "../components/LoadSpriteEvent";
-import { isNumber } from "../../shared/ecs/utils/Number";
+import { isNumber } from "../../ecs/utils/Number";
 
 class DrifterMessageToSpriteLoadEvent extends System {
   constructor(engine: Engine) {

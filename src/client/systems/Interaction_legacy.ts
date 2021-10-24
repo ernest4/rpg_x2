@@ -1,20 +1,20 @@
-import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
+import { Engine } from "../../ecs";
+import System from "../../ecs/System";
 import {
   DraggableObject,
   EntityId,
   InteractiveEventType,
   InteractiveObject,
   QuerySet,
-} from "../../shared/ecs/types";
+} from "../../ecs/types";
 import Sprite from "../components/Sprite";
 import Interactive from "../components/Interactive";
 import InteractiveEvent from "../components/InteractiveEvent_legacy";
-import SparseSet from "../../shared/ecs/utils/SparseSet";
+import SparseSet from "../../ecs/utils/SparseSet";
 import { Scene } from "phaser";
 
 import DragEvent from "../components/DragEvent";
-import { isNumber } from "../../shared/ecs/utils/Number";
+import { isNumber } from "../../ecs/utils/Number";
 
 class Interaction extends System {
   private _scene: Scene;

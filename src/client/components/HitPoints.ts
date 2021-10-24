@@ -1,5 +1,5 @@
 import { Component } from "react";
-import { EntityId } from "../../shared/ecs/types";
+import { EntityId } from "../../ecs/types";
 
 class HitPoints extends Component {
   hitPoints: number;

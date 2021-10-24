@@ -1,7 +1,7 @@
 import { Scene } from "phaser";
-import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
-import { InputEventType, InputObject, QuerySet } from "../../shared/ecs/types";
+import { Engine } from "../../ecs";
+import System from "../../ecs/System";
+import { InputEventType, InputObject, QuerySet } from "../../ecs/types";
 import InputEvent from "../components/InputEvent";
 
 const DEFAULT_INPUTS = [

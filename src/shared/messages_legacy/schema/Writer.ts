@@ -1,7 +1,6 @@
 import { Buffer } from "buffer";
 // import Message from "../../components/Message";
-import { isNumber } from "../../ecs/utils/Number";
-import { SERVER } from "../../utils/environment";
+import { isNumber } from "../../../ecs/utils/Number";
 import { prettyPrintArray } from "../../utils/logging";
 import Validator from "./Validator";
 import SCHEMA, {

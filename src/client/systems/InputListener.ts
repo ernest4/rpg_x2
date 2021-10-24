@@ -1,5 +1,5 @@
-import { Engine } from "../../shared/ecs";
-import Buffer from "../../shared/ecs/utils/Buffer";
+import { Engine } from "../../ecs";
+import Buffer from "../../ecs/utils/Buffer";
 import InputEvent from "../components/InputEvent";
 import Phaser from "phaser";
 import { Player } from "../components";

@@ -1,6 +1,5 @@
 import { Buffer } from "buffer";
-import { EntityId } from "../../ecs/types";
-import { SERVER } from "../../utils/environment";
+import { EntityId } from "../../../ecs/types";
 import SCHEMA, {
   LITTLE_ENDIAN,
   MESSAGE_TYPE_POSITION,

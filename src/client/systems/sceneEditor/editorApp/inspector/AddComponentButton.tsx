@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import Component from "../../../../../shared/ecs/Component";
-import { isNumber } from "../../../../../shared/ecs/utils/Number";
+import Component from "../../../../../ecs/Component";
+import { isNumber } from "../../../../../ecs/utils/Number";
 import * as sceneEditorActions from "../../../../store/actions/sceneEditor";
 
 const AddComponentButton = () => {

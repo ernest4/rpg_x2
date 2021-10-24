@@ -312,7 +312,10 @@ class Engine {
     return this._deltaTime;
   }
 
-  private updateSystem = (system: System) => system.update();
+  private updateSystem = (system: System) => {
+    // TODO: benchmark if debug
+    system.update();
+  };
 
   private reclaimEntityIdIfFree = (entityId: EntityId) => {
     if (this.getAllComponentsOfId(entityId).length === 0) {

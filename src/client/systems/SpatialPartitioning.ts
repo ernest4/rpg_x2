@@ -1,8 +1,8 @@
 import Transform from "../../shared/components/Transform";
-import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
-import { EntityId } from "../../shared/ecs/types";
-import SparseSet, { SparseSetItem } from "../../shared/ecs/utils/SparseSet";
+import { Engine } from "../../ecs";
+import System from "../../ecs/System";
+import { EntityId } from "../../ecs/types";
+import SparseSet, { SparseSetItem } from "../../ecs/utils/SparseSet";
 import NearbyCharacters from "../components/NearbyCharacters";
 import RoomComponent from "../components/Room";
 import State from "../game/State";

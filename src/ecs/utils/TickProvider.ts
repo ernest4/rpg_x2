@@ -1,4 +1,3 @@
-import { SERVER } from "../../utils/environment";
 import { DeltaTime } from "../types";
 
 const SERVER_FPS = 20;
@@ -9,16 +8,18 @@ class TickProvider {
   private _animationFrameRequest: number | undefined;
   private _tickCallback: (deltaTime: DeltaTime) => any;
   private _previousTick: number; // SERVER
+  private _isNode: boolean;
 
-  constructor(tickCallback: (deltaTime: DeltaTime) => any) {
+  constructor(isNode: boolean, tickCallback: (deltaTime: DeltaTime) => any) {
+    this._isNode = isNode;
     this._tickCallback = tickCallback;
     this._previousTick = Date.now(); // SERVER
   }
 
-  start = () => (SERVER ? this.startServer() : this.startClient());
-  stop = () => (SERVER ? this.stopServer() : this.stopClient());
+  start = () => (this._isNode ? this.startServer() : this.startClient());
+  stop = () => (this._isNode ? this.stopServer() : this.stopClient());
   tick = (timestamp: DeltaTime) => {
-    SERVER ? this.tickServer() : this.tickClient(timestamp);
+    this._isNode ? this.tickServer() : this.tickClient(timestamp);
   };
 
   // SERVER
@@ -39,7 +40,8 @@ class TickProvider {
 
     // Reason for this set up on Node.js server explained here:
     // https://timetocode.tumblr.com/post/71512510386/an-accurate-node-js-game-loop-inbetween-settimeout-and#notes
-    if (Date.now() - this._previousTick < SERVER_TICK_LENGTH_MS - 16) setTimeout(this.tickServer, 0);
+    if (Date.now() - this._previousTick < SERVER_TICK_LENGTH_MS - 16)
+      setTimeout(this.tickServer, 0);
     else setImmediate(this.tickServer);
   };
 

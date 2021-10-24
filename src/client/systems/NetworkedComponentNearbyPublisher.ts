@@ -1,9 +1,9 @@
-import { Engine } from "../../shared/ecs";
+import { Engine } from "../../ecs";
 import Publisher from "../../shared/systems/Publisher";
 import Networked from "../../shared/components/interfaces/Networked";
 import Event from "../../shared/components/interfaces/Event";
-import { ComponentClass, EntityId, QuerySet } from "../../shared/ecs/types";
-import SparseSet, { SparseSetItem } from "../../shared/ecs/utils/SparseSet";
+import { ComponentClass, EntityId, QuerySet } from "../../ecs/types";
+import SparseSet, { SparseSetItem } from "../../ecs/utils/SparseSet";
 import NearbyCharacters from "../components/NearbyCharacters";
 import { MESSAGE_TYPE } from "../../shared/messages/schema";
 

@@ -1,4 +1,5 @@
 import Engine from "./Engine";
+import { benchmarkSubject } from "./utils/benchmark";
 
 // TODO: jest tests !!!!
 abstract class System {
@@ -21,6 +22,10 @@ abstract class System {
 
   log = (object: any) => {
     console.log(`[Engine]:[${this.constructor.name}]:${JSON.stringify(object)}`);
+  };
+
+  benchmarkSubject = (subject: string, callback: Function) => {
+    this.log(benchmarkSubject(subject, callback));
   };
 
   get engine() {

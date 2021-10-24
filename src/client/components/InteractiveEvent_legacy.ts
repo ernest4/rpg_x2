@@ -1,5 +1,5 @@
-import Component from "../../shared/ecs/Component";
-import { EntityId, InteractiveEventType } from "../../shared/ecs/types";
+import Component from "../../ecs/Component";
+import { EntityId, InteractiveEventType } from "../../ecs/types";
 
 class InteractiveEvent extends Component {
   type!: InteractiveEventType;

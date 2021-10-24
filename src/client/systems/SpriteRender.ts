@@ -1,4 +1,4 @@
-import { QuerySet } from "../../shared/ecs/types";
+import { QuerySet } from "../../ecs/types";
 import LoadSpriteEvent from "../components/LoadSpriteEvent";
 import Sprite from "../components/Sprite";
 import Transform from "../components/Transform";

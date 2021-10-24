@@ -1,6 +1,6 @@
-import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
-import { QuerySet } from "../../shared/ecs/types";
+import { Engine } from "../../ecs";
+import System from "../../ecs/System";
+import { QuerySet } from "../../ecs/types";
 import InputEvent from "../components/InputEvent";
 import PhysicsBody from "../components/PhysicsBody";
 import Speed from "../components/Speed";

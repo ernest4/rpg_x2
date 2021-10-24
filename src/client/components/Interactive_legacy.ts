@@ -1,5 +1,5 @@
-import Component from "../../shared/ecs/Component";
-import { EntityId } from "../../shared/ecs/types";
+import Component from "../../ecs/Component";
+import { EntityId } from "../../ecs/types";
 
 // TODO: create parent 'LoadableComponent/AsyncComponent extends Component' that contains the common 'loaded' boolean ??
 class Interactive extends Component {

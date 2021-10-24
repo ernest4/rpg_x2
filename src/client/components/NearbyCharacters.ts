@@ -1,6 +1,6 @@
-import Component from "../../shared/ecs/Component";
-import { EntityId } from "../../shared/ecs/types";
-import SparseSet, { SparseSetItem } from "../../shared/ecs/utils/SparseSet";
+import Component from "../../ecs/Component";
+import { EntityId } from "../../ecs/types";
+import SparseSet, { SparseSetItem } from "../../ecs/utils/SparseSet";
 
 class NearbyCharacters extends Component {
   entityIdSet: SparseSet<SparseSetItem>;

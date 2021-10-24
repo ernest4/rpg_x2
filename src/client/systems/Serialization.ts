@@ -1,11 +1,11 @@
 import { Scene } from "phaser";
-import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
-import { QuerySet } from "../../shared/ecs/types";
+import { Engine } from "../../ecs";
+import System from "../../ecs/System";
+import { QuerySet } from "../../ecs/types";
 import SerializeEvent from "../components/SerializeEvent";
 import Transform from "../components/Transform";
 import * as availableComponents from "../components";
-import Vector3BufferView from "../../shared/ecs/utils/Vector3BufferView";
+import Vector3BufferView from "../../ecs/utils/Vector3BufferView";
 
 const MAX_SCENE_JSON_STRING_SIZE = 268435440; // NOTE: this is hard limit from chrome v8
 
