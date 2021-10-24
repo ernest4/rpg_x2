@@ -1,4 +1,4 @@
-import { context } from "../../../../../tests/jestHelpers";
+import { context } from "../../../../tests/jestHelpers";
 import Vector3BufferView from "../../utils/Vector3BufferView";
 
 describe(Vector3BufferView, () => {

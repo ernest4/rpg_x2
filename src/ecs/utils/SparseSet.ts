@@ -1,5 +1,4 @@
 import { isNumber } from "./Number";
-
 export class SparseSetItem {
   protected _id: number;
 

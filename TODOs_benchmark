@@ -4,3 +4,6 @@ print it out in dynamically created benchmark debug widget
 At the bottom widget list the frame budget in ms and %
 Frame budget is calculated from engine FPS
 (For each system that has different frame rate, show their own budget)
+
+TODO:
+Store game version in save state. When game is loaded, can compare version numbers and request and show changelog between players version and current version. Server would store all the change log jsons.

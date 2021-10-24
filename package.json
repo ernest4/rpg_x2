@@ -14,8 +14,8 @@
     "build:server:start": "yarn build:server && yarn start",
     "build:client:start": "yarn build:client && yarn start",
     "build": "yarn build-css && concurrently --prefix \"[{name}]\" --names \"SERVER,CLIENT\" -c \"bgYellow.bold,bgGreen.bold\" \"yarn build:server\" \"yarn build:client\"",
-    "build-css": "postcss src/client/css/tailwind.css -o src/client/css/main.css",
-    "build:server": "tsc -b src/server",
+    "build-css": "postcss src/css/tailwind.css -o src/css/main.css",
+    "build:server": "tsc -b server",
     "build:client": "cross-env NODE_ENV=production TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" webpack --mode production"
   },
   "author": "Ernestas Monkevicius",

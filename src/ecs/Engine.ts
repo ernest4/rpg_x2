@@ -79,6 +79,8 @@ class Engine {
   // removeAllSystems
 
   addComponent = <T extends Component>(component: T) => {
+    console.log("component.constructor.name");
+    console.log(component.constructor.name); // NOW YOU TELL ME THIS DOESNT WORK :D https://stackoverflow.com/questions/50267543/class-name-always-e-for-every-class-after-uglify-webpack-for-production
     // NOTE: indexing using component class name
     const componentClassName = component.constructor.name;
     let componentList = this._componentLists[componentClassName];

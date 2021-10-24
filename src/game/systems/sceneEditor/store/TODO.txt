@@ -1,0 +1,4 @@
+TODO: take out the game reducers/actions
+
+make a separate store for game state (for game UI system), put the game
+actions / reducers there.

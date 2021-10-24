@@ -21,7 +21,7 @@ const targets = __RPG_X2_DEVELOPMENT__ ? { chrome: "79", firefox: "72" } : "> 0.
 const config: Configuration = {
   mode: __RPG_X2_DEVELOPMENT__ ? "development" : "production",
   devtool: __RPG_X2_DEVELOPMENT__ ? "inline-source-map" : false,
-  entry: ["./src/client/index"],
+  entry: ["./src/index"],
   output: {
     path: path.join(__dirname, "dist", "statics"),
     filename: __RPG_X2_DEVELOPMENT__ ? "[name].bundle.js" : "[name].[contenthash].js",

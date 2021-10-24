@@ -1,4 +1,4 @@
-import { context } from "../../../../../tests/jestHelpers";
+import { context } from "../../../../tests/jestHelpers";
 import Component from "../../Component";
 import Engine from "../../Engine";
 import System from "../../System";
