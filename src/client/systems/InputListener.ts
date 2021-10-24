@@ -1,9 +1,9 @@
 import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
 import Buffer from "../../shared/ecs/utils/Buffer";
 import InputEvent from "../components/InputEvent";
 import Phaser from "phaser";
 import { Player } from "../components";
+import PhaserSystem from "./abstract/PhaserSystem";
 
 export const INPUT_KEYS = {
   UP: "UP",
@@ -48,16 +48,13 @@ const DEFAULT_INPUTS: InputEventObject[] = [
 ];
 
 // TODO: jests
-class InputListener extends System {
+class InputListener extends PhaserSystem {
   private _inputs: InputEventObject[];
-  private _inputsBuffer: Buffer<InputEventObject>;
-  private _scene: Phaser.Scene;
+  private _inputsBuffer: Buffer<InputEventObject> = new Buffer<InputEventObject>();
 
-  constructor(engine: Engine, scene: Phaser.Scene, inputs?: InputEventObject[]) {
-    super(engine);
-    this._scene = scene;
-    this._inputs = inputs || DEFAULT_INPUTS;
-    this._inputsBuffer = new Buffer<InputEventObject>();
+  constructor(engine: Engine, scene: Phaser.Scene, inputs: InputEventObject[] = DEFAULT_INPUTS) {
+    super(engine, scene);
+    this._inputs = inputs;
   }
 
   start(): void {
@@ -66,7 +63,6 @@ class InputListener extends System {
 
   update(): void {
     this.engine.removeComponentsOfClass(InputEvent);
-    // this.createInputEvents();
     this.engine.query(this.createInputEvents, Player);
   }
 
@@ -75,7 +71,7 @@ class InputListener extends System {
   private registerInputCallbacks = () => this._inputs.forEach(this.registerInputCallback);
 
   private registerInputCallback = ([type, key]: InputEventObject) => {
-    this._scene.input.keyboard.on(`${type}-${key}`, (e: any) =>
+    this.scene.input.keyboard.on(`${type}-${key}`, (e: any) =>
       this._inputsBuffer.push([type, key])
     );
   };
@@ -86,13 +82,6 @@ class InputListener extends System {
       this.engine.addComponent(inputEvent);
     });
   };
-
-  // private createInputEvents = () => {
-  //   this._inputsBuffer.process(([type, key]) => {
-  //     const inputEvent = new InputEvent(this.newEntityId(), type, key);
-  //     this.engine.addComponent(inputEvent);
-  //   });
-  // };
 }
 
 export default InputListener;

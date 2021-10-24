@@ -5,6 +5,7 @@ import LoadSpriteEvent from "../components/LoadSpriteEvent";
 import Buffer from "../../shared/ecs/utils/Buffer";
 import { Sprite } from "../components";
 import Phaser from "phaser";
+import PhaserSystem from "./abstract/PhaserSystem";
 
 type LoadEvent = {
   key: string;
@@ -14,24 +15,16 @@ type LoadEvent = {
 };
 
 // TODO: jests
-class SpriteLoader extends System {
-  private _scene: Phaser.Scene;
-  private _loadEventsBuffer: Buffer<LoadEvent>;
-  private _requestedTextures: { [key: string]: string };
-
-  constructor(engine: Engine, scene: Phaser.Scene) {
-    super(engine);
-    this._scene = scene;
-    this._loadEventsBuffer = new Buffer<LoadEvent>();
-    this._requestedTextures = {};
-  }
+class SpriteLoader extends PhaserSystem {
+  private _loadEventsBuffer: Buffer<LoadEvent> = new Buffer<LoadEvent>();
+  private _requestedTextures: { [key: string]: string } = {};
 
   start(): void {}
 
   update(): void {
     this.engine.query(this.queueLoadEvents, LoadSpriteEvent);
     // start loading (can call this over and over, even when already loading...no harm)
-    this._scene.load.start();
+    this.scene.load.start();
   }
 
   destroy(): void {}
@@ -55,21 +48,16 @@ class SpriteLoader extends System {
     return this._requestedTextures[url] && !this.isPhaserTextureMissing(url);
   };
 
-  // Not sure if this works as intended: https://photonstorm.github.io/phaser3-docs/Phaser.Textures.TextureManager.html
-  private isPhaserTextureMissing = (textureUrl: string): boolean => {
-    return this._scene.textures.get(textureUrl).key === "__MISSING";
-  };
-
   private queueTextureLoad = (
     url: string,
     frameConfig: Phaser.Types.Loader.FileTypes.ImageFrameConfig,
     targetEntityId: EntityId
   ) => {
-    const pendingLoad = this._scene.load.spritesheet({ key: url, url, frameConfig });
+    const pendingLoad = this.scene.load.spritesheet({ key: url, url, frameConfig });
     pendingLoad.on(
       "filecomplete",
       (key, type, texture) => this.addLoadEvent(key, type, texture, targetEntityId),
-      this._scene
+      this.scene
     );
     this._requestedTextures[url] = url;
   };

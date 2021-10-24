@@ -1,19 +1,11 @@
-import { Engine } from "../../shared/ecs";
-import System from "../../shared/ecs/System";
 import { QuerySet } from "../../shared/ecs/types";
 import LoadSpriteEvent from "../components/LoadSpriteEvent";
 import Sprite from "../components/Sprite";
 import Transform from "../components/Transform";
+import PhaserSystem from "./abstract/PhaserSystem";
 
 // TODO: jests
-class SpriteRender extends System {
-  private _scene: Phaser.Scene;
-
-  constructor(engine: Engine, scene: Phaser.Scene) {
-    super(engine);
-    this._scene = scene;
-  }
-
+class SpriteRender extends PhaserSystem {
   start(): void {}
 
   update(): void {
@@ -27,7 +19,7 @@ class SpriteRender extends System {
     const { phaserSprite, url } = sprite;
 
     if (!this.phaserSpriteReady(phaserSprite)) {
-      if (this.textureReady(url)) this.replacePhaserSprite(sprite);
+      if (this.isPhaserTexturePresent(url)) this.replacePhaserSprite(sprite);
       else this.initLoad(sprite);
     }
 
@@ -42,13 +34,9 @@ class SpriteRender extends System {
     return phaserSprite && phaserSprite.texture.key !== "__MISSING";
   };
 
-  private textureReady = (url: string) => {
-    return this._scene.textures.get(url).key !== "__MISSING";
-  };
-
   private replacePhaserSprite = (sprite: Sprite) => {
     sprite.phaserSprite.destroy(); // NOTE: cleanup, don't leak phaser objects!
-    sprite.phaserSprite = this._scene.add.sprite(0, 0, sprite.url);
+    sprite.phaserSprite = this.scene.add.sprite(0, 0, sprite.url);
   };
 
   private initLoad = ({ url, frameConfig, entityId }: Sprite) => {

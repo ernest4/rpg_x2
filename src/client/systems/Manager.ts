@@ -1,6 +1,5 @@
 import System from "../../shared/ecs/System";
 import { Player, Sprite } from "../components";
-import LoadSpriteEvent from "../components/LoadSpriteEvent";
 import PhysicsBody from "../components/PhysicsBody";
 import Speed from "../components/Speed";
 import Transform from "../components/Transform";
