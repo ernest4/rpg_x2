@@ -18,8 +18,6 @@ class SpriteRender extends PhaserSystem {
     const [{ position, rotation, scale }, sprite] = querySet as [Transform, Sprite];
     let { phaserSprite, url } = sprite;
 
-    this.log(sprite);
-
     if (!this.phaserSpriteReady(phaserSprite)) {
       if (this.isPhaserTexturePresent(url)) {
         phaserSprite = this.replacePhaserSprite(sprite);

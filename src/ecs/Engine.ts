@@ -5,6 +5,7 @@ import SparseSet, { SparseSetItem } from "./utils/SparseSet";
 import System from "./System";
 import { isNumber } from "./utils/Number";
 import Entity from "./Entity";
+import Stats from "./utils/Stats";
 
 // TODO: move out to own class?
 class EntityIdAlias extends SparseSetItem {
@@ -29,9 +30,11 @@ class Engine {
   private _debug: boolean | undefined;
   private _entityIdAliases: SparseSet<EntityIdAlias>;
   readonly entityIdPool: EntityIdPool;
+  private _stats: Stats;
 
   constructor(debug?: boolean) {
     this._debug = debug;
+    if (debug) this._stats = new Stats();
     // this._systemUpdateFunctions = [];
     this._systems = [];
     this._deltaTime = 0;
@@ -256,6 +259,7 @@ class Engine {
     this._updating = true;
     // this._systemUpdateFunctions.forEach(this.callSystemUpdateFunction);
     this._systems.forEach(this.updateSystem);
+    if (this._debug) this._stats.update();
     this._updating = false;
     // this.updateComplete.dispatch(); // TODO: signals??
   };
@@ -314,7 +318,8 @@ class Engine {
   }
 
   private updateSystem = (system: System) => {
-    // TODO: benchmark if debug
+    if (this._debug) return this._stats.benchmark(system.constructor.name, () => system.update());
+
     system.update();
   };
 
