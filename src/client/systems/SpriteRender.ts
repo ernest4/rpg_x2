@@ -16,11 +16,12 @@ class SpriteRender extends PhaserSystem {
 
   private updateSprites = (querySet: QuerySet) => {
     const [{ position, rotation, scale }, sprite] = querySet as [Transform, Sprite];
-    const { phaserSprite, url } = sprite;
+    let { phaserSprite, url } = sprite;
 
     if (!this.phaserSpriteReady(phaserSprite)) {
-      if (this.isPhaserTexturePresent(url)) this.replacePhaserSprite(sprite);
-      else this.initLoad(sprite);
+      if (this.isPhaserTexturePresent(url)) {
+        phaserSprite = this.replacePhaserSprite(sprite);
+      } else return this.initLoad(sprite);
     }
 
     phaserSprite.x = position.x;
@@ -35,8 +36,9 @@ class SpriteRender extends PhaserSystem {
   };
 
   private replacePhaserSprite = (sprite: Sprite) => {
-    sprite.phaserSprite.destroy(); // NOTE: cleanup, don't leak phaser objects!
-    sprite.phaserSprite = this.scene.add.sprite(0, 0, sprite.url);
+    const newPhaserSprite = this.scene.add.sprite(0, 0, sprite.url);
+    sprite.phaserSprite = newPhaserSprite;
+    return newPhaserSprite;
   };
 
   private initLoad = ({ url, frameConfig, entityId }: Sprite) => {
