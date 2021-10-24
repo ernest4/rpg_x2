@@ -18,16 +18,26 @@ class Movement extends System {
   destroy(): void {}
 
   private updateTransforms = (querySet: QuerySet) => {
-    const [transform, physicsBody] = <[Transform, PhysicsBody]>querySet;
+    const [{ position, rotation }, { linearVelocity, angularVelocity }] = querySet as [
+      Transform,
+      PhysicsBody
+    ];
 
     const seconds = this.deltaTime / 1000;
 
-    transform.position.x += physicsBody.linearVelocity.x * seconds;
-    transform.position.y += physicsBody.linearVelocity.y * seconds;
-    transform.position.z += physicsBody.linearVelocity.z * seconds;
+    // so far this is fast or faster?
+    // transform.position.x += physicsBody.linearVelocity.x * seconds;
+    // transform.position.y += physicsBody.linearVelocity.y * seconds;
+    // transform.position.z += physicsBody.linearVelocity.z * seconds;
 
-    transform.rotation.z += physicsBody.angularVelocity.z * seconds;
-    if (360 < transform.rotation.z) transform.rotation.z = transform.rotation.z - 360;
+    const { x, y, z } = position.xyz;
+    const newX = x + linearVelocity.x * seconds;
+    const newY = y + linearVelocity.y * seconds;
+    const newZ = z + linearVelocity.z * seconds;
+    position.xyz = { x: newX, y: newY, z: newZ };
+
+    rotation.z += angularVelocity.z * seconds;
+    if (360 < rotation.z) rotation.z = rotation.z - 360;
   };
 }
 

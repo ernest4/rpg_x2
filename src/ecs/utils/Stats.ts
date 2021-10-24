@@ -4,6 +4,11 @@ import Buffer from "./Buffer";
 import { round } from "./Number";
 
 // TODO: jests
+
+// TODO:
+// At the bottom widget list the frame budget in ms and %
+// Frame budget is calculated from engine FPS
+// (For each system that has different frame rate, show their own budget)
 export class Stats {
   private parentDiv: HTMLDivElement;
   private _data: { [datum: string]: { values: Buffer<number>; element: HTMLDivElement } } = {};

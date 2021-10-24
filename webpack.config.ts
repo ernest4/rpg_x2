@@ -16,7 +16,8 @@ const PackageJson = JSON.parse(rawPackageJson);
 const { version: __RPG_X2_VERSION__ } = PackageJson;
 
 const nodeModulesPath = path.resolve(__dirname, "node_modules");
-const targets = __RPG_X2_DEVELOPMENT__ ? { chrome: "79", firefox: "72" } : "> 0.25%, not dead";
+// const targets = __RPG_X2_DEVELOPMENT__ ? { chrome: "79", firefox: "72" } : "> 0.25%, not dead";
+const targets = { chrome: "80" };
 
 const config: Configuration = {
   mode: __RPG_X2_DEVELOPMENT__ ? "development" : "production",

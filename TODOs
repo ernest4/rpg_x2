@@ -1,0 +1,2 @@
+TODO: Store game version in save state. When game is loaded, can compare version numbers and request and show changelog between players version and current version. Server would store all the change log jsons.
+TODO: disclaimer that only Chrome is officially supported (for performance reasons).
