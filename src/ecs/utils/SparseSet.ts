@@ -111,7 +111,11 @@ class SparseSet<T extends SparseSetItem = SparseSetItem> {
     // Caching this to prevent add / remove from messing with the stream
     const elementCount = this._elementCount;
     const denseList = this._denseList;
-    for (let i = 0; i < elementCount; i++) callback(denseList[i]);
+    let i = 0;
+    while (i < elementCount) {
+      callback(denseList[i]);
+      i++;
+    }
   };
 }
 
