@@ -435,6 +435,25 @@ class Engine {
     }
   };
 
+  queryTwoInOrder = <C1 extends Component, C2 extends Component>(
+    callback: (component1: C1, component2: C2) => void,
+    queryTag1: number,
+    queryTag2: number
+  ) => {
+    const componentsLists = this._componentLists;
+    const tag2ComponentList = componentsLists[queryTag2];
+    if (!tag2ComponentList) return;
+
+    let tag2Component: C2;
+    const processComponent = component => {
+      tag2Component = <C2>tag2ComponentList.get(component.id);
+      if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+
+      callback(component, tag2Component);
+    };
+    componentsLists[queryTag1]?.stream(processComponent);
+  };
+
   // For systems that query 1 component, can't be faster than this!
   queryOne = <T extends Component>(callback: (component: T) => void, queryTag: number) => {
     (<SparseSet<T>>(<any>this._componentLists[queryTag]))?.stream(callback);
