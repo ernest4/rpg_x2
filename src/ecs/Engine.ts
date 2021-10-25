@@ -19,14 +19,14 @@ class EntityIdAlias extends SparseSetItem {
 
 // TODO: jest tests !!!!
 class Engine {
-  private _deltaTime: DeltaTime;
-  private _updating: boolean;
+  private _deltaTime: DeltaTime = 0;
+  private _updating: boolean = false;
   // updateComplete: any; // TODO: better type?
   // NOTE: for faster iteration, reference straight to update function, one indirection instead of 2
   // (-> system -> update)
   // _systemUpdateFunctions: ((engine: Engine, deltaTime: DeltaTime) => void)[];
-  private _systems: System[]; // NOTE: handle onn system to call start() and destroy()
-  private _componentLists: { [key: string]: SparseSet<Component> };
+  private _systems: System[] = []; // NOTE: handle onn system to call start() and destroy()
+  private _componentLists: SparseSet<Component>[] = [];
   private _debug: boolean | undefined;
   private _entityIdAliases: SparseSet<EntityIdAlias>;
   readonly entityIdPool: EntityIdPool;
@@ -36,10 +36,6 @@ class Engine {
     this._debug = debug;
     if (debug) this._stats = new Stats();
     // this._systemUpdateFunctions = [];
-    this._systems = [];
-    this._deltaTime = 0;
-    this._updating = false;
-    this._componentLists = {};
     // this.updateComplete = new signals.Signal(); // TODO: signals?? https://github.com/millermedeiros/js-signals
     this.entityIdPool = new EntityIdPool();
     this._entityIdAliases = new SparseSet();
@@ -418,6 +414,10 @@ class Engine {
     };
 
     shortestComponentList.stream(processComponent);
+  };
+
+  querySingle = <T extends Component>(callback: (component: T) => void, queryTag: number) => {
+    (<SparseSet<T>>(<any>this._componentLists[queryTag]))?.stream(callback);
   };
 
   get deltaTime() {

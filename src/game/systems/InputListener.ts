@@ -65,7 +65,7 @@ class InputListener extends PhaserSystem {
 
   update(): void {
     this.engine.removeComponentsOfTag(INPUT_EVENT);
-    this.engine.query(this.createInputEvents, PLAYER);
+    this.engine.querySingle(this.createInputEvents, PLAYER);
   }
 
   destroy(): void {}
@@ -78,8 +78,7 @@ class InputListener extends PhaserSystem {
     );
   };
 
-  private createInputEvents = (querySet: QuerySet) => {
-    const [{ entityId: playerEntityId }] = <[Player]>querySet;
+  private createInputEvents = ({ entityId: playerEntityId }: Player) => {
     this._inputsBuffer.process(([type, key]) => {
       const inputEvent = new InputEvent(this.newEntityId(), type, key, playerEntityId);
       this.engine.addComponent(INPUT_EVENT, inputEvent);

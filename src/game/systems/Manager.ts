@@ -16,6 +16,7 @@ class Manager extends System {
       const entityId = this.newEntityId();
 
       if (i === 1) this.engine.addComponent(PLAYER, new Player(entityId));
+      // this.engine.addComponent(PLAYER, new Player(entityId));
 
       this.engine.addComponent(SPEED, new Speed(entityId, 100 + i));
 
