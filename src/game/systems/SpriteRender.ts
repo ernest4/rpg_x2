@@ -3,14 +3,22 @@ import { benchmarkSubject } from "../../ecs/utils/benchmark";
 import LoadSpriteEvent from "../components/LoadSpriteEvent";
 import Sprite from "../components/Sprite";
 import Transform from "../components/Transform";
-import PhaserSystem from "./abstract/PhaserSystem";
+import PhaserSystem, { __MISSING } from "./abstract/PhaserSystem";
 
 // TODO: jests
 class SpriteRender extends PhaserSystem {
   start(): void {}
 
   update(): void {
-    this.engine.query(this.updateSprites, Transform, Sprite);
+    this.benchmarkSubject("old query", () => {
+      this.engine.query(this.updateSprites, Transform, Sprite);
+    });
+    this.benchmarkSubject("new query 2.0", () => {
+      this.engine.queryByString2(this.updateSprites, "Transform", "Sprite");
+    });
+    this.benchmarkSubject("new query 3.0", () => {
+      this.engine.queryByNumber(this.updateSprites, 0, 1);
+    });
   }
 
   destroy(): void {}
@@ -33,7 +41,7 @@ class SpriteRender extends PhaserSystem {
   };
 
   private phaserSpriteReady = (phaserSprite: Phaser.GameObjects.Sprite) => {
-    return phaserSprite && phaserSprite.texture.key !== "__MISSING";
+    return phaserSprite && phaserSprite.texture.key !== __MISSING;
   };
 
   private replacePhaserSprite = (sprite: Sprite) => {

@@ -13,13 +13,23 @@ class Manager extends System {
     // TODO: remove, testing
     Array.from(Array(30000).keys()).forEach(i => {
       const entityId = this.newEntityId();
-      if (i === 1) this.engine.addComponent(new Player(entityId));
-      this.engine.addComponents(
-        new Speed(entityId, 100 + i),
-        new Transform(entityId, { x: 200 + i, y: 200 + i, z: 0 }),
-        new PhysicsBody(entityId),
-        new Sprite(entityId, assetsPath("images/unit_T.png"), { frameWidth: 32 })
-      );
+
+      const speed = new Speed(entityId, 100 + i);
+      const transform = new Transform(entityId, { x: 200 + i, y: 200 + i, z: 0 });
+      const physicsBody = new PhysicsBody(entityId);
+      const sprite = new Sprite(entityId, assetsPath("images/unit_T.png"), { frameWidth: 32 });
+
+      if (i === 1) {
+        const player = new Player(entityId);
+        this.engine.addComponent(player);
+        this.engine.addComponent2(4, player);
+      }
+      this.engine.addComponents(speed, transform, physicsBody, sprite);
+
+      this.engine.addComponent2(3, speed);
+      this.engine.addComponent2(0, transform);
+      this.engine.addComponent2(2, physicsBody);
+      this.engine.addComponent2(1, sprite);
     });
   }
 

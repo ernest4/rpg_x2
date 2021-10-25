@@ -97,6 +97,18 @@ class Engine {
     return component;
   };
 
+  addComponent2 = <T extends Component>(tag: number, component: T) => {
+    let componentList = this._componentLists[tag];
+
+    if (!componentList) {
+      componentList = new SparseSet();
+      this._componentLists[tag] = componentList;
+    }
+
+    componentList.add(component);
+    return component;
+  };
+
   addComponents = (...components: Component[]) => components.forEach(this.addComponent);
 
   // TODO: sketches...
@@ -265,8 +277,6 @@ class Engine {
   };
 
   query = (callback: QueryCallback, ...componentClasses: ComponentClass<any>[]) => {
-    if (componentClasses.length === 0) throw Error("Empty Query");
-
     // NOTE: finding shortest component list
     let shortestComponentListIndex = 0;
 
@@ -304,6 +314,143 @@ class Engine {
         const anotherComponent = this._componentLists[componentClassName]?.get(entityId);
 
         if (anotherComponent) querySet.push(anotherComponent as Component);
+        else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+
+        if (i + 1 === componentClassesLength) callback(querySet);
+      }
+    };
+
+    shortestComponentList.stream(processComponent);
+  };
+
+  queryByString = (callback: QueryCallback, ...componentClasses: string[]) => {
+    // NOTE: finding shortest component list
+    let shortestComponentListIndex = 0;
+
+    let shortestComponentList = this._componentLists[componentClasses[shortestComponentListIndex]];
+
+    if (!shortestComponentList) return;
+
+    componentClasses.forEach((componentClass, index) => {
+      const nextShortestComponentList = this._componentLists[componentClass];
+
+      if (nextShortestComponentList && shortestComponentList) {
+        if (nextShortestComponentList.size < shortestComponentList.size) {
+          shortestComponentList = nextShortestComponentList;
+          shortestComponentListIndex = index;
+        }
+      }
+    });
+
+    // NOTE: cycling through the shortest component list
+
+    // NOTE: pre-made function to avoid creating new one on each iteration
+    // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
+    // it could be defined outside. But still, defining function once per query [O(1)] is much
+    // better than defining it once per iteration [O(n)]
+    const processComponent = component => {
+      const entityId = component.id;
+
+      // TODO: optimize by caching querySet array ??
+      const querySet: QuerySet = [];
+
+      const componentClassesLength = componentClasses.length;
+      for (let i = 0; i < componentClassesLength; i++) {
+        const componentClassName = componentClasses[i];
+        const anotherComponent = this._componentLists[componentClassName]?.get(entityId);
+
+        if (anotherComponent) querySet.push(anotherComponent as Component);
+        else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+
+        if (i + 1 === componentClassesLength) callback(querySet);
+      }
+    };
+
+    shortestComponentList.stream(processComponent);
+  };
+
+  queryByString2 = (callback: QueryCallback, ...componentClasses: string[]) => {
+    // NOTE: finding shortest component list
+    let shortestComponentListIndex = 0;
+
+    let shortestComponentList = this._componentLists[componentClasses[shortestComponentListIndex]];
+
+    if (!shortestComponentList) return;
+
+    const componentClassesLength = componentClasses.length;
+    for (let i = 0; i < componentClassesLength; i++) {
+      const nextShortestComponentList = this._componentLists[componentClasses[i]];
+
+      if (nextShortestComponentList && shortestComponentList) {
+        if (nextShortestComponentList.size < shortestComponentList.size) {
+          shortestComponentList = nextShortestComponentList;
+          shortestComponentListIndex = i;
+        }
+      }
+    }
+
+    // NOTE: cycling through the shortest component list
+
+    // NOTE: pre-made function to avoid creating new one on each iteration
+    // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
+    // it could be defined outside. But still, defining function once per query [O(1)] is much
+    // better than defining it once per iteration [O(n)]
+    const processComponent = component => {
+      const entityId = component.id;
+
+      // TODO: optimize by caching querySet array ??
+      const querySet: QuerySet = [];
+
+      const componentClassesLength = componentClasses.length;
+      for (let i = 0; i < componentClassesLength; i++) {
+        const componentClassName = componentClasses[i];
+        const anotherComponent = this._componentLists[componentClassName]?.get(entityId);
+
+        if (anotherComponent) querySet.push(anotherComponent as Component);
+        else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+
+        if (i + 1 === componentClassesLength) callback(querySet);
+      }
+    };
+
+    shortestComponentList.stream(processComponent);
+  };
+
+  queryByNumber = (callback: QueryCallback, ...componentClasses: number[]) => {
+    // NOTE: finding shortest component list
+    let shortestComponentListIndex = 0;
+
+    let shortestComponentList = this._componentLists[componentClasses[shortestComponentListIndex]];
+
+    if (!shortestComponentList) return;
+
+    const componentClassesLength = componentClasses.length;
+    for (let i = 0; i < componentClassesLength; i++) {
+      const nextShortestComponentList = this._componentLists[componentClasses[i]];
+
+      if (nextShortestComponentList && shortestComponentList) {
+        if (nextShortestComponentList.size < shortestComponentList.size) {
+          shortestComponentList = nextShortestComponentList;
+          shortestComponentListIndex = i;
+        }
+      }
+    }
+
+    // NOTE: cycling through the shortest component list
+
+    // NOTE: pre-made function to avoid creating new one on each iteration
+    // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
+    // it could be defined outside. But still, defining function once per query [O(1)] is much
+    // better than defining it once per iteration [O(n)]
+    const processComponent = component => {
+      // TODO: optimize by caching querySet array ??
+      const querySet: QuerySet = [];
+
+      const componentClassesLength = componentClasses.length;
+      for (let i = 0; i < componentClassesLength; i++) {
+        const anotherComponent = this._componentLists[componentClasses[i]]?.get(component.id);
+
+        if (anotherComponent) querySet.push(anotherComponent);
         else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
 
         if (i + 1 === componentClassesLength) callback(querySet);

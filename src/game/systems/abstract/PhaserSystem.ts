@@ -3,6 +3,8 @@ import { Engine } from "../../../ecs";
 import Phaser from "phaser";
 
 // TODO: jests
+
+export const __MISSING = "__MISSING";
 abstract class PhaserSystem extends System {
   private readonly _scene: Phaser.Scene;
 
@@ -12,7 +14,7 @@ abstract class PhaserSystem extends System {
   }
 
   isPhaserTextureMissing = (textureUrl: string): boolean => {
-    return this._scene.textures.get(textureUrl).key === "__MISSING";
+    return this._scene.textures.get(textureUrl).key === __MISSING;
   };
 
   isPhaserTexturePresent = (textureUrl: string): boolean => {
