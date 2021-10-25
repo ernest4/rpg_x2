@@ -13,15 +13,15 @@ class Movement extends System {
   start(): void {}
 
   update(): void {
-    this.engine.query(this.updateTransforms, TRANSFORM, PHYSICS_BODY);
+    this.engine.queryInOrder(this.updateTransforms, PHYSICS_BODY, TRANSFORM);
   }
 
   destroy(): void {}
 
   private updateTransforms = (querySet: QuerySet) => {
-    const [{ position, rotation }, { linearVelocity, angularVelocity }] = querySet as [
-      Transform,
-      PhysicsBody
+    const [{ linearVelocity, angularVelocity }, { position, rotation }] = querySet as [
+      PhysicsBody,
+      Transform
     ];
 
     const seconds = this.deltaTime / 1000;

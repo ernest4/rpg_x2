@@ -12,34 +12,15 @@ class SpriteRender extends PhaserSystem {
   start(): void {}
 
   update(): void {
-    this.engine.query(this.updateSprites, TRANSFORM, SPRITE);
-    // this.benchmarkSubject("query no tags", () => {
+    // this.benchmarkSubject("query...", () => {
+    //   this.engine.queryInOrder(this.updateSprites, SPRITE, TRANSFORM);
     // });
-    // this.benchmarkSubject("new alt query", () => {
-    //   this.engine.queryInOrder(this.updateSpritesAlt, 1, 0);
-    // });
+    this.engine.queryInOrder(this.updateSprites, SPRITE, TRANSFORM);
   }
 
   destroy(): void {}
 
   private updateSprites = (querySet: QuerySet) => {
-    const [{ position, rotation, scale }, sprite] = querySet as [Transform, Sprite];
-    let { phaserSprite } = sprite;
-
-    if (!this.phaserSpriteReady(phaserSprite)) {
-      if (this.isPhaserTexturePresent(sprite.url)) {
-        phaserSprite = this.replacePhaserSprite(sprite);
-      } else return this.initLoad(sprite);
-    }
-
-    phaserSprite.x = position.x;
-    phaserSprite.y = position.y;
-    phaserSprite.angle = rotation.z;
-    phaserSprite.scaleX = scale.x;
-    phaserSprite.scaleY = scale.y;
-  };
-
-  private updateSpritesAlt = (querySet: QuerySet) => {
     const [sprite, { position, rotation, scale }] = querySet as [Sprite, Transform];
     let { phaserSprite } = sprite;
 
