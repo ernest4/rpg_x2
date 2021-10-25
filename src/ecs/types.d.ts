@@ -29,7 +29,8 @@ type QueryCallback = (querySet: QuerySet) => void;
 type ComponentClass<T extends Component> = {
   // name: string;
   // readonly className: string;
-  className: () => string;
+  // className: () => string;
+  tag: () => number;
   prototype: T;
   new (entityId: EntityId, ...arguments: any[]): T;
 };

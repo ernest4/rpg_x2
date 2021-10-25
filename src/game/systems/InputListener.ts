@@ -5,6 +5,7 @@ import Phaser from "phaser";
 import { Player } from "../components";
 import PhaserSystem from "./abstract/PhaserSystem";
 import { QuerySet } from "../../ecs/types";
+import { INPUT_EVENT, PLAYER } from "../components/queryTags";
 
 export const INPUT_KEYS = {
   UP: "UP",
@@ -63,8 +64,8 @@ class InputListener extends PhaserSystem {
   }
 
   update(): void {
-    this.engine.removeComponentsOfClass(InputEvent);
-    this.engine.query(this.createInputEvents, Player);
+    this.engine.removeComponentsOfTag(INPUT_EVENT);
+    this.engine.query(this.createInputEvents, PLAYER);
   }
 
   destroy(): void {}
@@ -81,7 +82,7 @@ class InputListener extends PhaserSystem {
     const [{ entityId: playerEntityId }] = <[Player]>querySet;
     this._inputsBuffer.process(([type, key]) => {
       const inputEvent = new InputEvent(this.newEntityId(), type, key, playerEntityId);
-      this.engine.addComponent(inputEvent);
+      this.engine.addComponent(INPUT_EVENT, inputEvent);
     });
   };
 }

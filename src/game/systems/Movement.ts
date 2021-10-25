@@ -2,6 +2,7 @@ import { Engine } from "../../ecs";
 import System from "../../ecs/System";
 import { QuerySet } from "../../ecs/types";
 import PhysicsBody from "../components/PhysicsBody";
+import { PHYSICS_BODY, TRANSFORM } from "../components/queryTags";
 import Transform from "../components/Transform";
 
 class Movement extends System {
@@ -12,7 +13,7 @@ class Movement extends System {
   start(): void {}
 
   update(): void {
-    this.engine.query(this.updateTransforms, Transform, PhysicsBody);
+    this.engine.query(this.updateTransforms, TRANSFORM, PHYSICS_BODY);
   }
 
   destroy(): void {}

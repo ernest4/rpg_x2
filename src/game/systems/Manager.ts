@@ -4,6 +4,7 @@ import PhysicsBody from "../components/PhysicsBody";
 import Speed from "../components/Speed";
 import Transform from "../components/Transform";
 import { assetsPath } from "../../utils/environment";
+import { PHYSICS_BODY, PLAYER, SPEED, SPRITE, TRANSFORM } from "../components/queryTags";
 
 // TODO: jests
 
@@ -14,22 +15,21 @@ class Manager extends System {
     Array.from(Array(30000).keys()).forEach(i => {
       const entityId = this.newEntityId();
 
-      const speed = new Speed(entityId, 100 + i);
-      const transform = new Transform(entityId, { x: 200 + i, y: 200 + i, z: 0 });
-      const physicsBody = new PhysicsBody(entityId);
-      const sprite = new Sprite(entityId, assetsPath("images/unit_T.png"), { frameWidth: 32 });
+      if (i === 1) this.engine.addComponent(PLAYER, new Player(entityId));
 
-      if (i === 1) {
-        const player = new Player(entityId);
-        this.engine.addComponent(player);
-        this.engine.addComponent2(4, player);
-      }
-      this.engine.addComponents(speed, transform, physicsBody, sprite);
+      this.engine.addComponent(SPEED, new Speed(entityId, 100 + i));
 
-      this.engine.addComponent2(3, speed);
-      this.engine.addComponent2(0, transform);
-      this.engine.addComponent2(2, physicsBody);
-      this.engine.addComponent2(1, sprite);
+      this.engine.addComponent(
+        TRANSFORM,
+        new Transform(entityId, { x: 200 + i, y: 200 + i, z: 0 })
+      );
+
+      this.engine.addComponent(PHYSICS_BODY, new PhysicsBody(entityId));
+
+      this.engine.addComponent(
+        SPRITE,
+        new Sprite(entityId, assetsPath("images/unit_T.png"), { frameWidth: 32 })
+      );
     });
   }
 

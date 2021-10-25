@@ -3,6 +3,7 @@ import System from "../../ecs/System";
 import { QuerySet } from "../../ecs/types";
 import InputEvent from "../components/InputEvent";
 import PhysicsBody from "../components/PhysicsBody";
+import { INPUT_EVENT, PHYSICS_BODY, SPEED } from "../components/queryTags";
 import Speed from "../components/Speed";
 import { INPUT_EVENT_TYPES } from "./InputListener";
 
@@ -15,7 +16,7 @@ class MovementController extends System {
   start(): void {}
 
   update(): void {
-    this.engine.query(this.filterInputEvents, InputEvent);
+    this.engine.query(this.filterInputEvents, INPUT_EVENT);
   }
 
   destroy(): void {}
@@ -26,8 +27,8 @@ class MovementController extends System {
     this.engine.withComponents(
       components => this.applyInputEvent(inputEvent, ...(components as [PhysicsBody, Speed])),
       inputEvent.targetEntityId,
-      PhysicsBody,
-      Speed
+      PHYSICS_BODY,
+      SPEED
     );
   };
 

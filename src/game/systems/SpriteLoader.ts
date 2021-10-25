@@ -6,6 +6,7 @@ import Buffer from "../../ecs/utils/Buffer";
 import { Sprite } from "../components";
 import Phaser from "phaser";
 import PhaserSystem from "./abstract/PhaserSystem";
+import { LOAD_SPRITE_EVENT } from "../components/queryTags";
 
 type LoadEvent = {
   key: string;
@@ -22,7 +23,7 @@ class SpriteLoader extends PhaserSystem {
   start(): void {}
 
   update(): void {
-    this.engine.query(this.queueLoadEvents, LoadSpriteEvent);
+    this.engine.query(this.queueLoadEvents, LOAD_SPRITE_EVENT);
     // start loading (can call this over and over, even when already loading...no harm)
     this.scene.load.start();
   }
@@ -32,7 +33,7 @@ class SpriteLoader extends PhaserSystem {
   private queueLoadEvents = (querySet: QuerySet) => {
     const [{ url, frameConfig, targetEntityId, id }] = querySet as [LoadSpriteEvent];
 
-    this.engine.removeComponentById(id, LoadSpriteEvent);
+    this.engine.removeComponentById(id, LOAD_SPRITE_EVENT);
     // NOTE: don't re-request to load something loading/loaded already
     if (this.isTextureLoading(url) || this.isTextureLoaded(url)) return;
 

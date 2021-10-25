@@ -82,22 +82,22 @@ class Engine {
 
   // removeAllSystems
 
-  addComponent = <T extends Component>(component: T) => {
-    // NOTE: indexing using component class name
-    // @ts-ignore
-    const componentClassName = component.constructor.className();
-    let componentList = this._componentLists[componentClassName];
+  // addComponent = <T extends Component>(component: T) => {
+  //   // NOTE: indexing using component class name
+  //   // @ts-ignore
+  //   const componentClassName = component.constructor.className();
+  //   let componentList = this._componentLists[componentClassName];
 
-    if (!componentList) {
-      componentList = new SparseSet();
-      this._componentLists[componentClassName] = componentList;
-    }
+  //   if (!componentList) {
+  //     componentList = new SparseSet();
+  //     this._componentLists[componentClassName] = componentList;
+  //   }
 
-    componentList.add(component);
-    return component;
-  };
+  //   componentList.add(component);
+  //   return component;
+  // };
 
-  addComponent2 = <T extends Component>(tag: number, component: T) => {
+  addComponent = <T extends Component>(tag: number, component: T) => {
     let componentList = this._componentLists[tag];
 
     if (!componentList) {
@@ -109,19 +109,33 @@ class Engine {
     return component;
   };
 
-  addComponents = (...components: Component[]) => components.forEach(this.addComponent);
+  // addComponents = (...components: Component[]) => components.forEach(this.addComponent);
+  // addComponents = (...components: Component[]) => components.forEach(this.addComponent);
 
   // TODO: sketches...
-  addComponentToEntity = <T extends Component>(entity: Entity, component: T) => {
-    entity._loadComponent(component); // TODO: maybe call reload() sticking to public api? but it's expensive, will loop through all component lists...
-    return this.addComponent(component);
-  };
+  // addComponentToEntity = <T extends Component>(entity: Entity, component: T) => {
+  //   entity._loadComponent(component); // TODO: maybe call reload() sticking to public api? but it's expensive, will loop through all component lists...
+  //   return this.addComponent(component);
+  // };
 
-  removeComponent = (component: Component) => {
+  // removeComponent = (component: Component) => {
+  //   // NOTE: indexing using component class name
+  //   // @ts-ignore
+  //   const componentClassName = component.constructor.className();
+  //   const componentList = this._componentLists[componentClassName];
+  //   if (!componentList) return;
+
+  //   const oldEntityId = component.id;
+  //   // this._events.removedComponent(component, oldEntityId);
+  //   componentList.remove(component);
+  //   if (isNumber(oldEntityId)) this.reclaimEntityIdIfFree(oldEntityId);
+  // };
+
+  removeComponent = (tag: number, component: Component) => {
     // NOTE: indexing using component class name
     // @ts-ignore
-    const componentClassName = component.constructor.className();
-    const componentList = this._componentLists[componentClassName];
+    // const componentClassName = component.constructor.className();
+    const componentList = this._componentLists[tag];
     if (!componentList) return;
 
     const oldEntityId = component.id;
@@ -130,68 +144,73 @@ class Engine {
     if (isNumber(oldEntityId)) this.reclaimEntityIdIfFree(oldEntityId);
   };
 
-  removeComponents = (...components: Component[]) => components.forEach(this.removeComponent);
+  // removeComponents = (...components: Component[]) => components.forEach(this.removeComponent);
 
-  removeComponentById = <T extends Component>(
-    entityId: EntityId,
-    componentClass: ComponentClass<T>
-  ) => {
-    const componentList = this._componentLists[componentClass.className()];
+  // removeComponentById = <T extends Component>(
+  //   entityId: EntityId,
+  //   componentClass: ComponentClass<T>
+  // ) => {
+  //   const componentList = this._componentLists[componentClass.className()];
+  //   if (!componentList) return;
+
+  //   componentList.remove(entityId);
+  //   if (isNumber(entityId)) this.reclaimEntityIdIfFree(entityId);
+  // };
+
+  removeComponentById = (entityId: EntityId, tag: number) => {
+    const componentList = this._componentLists[tag];
     if (!componentList) return;
 
     componentList.remove(entityId);
     if (isNumber(entityId)) this.reclaimEntityIdIfFree(entityId);
   };
 
-  removeComponentsById = (entityId: EntityId, ...componentClasses: ComponentClass<any>[]) => {
-    const callback = (componentClass: ComponentClass<any>) => {
-      this.removeComponentById(entityId, componentClass);
-    };
-    componentClasses.forEach(callback);
+  // removeComponentsById = (entityId: EntityId, ...componentClasses: ComponentClass<any>[]) => {
+  //   const callback = (componentClass: ComponentClass<any>) => {
+  //     this.removeComponentById(entityId, componentClass);
+  //   };
+  //   componentClasses.forEach(callback);
+  // };
+
+  // removeComponentsOfClass = <T extends Component>(componentClass: ComponentClass<T>) => {
+  //   this._componentLists[componentClass.className()]?.stream(this.removeComponent);
+  // };
+
+  removeComponentsOfTag = (tag: number) => {
+    const removeCallback = (component: Component) => this.removeComponent(tag, component);
+    this._componentLists[tag]?.stream(removeCallback);
   };
 
-  removeComponentsOfClass = <T extends Component>(componentClass: ComponentClass<T>) => {
-    this._componentLists[componentClass.className()]?.stream(this.removeComponent);
-  };
+  // removeComponentsOfClasses = (...componentClasses: ComponentClass<any>[]) => {
+  //   componentClasses.forEach(this.removeComponentsOfTag);
+  // };
 
-  removeComponentsOfClasses = (...componentClasses: ComponentClass<any>[]) => {
-    componentClasses.forEach(this.removeComponentsOfClass);
-  };
-
-  getComponentById = <T extends Component>(
-    entityId: EntityId,
-    componentClass: ComponentClass<T>
-  ) => {
-    return this._componentLists[componentClass.className()]?.get(entityId) as T | null;
+  getComponentById = <T extends Component>(entityId: EntityId, tag: number) => {
+    return this._componentLists[tag]?.get(entityId) as T | null;
   };
 
   withComponent = <T extends Component>(
     callback: (component: T) => void,
     entityId: EntityId,
-    componentClass: ComponentClass<T>
+    tag: number
   ): void => {
-    const component = this.getComponentById(entityId, componentClass);
+    const component = this.getComponentById<T>(entityId, tag);
     if (component) callback(component);
   };
 
-  getComponentsById = (
-    entityId: EntityId,
-    ...componentClasses: ComponentClass<any>[]
-  ): Component[] => {
+  getComponentsById = (entityId: EntityId, ...tags: number[]): Component[] => {
     const components: Component[] = [];
-    const callback = (componentClass: ComponentClass<any>) => {
-      components.push(this.getComponentById(entityId, componentClass));
-    };
-    componentClasses.forEach(callback);
+    const callback = (tag: number) => components.push(this.getComponentById(entityId, tag));
+    tags.forEach(callback);
     return components;
   };
 
   withComponents = (
     callback: (components: Component[]) => void,
     entityId: EntityId,
-    ...componentClasses: ComponentClass<any>[]
+    ...tags: number[]
   ): void => {
-    const components = this.getComponentsById(entityId, ...componentClasses);
+    const components = this.getComponentsById(entityId, ...tags);
     if (components.filter(component => component).length !== components.length) return;
     callback(components);
   };
@@ -240,17 +259,19 @@ class Engine {
 
   getOrCreateNullComponentById = <T extends Component>(
     entityId: EntityId,
-    componentClass: ComponentClass<T>
+    componentClass: ComponentClass<T>,
+    tag: number
   ): T => {
-    let component = this.getComponentById(entityId, componentClass);
+    let component = this.getComponentById<T>(entityId, tag);
     return component ? component : Component.createNull(entityId, componentClass);
   };
 
   getOrAddNullComponentById = <T extends Component>(
     entityId: EntityId,
-    componentClass: ComponentClass<T>
+    componentClass: ComponentClass<T>,
+    tag: number
   ): T => {
-    return this.addComponent(this.getOrCreateNullComponentById(entityId, componentClass));
+    return this.addComponent(tag, this.getOrCreateNullComponentById(entityId, componentClass, tag));
   };
 
   removeEntity = (entityId: EntityId) => {
@@ -276,157 +297,62 @@ class Engine {
     // this.updateComplete.dispatch(); // TODO: signals??
   };
 
-  query = (callback: QueryCallback, ...componentClasses: ComponentClass<any>[]) => {
+  // query = (callback: QueryCallback, ...componentClasses: ComponentClass<any>[]) => {
+  //   // NOTE: finding shortest component list
+  //   let shortestComponentListIndex = 0;
+
+  //   let shortestComponentList =
+  //     this._componentLists[componentClasses[shortestComponentListIndex].className()];
+
+  //   if (!shortestComponentList) return;
+
+  //   componentClasses.forEach((componentClass, index) => {
+  //     const nextShortestComponentList = this._componentLists[componentClass.className()];
+
+  //     if (nextShortestComponentList && shortestComponentList) {
+  //       if (nextShortestComponentList.size < shortestComponentList.size) {
+  //         shortestComponentList = nextShortestComponentList;
+  //         shortestComponentListIndex = index;
+  //       }
+  //     }
+  //   });
+
+  //   // NOTE: cycling through the shortest component list
+
+  //   // NOTE: pre-made function to avoid creating new one on each iteration
+  //   // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
+  //   // it could be defined outside. But still, defining function once per query [O(1)] is much
+  //   // better than defining it once per iteration [O(n)]
+  //   const processComponent = component => {
+  //     const entityId = component.id;
+
+  //     // TODO: optimize by caching querySet array ??
+  //     const querySet: QuerySet = [];
+
+  //     const componentClassesLength = componentClasses.length;
+  //     for (let i = 0; i < componentClassesLength; i++) {
+  //       const componentClassName = componentClasses[i].className();
+  //       const anotherComponent = this._componentLists[componentClassName]?.get(entityId);
+
+  //       if (anotherComponent) querySet.push(anotherComponent as Component);
+  //       else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+
+  //       if (i + 1 === componentClassesLength) callback(querySet);
+  //     }
+  //   };
+
+  //   shortestComponentList.stream(processComponent);
+  // };
+
+  query = (callback: QueryCallback, ...queryTags: number[]) => {
     // NOTE: finding shortest component list
     let shortestComponentListIndex = 0;
-
-    let shortestComponentList =
-      this._componentLists[componentClasses[shortestComponentListIndex].className()];
-
+    let shortestComponentList = this._componentLists[queryTags[shortestComponentListIndex]];
     if (!shortestComponentList) return;
 
-    componentClasses.forEach((componentClass, index) => {
-      const nextShortestComponentList = this._componentLists[componentClass.className()];
-
-      if (nextShortestComponentList && shortestComponentList) {
-        if (nextShortestComponentList.size < shortestComponentList.size) {
-          shortestComponentList = nextShortestComponentList;
-          shortestComponentListIndex = index;
-        }
-      }
-    });
-
-    // NOTE: cycling through the shortest component list
-
-    // NOTE: pre-made function to avoid creating new one on each iteration
-    // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
-    // it could be defined outside. But still, defining function once per query [O(1)] is much
-    // better than defining it once per iteration [O(n)]
-    const processComponent = component => {
-      const entityId = component.id;
-
-      // TODO: optimize by caching querySet array ??
-      const querySet: QuerySet = [];
-
-      const componentClassesLength = componentClasses.length;
-      for (let i = 0; i < componentClassesLength; i++) {
-        const componentClassName = componentClasses[i].className();
-        const anotherComponent = this._componentLists[componentClassName]?.get(entityId);
-
-        if (anotherComponent) querySet.push(anotherComponent as Component);
-        else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-        if (i + 1 === componentClassesLength) callback(querySet);
-      }
-    };
-
-    shortestComponentList.stream(processComponent);
-  };
-
-  queryByString = (callback: QueryCallback, ...componentClasses: string[]) => {
-    // NOTE: finding shortest component list
-    let shortestComponentListIndex = 0;
-
-    let shortestComponentList = this._componentLists[componentClasses[shortestComponentListIndex]];
-
-    if (!shortestComponentList) return;
-
-    componentClasses.forEach((componentClass, index) => {
-      const nextShortestComponentList = this._componentLists[componentClass];
-
-      if (nextShortestComponentList && shortestComponentList) {
-        if (nextShortestComponentList.size < shortestComponentList.size) {
-          shortestComponentList = nextShortestComponentList;
-          shortestComponentListIndex = index;
-        }
-      }
-    });
-
-    // NOTE: cycling through the shortest component list
-
-    // NOTE: pre-made function to avoid creating new one on each iteration
-    // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
-    // it could be defined outside. But still, defining function once per query [O(1)] is much
-    // better than defining it once per iteration [O(n)]
-    const processComponent = component => {
-      const entityId = component.id;
-
-      // TODO: optimize by caching querySet array ??
-      const querySet: QuerySet = [];
-
-      const componentClassesLength = componentClasses.length;
-      for (let i = 0; i < componentClassesLength; i++) {
-        const componentClassName = componentClasses[i];
-        const anotherComponent = this._componentLists[componentClassName]?.get(entityId);
-
-        if (anotherComponent) querySet.push(anotherComponent as Component);
-        else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-        if (i + 1 === componentClassesLength) callback(querySet);
-      }
-    };
-
-    shortestComponentList.stream(processComponent);
-  };
-
-  queryByString2 = (callback: QueryCallback, ...componentClasses: string[]) => {
-    // NOTE: finding shortest component list
-    let shortestComponentListIndex = 0;
-
-    let shortestComponentList = this._componentLists[componentClasses[shortestComponentListIndex]];
-
-    if (!shortestComponentList) return;
-
-    const componentClassesLength = componentClasses.length;
+    const componentClassesLength = queryTags.length;
     for (let i = 0; i < componentClassesLength; i++) {
-      const nextShortestComponentList = this._componentLists[componentClasses[i]];
-
-      if (nextShortestComponentList && shortestComponentList) {
-        if (nextShortestComponentList.size < shortestComponentList.size) {
-          shortestComponentList = nextShortestComponentList;
-          shortestComponentListIndex = i;
-        }
-      }
-    }
-
-    // NOTE: cycling through the shortest component list
-
-    // NOTE: pre-made function to avoid creating new one on each iteration
-    // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
-    // it could be defined outside. But still, defining function once per query [O(1)] is much
-    // better than defining it once per iteration [O(n)]
-    const processComponent = component => {
-      const entityId = component.id;
-
-      // TODO: optimize by caching querySet array ??
-      const querySet: QuerySet = [];
-
-      const componentClassesLength = componentClasses.length;
-      for (let i = 0; i < componentClassesLength; i++) {
-        const componentClassName = componentClasses[i];
-        const anotherComponent = this._componentLists[componentClassName]?.get(entityId);
-
-        if (anotherComponent) querySet.push(anotherComponent as Component);
-        else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-        if (i + 1 === componentClassesLength) callback(querySet);
-      }
-    };
-
-    shortestComponentList.stream(processComponent);
-  };
-
-  queryByNumber = (callback: QueryCallback, ...componentClasses: number[]) => {
-    // NOTE: finding shortest component list
-    let shortestComponentListIndex = 0;
-
-    let shortestComponentList = this._componentLists[componentClasses[shortestComponentListIndex]];
-
-    if (!shortestComponentList) return;
-
-    const componentClassesLength = componentClasses.length;
-    for (let i = 0; i < componentClassesLength; i++) {
-      const nextShortestComponentList = this._componentLists[componentClasses[i]];
+      const nextShortestComponentList = this._componentLists[queryTags[i]];
 
       if (nextShortestComponentList && shortestComponentList) {
         if (nextShortestComponentList.size < shortestComponentList.size) {
@@ -446,9 +372,43 @@ class Engine {
       // TODO: optimize by caching querySet array ??
       const querySet: QuerySet = [];
 
-      const componentClassesLength = componentClasses.length;
+      const componentClassesLength = queryTags.length;
       for (let i = 0; i < componentClassesLength; i++) {
-        const anotherComponent = this._componentLists[componentClasses[i]]?.get(component.id);
+        const anotherComponent = this._componentLists[queryTags[i]]?.get(component.id);
+
+        if (anotherComponent) querySet.push(anotherComponent);
+        else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+
+        if (i + 1 === componentClassesLength) callback(querySet);
+      }
+    };
+
+    shortestComponentList.stream(processComponent);
+  };
+
+  // NOTE: faster query that assumes first QueryTag is the shortest list
+  // This heuristic is accurate for heaviest and most predictable systems e.g.
+  // like movement [Transform, PhysicsBody] & render [Transform, Sprite]
+  // where PhysicsBody and Sprite are the shorter lists
+  queryInOrder = (callback: QueryCallback, ...queryTags: number[]) => {
+    // NOTE: finding shortest component list
+
+    let shortestComponentList = this._componentLists[queryTags[0]];
+    if (!shortestComponentList) return;
+
+    // NOTE: cycling through the shortest component list
+
+    // NOTE: pre-made function to avoid creating new one on each iteration
+    // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
+    // it could be defined outside. But still, defining function once per query [O(1)] is much
+    // better than defining it once per iteration [O(n)]
+    const processComponent = component => {
+      // TODO: optimize by caching querySet array ??
+      const querySet: QuerySet = [];
+
+      const componentClassesLength = queryTags.length;
+      for (let i = 0; i < componentClassesLength; i++) {
+        const anotherComponent = this._componentLists[queryTags[i]]?.get(component.id);
 
         if (anotherComponent) querySet.push(anotherComponent);
         else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !

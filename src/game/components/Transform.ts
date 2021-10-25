@@ -5,6 +5,7 @@ import { nullVector, unitVector, Vector3Hash } from "../../ecs/utils/vector";
 
 class Transform extends Component implements Serializable {
   static className = () => "Transform";
+  static tag = () => 0;
 
   position: Vector3Hash;
   rotation: Vector3Hash;
