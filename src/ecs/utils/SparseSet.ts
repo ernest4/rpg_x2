@@ -18,11 +18,11 @@ export class SparseSetItem {
 class SparseSet<T extends SparseSetItem = SparseSetItem> {
   // TODO: will want to optimize these lists to use ArrayBuffer for dense memory access where
   // possible?
-  private _denseList: T[];
+  private _denseList: T[] = [];
   // TODO: Sparse lists will become hash maps in V8 optimizer. They are less efficient in speed
   // compared to arrays. So maybe use fixed size ArrayBuffer as well? Dynamically grow it yourself?
-  private _sparseList: number[];
-  private _elementCount: number;
+  private _sparseList: number[] = [];
+  private _elementCount: number = 0; // No elements initially
 
   constructor() {
     // constructor(sparseSetMaxValue, denseSetCapacity) {
@@ -32,10 +32,6 @@ class SparseSet<T extends SparseSetItem = SparseSetItem> {
     // maxValue = maxV;
     // n = 0; // No elements initially
     // this._objectIdKeyName = objectIdKeyName;
-
-    this._sparseList = [];
-    this._denseList = [];
-    this._elementCount = 0; // No elements initially
   }
 
   get = (id: number): T | null => {
@@ -48,16 +44,18 @@ class SparseSet<T extends SparseSetItem = SparseSetItem> {
     // the data structure.
 
     const denseListIndex = this._sparseList[id];
-
     if (this._elementCount <= denseListIndex) return null;
-    if (this._denseList[denseListIndex]?.id !== id) return null;
 
-    return this._denseList[denseListIndex];
+    const denseList = this._denseList;
+    if (denseList[denseListIndex]?.id !== id) return null;
+
+    return denseList[denseListIndex];
   };
 
   // Inserts a new element into set
   add = (item: T): T | null => {
     const itemId = item.id;
+    const elementCount = this._elementCount;
 
     // Corner cases, x must not be out of
     // range, dense[] should not be full and
@@ -67,13 +65,13 @@ class SparseSet<T extends SparseSetItem = SparseSetItem> {
     if (this.get(itemId) !== null) return null;
 
     // Inserting into array-dense[] at index 'n'.
-    this._denseList[this._elementCount] = item;
+    this._denseList[elementCount] = item;
 
     // Mapping it to sparse[] array.
-    this._sparseList[itemId] = this._elementCount;
+    this._sparseList[itemId] = elementCount;
 
     // Increment count of elements in set
-    this._elementCount++;
+    this._elementCount = elementCount + 1;
 
     return item;
   };
@@ -83,19 +81,22 @@ class SparseSet<T extends SparseSetItem = SparseSetItem> {
   // By deleting 'x', we unset 'x' from this set.
   remove = (item: T | number): number | null => {
     const itemId = isNumber(item) ? (item as number) : (item as T).id;
+    const sparseList = this._sparseList;
+    const denseList = this._denseList;
+    const elementCount = this._elementCount;
 
     // If x is not present
     if (this.get(itemId) === null) return null;
 
-    const denseListIndex = this._sparseList[itemId];
+    const denseListIndex = sparseList[itemId];
 
-    const lastItem = this._denseList[this._elementCount - 1]; // Take an element from end
-    this._denseList[denseListIndex] = lastItem; // Overwrite.
-    this._sparseList[lastItem.id] = denseListIndex; // Overwrite.
+    const lastItem = denseList[elementCount - 1]; // Take an element from end
+    denseList[denseListIndex] = lastItem; // Overwrite.
+    sparseList[lastItem.id] = denseListIndex; // Overwrite.
 
     // Since one element has been deleted, we
     // decrement 'n' by 1.
-    this._elementCount--;
+    this._elementCount = elementCount - 1;
 
     return itemId; // return removed item id
   };
@@ -109,7 +110,8 @@ class SparseSet<T extends SparseSetItem = SparseSetItem> {
   stream = (callback: (item: T) => void) => {
     // Caching this to prevent add / remove from messing with the stream
     const elementCount = this._elementCount;
-    for (let i = 0; i < elementCount; i++) callback(this._denseList[i]);
+    const denseList = this._denseList;
+    for (let i = 0; i < elementCount; i++) callback(denseList[i]);
   };
 }
 
