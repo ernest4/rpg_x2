@@ -343,7 +343,6 @@ class Engine {
   // NOTE: most general, slowest query
   queryN = (callback: QueryCallback, ...queryTags: number[]) => {
     const componentsLists = this._componentLists;
-    // NOTE: finding shortest component list
     let shortestComponentListIndex = 0;
     let shortestComponentList = componentsLists[queryTags[shortestComponentListIndex]];
     if (!shortestComponentList) return;
@@ -361,12 +360,6 @@ class Engine {
       }
     }
 
-    // NOTE: cycling through the shortest component list
-
-    // NOTE: pre-made function to avoid creating new one on each iteration
-    // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
-    // it could be defined outside. But still, defining function once per query [O(1)] is much
-    // better than defining it once per iteration [O(n)]
     let querySet: QuerySet = [];
     let anotherComponent: Component;
     const processComponent = component => {
@@ -382,6 +375,32 @@ class Engine {
     shortestComponentList.stream(processComponent);
   };
 
+  // NOTE: faster query that assumes first QueryTag is the shortest list
+  // This heuristic is accurate for heaviest and most predictable systems e.g.
+  // like movement [Transform, PhysicsBody] & render [Transform, Sprite]
+  // where PhysicsBody and Sprite are the shorter lists
+  queryNInOrder = (callback: QueryCallback, ...queryTags: number[]) => {
+    const componentsLists = this._componentLists;
+    let shortestComponentList = componentsLists[queryTags[0]];
+    if (!shortestComponentList) return;
+
+    let querySet: QuerySet = [];
+    let anotherComponent: Component;
+    const componentClassesLength = queryTags.length;
+    const processComponent = component => {
+      for (let i = 1; i < componentClassesLength; i++) {
+        anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
+
+        if (!anotherComponent) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+        querySet[i - 1] = anotherComponent;
+      }
+      callback([component, ...querySet]);
+    };
+
+    shortestComponentList.stream(processComponent);
+  };
+
+  // NOTE: most systems query 1 to 2 components. Heavy optimization available
   queryTwo = <C1 extends Component, C2 extends Component>(
     callback: (component1: C1, component2: C2) => void,
     queryTag1: number,
@@ -416,40 +435,7 @@ class Engine {
     }
   };
 
-  // NOTE: faster query that assumes first QueryTag is the shortest list
-  // This heuristic is accurate for heaviest and most predictable systems e.g.
-  // like movement [Transform, PhysicsBody] & render [Transform, Sprite]
-  // where PhysicsBody and Sprite are the shorter lists
-  queryInOrder = (callback: QueryCallback, ...queryTags: number[]) => {
-    // NOTE: finding shortest component list
-
-    let shortestComponentList = this._componentLists[queryTags[0]];
-    if (!shortestComponentList) return;
-
-    // NOTE: cycling through the shortest component list
-
-    // NOTE: pre-made function to avoid creating new one on each iteration
-    // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
-    // it could be defined outside. But still, defining function once per query [O(1)] is much
-    // better than defining it once per iteration [O(n)]
-    const processComponent = component => {
-      // TODO: optimize by caching querySet array ??
-      const querySet: QuerySet = [];
-
-      const componentClassesLength = queryTags.length;
-      for (let i = 0; i < componentClassesLength; i++) {
-        const anotherComponent = this._componentLists[queryTags[i]]?.get(component.id);
-
-        if (anotherComponent) querySet.push(anotherComponent);
-        else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-        if (i + 1 === componentClassesLength) callback(querySet);
-      }
-    };
-
-    shortestComponentList.stream(processComponent);
-  };
-
+  // For systems that query 1 component, can't be faster than this!
   queryOne = <T extends Component>(callback: (component: T) => void, queryTag: number) => {
     (<SparseSet<T>>(<any>this._componentLists[queryTag]))?.stream(callback);
   };

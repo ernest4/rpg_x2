@@ -13,7 +13,7 @@ class Movement extends System {
   start(): void {}
 
   update(): void {
-    this.engine.queryInOrder(this.updateTransforms, PHYSICS_BODY, TRANSFORM);
+    this.engine.queryNInOrder(this.updateTransforms, PHYSICS_BODY, TRANSFORM);
   }
 
   destroy(): void {}
