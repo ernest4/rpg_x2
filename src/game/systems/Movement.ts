@@ -1,6 +1,5 @@
 import { Engine } from "../../ecs";
 import System from "../../ecs/System";
-import { QuerySet } from "../../ecs/types";
 import PhysicsBody from "../components/PhysicsBody";
 import { PHYSICS_BODY, TRANSFORM } from "../components/queryTags";
 import Transform from "../components/Transform";
@@ -13,17 +12,15 @@ class Movement extends System {
   start(): void {}
 
   update(): void {
-    this.engine.queryNInOrder(this.updateTransforms, PHYSICS_BODY, TRANSFORM);
+    this.engine.queryTwoInOrder(this.updateTransforms, PHYSICS_BODY, TRANSFORM);
   }
 
   destroy(): void {}
 
-  private updateTransforms = (querySet: QuerySet) => {
-    const [{ linearVelocity, angularVelocity }, { position, rotation }] = querySet as [
-      PhysicsBody,
-      Transform
-    ];
-
+  private updateTransforms = (
+    { linearVelocity, angularVelocity }: PhysicsBody,
+    { position, rotation }: Transform
+  ) => {
     const seconds = this.deltaTime / 1000;
 
     position.x = position.x + linearVelocity.x * seconds;

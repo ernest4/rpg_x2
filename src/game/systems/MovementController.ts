@@ -1,6 +1,5 @@
 import { Engine } from "../../ecs";
 import System from "../../ecs/System";
-import { QuerySet } from "../../ecs/types";
 import InputEvent from "../components/InputEvent";
 import PhysicsBody from "../components/PhysicsBody";
 import { INPUT_EVENT, PHYSICS_BODY, SPEED } from "../components/queryTags";
@@ -16,14 +15,12 @@ class MovementController extends System {
   start(): void {}
 
   update(): void {
-    this.engine.queryN(this.filterInputEvents, INPUT_EVENT);
+    this.engine.queryOne(this.filterInputEvents, INPUT_EVENT);
   }
 
   destroy(): void {}
 
-  private filterInputEvents = (querySet: QuerySet) => {
-    const [inputEvent] = querySet as [InputEvent];
-
+  private filterInputEvents = (inputEvent: InputEvent) => {
     this.engine.withComponents(
       components => this.applyInputEvent(inputEvent, ...(components as [PhysicsBody, Speed])),
       inputEvent.targetEntityId,

@@ -334,27 +334,6 @@ class Engine {
   // where PhysicsBody and Sprite are the shorter lists
   queryNInOrder = (callback: QueryCallback, ...queryTags: number[]) => {
     const componentsLists = this._componentLists;
-    let shortestComponentList = componentsLists[queryTags[0]];
-    if (!shortestComponentList) return;
-
-    let querySet: QuerySet = [];
-    let anotherComponent: Component;
-    const componentClassesLength = queryTags.length;
-    const processComponent = component => {
-      for (let i = 1; i < componentClassesLength; i++) {
-        anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
-
-        if (!anotherComponent) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-        querySet[i - 1] = anotherComponent;
-      }
-      callback([component, ...querySet]);
-    };
-
-    shortestComponentList.stream(processComponent);
-  };
-
-  queryNInOrder2 = (callback: QueryCallback, ...queryTags: number[]) => {
-    const componentsLists = this._componentLists;
 
     let querySet: QuerySet = [];
     let anotherComponent: Component;

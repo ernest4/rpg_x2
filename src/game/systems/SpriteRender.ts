@@ -16,40 +16,31 @@ class SpriteRender extends PhaserSystem {
     // this.benchmarkSubject("query", () => {
     //   this.engine.queryN(this.updateSprites, SPRITE, TRANSFORM);
     // });
-    this.benchmarkSubject("queryNInOrder", () => {
-      this.engine.queryNInOrder(this.updateSprites, SPRITE, TRANSFORM);
-    });
-    this.benchmarkSubject("queryNInOrder 2", () => {
-      this.engine.queryNInOrder2(this.updateSprites, SPRITE, TRANSFORM);
-    });
-    // this.benchmarkSubject("query two", () => {
-    //   this.engine.queryTwo(this.updateSpritesTwo, SPRITE, TRANSFORM);
-    // });
     // this.benchmarkSubject("query two in order", () => {
-    //   this.engine.queryTwoInOrder(this.updateSpritesTwo, SPRITE, TRANSFORM);
     // });
+    this.engine.queryTwoInOrder(this.updateSprites, SPRITE, TRANSFORM);
   }
 
   destroy(): void {}
 
-  private updateSprites = (querySet: QuerySet) => {
-    const [sprite, { position, rotation, scale }] = querySet as [Sprite, Transform];
-    let { phaserSprite } = sprite;
+  // private updateSprites = (querySet: QuerySet) => {
+  //   const [sprite, { position, rotation, scale }] = querySet as [Sprite, Transform];
+  //   let { phaserSprite } = sprite;
 
-    if (!this.phaserSpriteReady(phaserSprite)) {
-      if (this.isPhaserTexturePresent(sprite.url)) {
-        phaserSprite = this.replacePhaserSprite(sprite);
-      } else return this.initLoad(sprite);
-    }
+  //   if (!this.phaserSpriteReady(phaserSprite)) {
+  //     if (this.isPhaserTexturePresent(sprite.url)) {
+  //       phaserSprite = this.replacePhaserSprite(sprite);
+  //     } else return this.initLoad(sprite);
+  //   }
 
-    phaserSprite.x = position.x;
-    phaserSprite.y = position.y;
-    phaserSprite.angle = rotation.z;
-    phaserSprite.scaleX = scale.x;
-    phaserSprite.scaleY = scale.y;
-  };
+  //   phaserSprite.x = position.x;
+  //   phaserSprite.y = position.y;
+  //   phaserSprite.angle = rotation.z;
+  //   phaserSprite.scaleX = scale.x;
+  //   phaserSprite.scaleY = scale.y;
+  // };
 
-  private updateSpritesTwo = (sprite: Sprite, { position, rotation, scale }: Transform) => {
+  private updateSprites = (sprite: Sprite, { position, rotation, scale }: Transform) => {
     let { phaserSprite } = sprite;
 
     if (!this.phaserSpriteReady(phaserSprite)) {

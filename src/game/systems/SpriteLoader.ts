@@ -23,16 +23,14 @@ class SpriteLoader extends PhaserSystem {
   start(): void {}
 
   update(): void {
-    this.engine.queryN(this.queueLoadEvents, LOAD_SPRITE_EVENT);
+    this.engine.queryOne(this.queueLoadEvents, LOAD_SPRITE_EVENT);
     // start loading (can call this over and over, even when already loading...no harm)
     this.scene.load.start();
   }
 
   destroy(): void {}
 
-  private queueLoadEvents = (querySet: QuerySet) => {
-    const [{ url, frameConfig, targetEntityId, id }] = querySet as [LoadSpriteEvent];
-
+  private queueLoadEvents = ({ url, frameConfig, targetEntityId, id }: LoadSpriteEvent) => {
     this.engine.removeComponentById(id, LOAD_SPRITE_EVENT);
     // NOTE: don't re-request to load something loading/loaded already
     if (this.isTextureLoading(url) || this.isTextureLoaded(url)) return;

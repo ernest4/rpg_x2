@@ -4,7 +4,6 @@ import InputEvent from "../components/InputEvent";
 import Phaser from "phaser";
 import { Player } from "../components";
 import PhaserSystem from "./abstract/PhaserSystem";
-import { QuerySet } from "../../ecs/types";
 import { INPUT_EVENT, PLAYER } from "../components/queryTags";
 
 export const INPUT_KEYS = {
