@@ -9,24 +9,23 @@
 
 import { EntityId } from "../../ecs/types";
 import Component from "../../ecs/Component";
-import Vector3BufferView, { Vector3Hash } from "../../ecs/utils/Vector3BufferView";
+import { nullVector, Vector3Hash } from "../../ecs/utils/vector";
 
-const FLOAT_32_BYTES = 4;
-
-// TODO: optimize with ArrayBuffers
 class PhysicsBody extends Component {
   static className = () => "PhysicsBody";
 
-  private _values: Float32Array;
-  linearVelocity: Vector3BufferView;
-  angularVelocity: Vector3BufferView;
+  stationary: boolean = true;
+  linearVelocity: Vector3Hash;
+  angularVelocity: Vector3Hash;
 
-  // TODO: ...
-  constructor(entityId: EntityId, linearVelocity?: Vector3Hash, angularVelocity?: Vector3Hash) {
+  constructor(
+    entityId: EntityId,
+    linearVelocity: Vector3Hash = nullVector(),
+    angularVelocity: Vector3Hash = nullVector()
+  ) {
     super(entityId);
-    this._values = new Float32Array(6);
-    this.linearVelocity = new Vector3BufferView(this._values, 0, linearVelocity);
-    this.angularVelocity = new Vector3BufferView(this._values, 3 * FLOAT_32_BYTES, angularVelocity);
+    this.linearVelocity = linearVelocity;
+    this.angularVelocity = angularVelocity;
   }
 }
 

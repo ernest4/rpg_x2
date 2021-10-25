@@ -5,7 +5,6 @@ import { QuerySet } from "../../ecs/types";
 // import SerializeEvent from "../components/SerializeEvent";
 // import Transform from "../components/Transform";
 // import * as availableComponents from "../components";
-import Vector3BufferView from "../../ecs/utils/Vector3BufferView";
 
 const MAX_SCENE_JSON_STRING_SIZE = 268435440; // NOTE: this is hard limit from chrome v8
 
@@ -31,7 +30,6 @@ class Serialization extends System {
 
   update(): void {
     // this.engine.query(this.handleSerializeEvents, SerializeEvent);
-
     // if (this._serialize) {
     //   this.prepareSceneHashBuffer();
     //   this.engine.query(this.serializeEntities, Transform); // NOTE: any entity with Transform only
