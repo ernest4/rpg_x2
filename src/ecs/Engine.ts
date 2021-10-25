@@ -293,6 +293,7 @@ class Engine {
     // this.updateComplete.dispatch(); // TODO: signals??
   };
 
+  // TODO: jests
   // NOTE: most general, slowest query
   queryN = (callback: QueryCallback, ...queryTags: number[]) => {
     const componentsLists = this._componentLists;
@@ -328,6 +329,7 @@ class Engine {
     shortestComponentList.stream(processComponent);
   };
 
+  // TODO: jests
   // NOTE: faster query that assumes first QueryTag is the shortest list
   // This heuristic is accurate for heaviest and most predictable systems e.g.
   // like movement [Transform, PhysicsBody] & render [Transform, Sprite]
@@ -351,6 +353,7 @@ class Engine {
     componentsLists[queryTags[0]]?.stream(processComponent);
   };
 
+  // TODO: jests
   // NOTE: most systems query 1 to 2 components. Heavy optimization available
   queryTwo = <C1 extends Component, C2 extends Component>(
     callback: (component1: C1, component2: C2) => void,
@@ -368,8 +371,9 @@ class Engine {
     let tag2Component: C2;
 
     if (tag1ComponentList.size < tag2ComponentList.size) {
+      const tag2ComponentList_get = tag2ComponentList.get;
       const processComponent = component => {
-        tag2Component = <C2>tag2ComponentList.get(component.id);
+        tag2Component = <C2>tag2ComponentList_get(component.id);
         if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
 
         callback(component, tag2Component);
@@ -377,7 +381,8 @@ class Engine {
       tag1ComponentList.stream(processComponent);
     } else {
       const processComponent = component => {
-        tag1Component = <C1>tag1ComponentList.get(component.id);
+        const tag1ComponentList_get = tag1ComponentList.get;
+        tag1Component = <C1>tag1ComponentList_get(component.id);
         if (!tag1Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
 
         callback(tag1Component, component);
@@ -386,6 +391,7 @@ class Engine {
     }
   };
 
+  // TODO: jests
   queryTwoInOrder = <C1 extends Component, C2 extends Component>(
     callback: (component1: C1, component2: C2) => void,
     queryTag1: number,
@@ -396,8 +402,9 @@ class Engine {
     if (!tag2ComponentList) return;
 
     let tag2Component: C2;
+    const tag2ComponentList_get = tag2ComponentList.get;
     const processComponent = component => {
-      tag2Component = <C2>tag2ComponentList.get(component.id);
+      tag2Component = <C2>tag2ComponentList_get(component.id);
       if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
 
       callback(component, tag2Component);
@@ -405,6 +412,7 @@ class Engine {
     componentsLists[queryTag1]?.stream(processComponent);
   };
 
+  // TODO: jests
   // For systems that query 1 component, can't be faster than this!
   queryOne = <T extends Component>(callback: (component: T) => void, queryTag: number) => {
     (<SparseSet<T>>(<any>this._componentLists[queryTag]))?.stream(callback);
