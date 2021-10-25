@@ -1,4 +1,5 @@
 import { QuerySet } from "../../ecs/types";
+import { benchmarkSubject } from "../../ecs/utils/benchmark";
 import LoadSpriteEvent from "../components/LoadSpriteEvent";
 import Sprite from "../components/Sprite";
 import Transform from "../components/Transform";
@@ -16,10 +17,10 @@ class SpriteRender extends PhaserSystem {
 
   private updateSprites = (querySet: QuerySet) => {
     const [{ position, rotation, scale }, sprite] = querySet as [Transform, Sprite];
-    let { phaserSprite, url } = sprite;
+    let { phaserSprite } = sprite;
 
     if (!this.phaserSpriteReady(phaserSprite)) {
-      if (this.isPhaserTexturePresent(url)) {
+      if (this.isPhaserTexturePresent(sprite.url)) {
         phaserSprite = this.replacePhaserSprite(sprite);
       } else return this.initLoad(sprite);
     }
@@ -41,8 +42,10 @@ class SpriteRender extends PhaserSystem {
     return newPhaserSprite;
   };
 
-  private initLoad = ({ url, frameConfig, entityId }: Sprite) => {
-    this.engine.addComponent(new LoadSpriteEvent(this.newEntityId(), url, frameConfig, entityId));
+  private initLoad = (sprite: Sprite) => {
+    this.engine.addComponent(
+      new LoadSpriteEvent(this.newEntityId(), sprite.url, sprite.frameConfig, sprite.entityId)
+    );
   };
 }
 

@@ -14,7 +14,6 @@ import { nullVector, Vector3Hash } from "../../ecs/utils/vector";
 class PhysicsBody extends Component {
   static className = () => "PhysicsBody";
 
-  stationary: boolean = true;
   linearVelocity: Vector3Hash;
   angularVelocity: Vector3Hash;
 

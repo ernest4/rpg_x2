@@ -18,7 +18,7 @@ class Movement extends System {
   destroy(): void {}
 
   private updateTransforms = (querySet: QuerySet) => {
-    const [{ position, rotation }, { stationary, linearVelocity, angularVelocity }] = querySet as [
+    const [{ position, rotation }, { linearVelocity, angularVelocity }] = querySet as [
       Transform,
       PhysicsBody
     ];
