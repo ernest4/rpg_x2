@@ -341,14 +341,16 @@ class Engine {
   // };
 
   query = (callback: QueryCallback, ...queryTags: number[]) => {
+    const componentsLists = this._componentLists;
     // NOTE: finding shortest component list
     let shortestComponentListIndex = 0;
-    let shortestComponentList = this._componentLists[queryTags[shortestComponentListIndex]];
+    let shortestComponentList = componentsLists[queryTags[shortestComponentListIndex]];
     if (!shortestComponentList) return;
 
+    let nextShortestComponentList;
     const componentClassesLength = queryTags.length;
     for (let i = 0; i < componentClassesLength; i++) {
-      const nextShortestComponentList = this._componentLists[queryTags[i]];
+      nextShortestComponentList = componentsLists[queryTags[i]];
 
       if (nextShortestComponentList && shortestComponentList) {
         if (nextShortestComponentList.size < shortestComponentList.size) {
@@ -364,13 +366,57 @@ class Engine {
     // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
     // it could be defined outside. But still, defining function once per query [O(1)] is much
     // better than defining it once per iteration [O(n)]
+    let querySet: QuerySet = [];
+    let anotherComponent: Component;
     const processComponent = component => {
-      // TODO: optimize by caching querySet array ??
-      const querySet: QuerySet = [];
+      querySet = [];
 
-      const componentClassesLength = queryTags.length;
       for (let i = 0; i < componentClassesLength; i++) {
-        const anotherComponent = this._componentLists[queryTags[i]]?.get(component.id);
+        anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
+
+        if (anotherComponent) querySet.push(anotherComponent);
+        else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+
+        if (i + 1 === componentClassesLength) callback(querySet);
+      }
+    };
+
+    shortestComponentList.stream(processComponent);
+  };
+
+  query2 = (callback: QueryCallback, ...queryTags: number[]) => {
+    const componentsLists = this._componentLists;
+    // NOTE: finding shortest component list
+    let shortestComponentListIndex = 0;
+    let shortestComponentList = componentsLists[queryTags[shortestComponentListIndex]];
+    if (!shortestComponentList) return;
+
+    let nextShortestComponentList;
+    const componentClassesLength = queryTags.length;
+    for (let i = 0; i < componentClassesLength; i++) {
+      nextShortestComponentList = componentsLists[queryTags[i]];
+
+      if (nextShortestComponentList && shortestComponentList) {
+        if (nextShortestComponentList.size < shortestComponentList.size) {
+          shortestComponentList = nextShortestComponentList;
+          shortestComponentListIndex = i;
+        }
+      }
+    }
+
+    // NOTE: cycling through the shortest component list
+
+    // NOTE: pre-made function to avoid creating new one on each iteration
+    // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
+    // it could be defined outside. But still, defining function once per query [O(1)] is much
+    // better than defining it once per iteration [O(n)]
+    let querySet: QuerySet = [];
+    let anotherComponent: Component;
+    const processComponent = component => {
+      querySet = [];
+
+      for (let i = 0; i < componentClassesLength; i++) {
+        anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
 
         if (anotherComponent) querySet.push(anotherComponent);
         else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
