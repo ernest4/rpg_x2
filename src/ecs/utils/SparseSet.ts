@@ -18,11 +18,11 @@ export class SparseSetItem {
 class SparseSet<T extends SparseSetItem = SparseSetItem> {
   // TODO: will want to optimize these lists to use ArrayBuffer for dense memory access where
   // possible?
-  private _denseList: T[] = [];
+  _denseList: T[] = [];
   // TODO: Sparse lists will become hash maps in V8 optimizer. They are less efficient in speed
   // compared to arrays. So maybe use fixed size ArrayBuffer as well? Dynamically grow it yourself?
   private _sparseList: number[] = [];
-  private _elementCount: number = 0; // No elements initially
+  _elementCount: number = 0; // No elements initially
 
   constructor() {
     // constructor(sparseSetMaxValue, denseSetCapacity) {

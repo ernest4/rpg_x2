@@ -403,13 +403,21 @@ class Engine {
 
     let tag2Component: C2;
     const tag2ComponentList_get = tag2ComponentList.get;
-    const processComponent = component => {
-      tag2Component = <C2>tag2ComponentList_get(component.id);
-      if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+    const tag1ComponentList = componentsLists[queryTag1];
+    if (tag1ComponentList) {
+      let component;
+      const elementCount = tag1ComponentList._elementCount;
+      const denseList = tag1ComponentList._denseList;
+      let i = 0;
+      while (i < elementCount) {
+        component = denseList[i];
+        tag2Component = <C2>tag2ComponentList_get(component.id);
+        if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
 
-      callback(component, tag2Component);
-    };
-    componentsLists[queryTag1]?.stream(processComponent);
+        callback(component, tag2Component);
+        i++;
+      }
+    }
   };
 
   // TODO: jests
