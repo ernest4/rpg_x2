@@ -16,9 +16,12 @@ class SpriteRender extends PhaserSystem {
     // this.benchmarkSubject("query", () => {
     //   this.engine.queryN(this.updateSprites, SPRITE, TRANSFORM);
     // });
-    // this.benchmarkSubject("query 2", () => {
-    //   this.engine.queryNInOrder(this.updateSprites, SPRITE, TRANSFORM);
-    // });
+    this.benchmarkSubject("queryNInOrder", () => {
+      this.engine.queryNInOrder(this.updateSprites, SPRITE, TRANSFORM);
+    });
+    this.benchmarkSubject("queryNInOrder 2", () => {
+      this.engine.queryNInOrder2(this.updateSprites, SPRITE, TRANSFORM);
+    });
     // this.benchmarkSubject("query two", () => {
     //   this.engine.queryTwo(this.updateSpritesTwo, SPRITE, TRANSFORM);
     // });

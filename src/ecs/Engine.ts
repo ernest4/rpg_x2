@@ -400,6 +400,25 @@ class Engine {
     shortestComponentList.stream(processComponent);
   };
 
+  queryNInOrder2 = (callback: QueryCallback, ...queryTags: number[]) => {
+    const componentsLists = this._componentLists;
+
+    let querySet: QuerySet = [];
+    let anotherComponent: Component;
+    const componentClassesLength = queryTags.length;
+    const processComponent = component => {
+      for (let i = 1; i < componentClassesLength; i++) {
+        anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
+
+        if (!anotherComponent) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+        querySet[i - 1] = anotherComponent;
+      }
+      callback([component, ...querySet]);
+    };
+
+    componentsLists[queryTags[0]]?.stream(processComponent);
+  };
+
   // NOTE: most systems query 1 to 2 components. Heavy optimization available
   queryTwo = <C1 extends Component, C2 extends Component>(
     callback: (component1: C1, component2: C2) => void,
