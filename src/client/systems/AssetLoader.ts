@@ -1,10 +1,11 @@
 import { Engine } from "../../ecs";
 import System from "../../ecs/System";
 import { EntityId, QuerySet } from "../../ecs/types";
-import LoadSpriteEvent from "../components/LoadSpriteEvent";
+import LoadSpriteEvent from "../../components/LoadSpriteEvent";
 import Buffer from "../../ecs/utils/Buffer";
-import { Sprite } from "../components";
+import { Sprite } from "../../components";
 import Phaser from "phaser";
+import PhaserComponent from "../../components/abstract/PhaserComponent";
 
 type LoadEvent = {
   key: string;
@@ -14,7 +15,7 @@ type LoadEvent = {
 };
 
 // TODO: jests
-class SpriteLoader extends System {
+class AssetLoader extends System {
   private _scene: Phaser.Scene;
   private _loadEventsBuffer: Buffer<LoadEvent>;
   private _requestedTextures: { [key: string]: string };
@@ -67,6 +68,10 @@ class SpriteLoader extends System {
     return this._scene.textures.get(textureUrl).key === "__MISSING";
   };
 
+  // private isPhaserAudioMissing = (audioUrl: string): boolean => {
+  //   return !!this._scene.cache.audio.get(audioUrl);
+  // };
+
   private queueTextureLoad = (
     url: string,
     frameConfig: Phaser.Types.Loader.FileTypes.ImageFrameConfig,
@@ -98,12 +103,12 @@ class SpriteLoader extends System {
 
   private addSpriteComponent = (key: string, targetEntityId: EntityId) => {
     const phaserSprite = this._scene.add.sprite(0, 0, key);
-    // const sprite = new Sprite(targetEntityId, phaserSprite);
-    // this.engine.addComponent(sprite);
+    const sprite = new Sprite(targetEntityId, phaserSprite);
+    this.engine.addComponent(sprite);
   };
 }
 
-export default SpriteLoader;
+export default AssetLoader;
 
 // function addImage (key, type, thing)
 // {

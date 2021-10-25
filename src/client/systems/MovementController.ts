@@ -1,14 +1,13 @@
 import { Engine } from "../../ecs";
 import System from "../../ecs/System";
 import { QuerySet } from "../../ecs/types";
-import InputEvent from "../components/InputEvent";
-import PhysicsBody from "../components/PhysicsBody";
-import { INPUT_EVENT, PHYSICS_BODY, SPEED } from "../components/queryTags";
-import Speed from "../components/Speed";
+import InputEvent from "../../components/InputEvent";
+import PhysicsBody from "../../components/PhysicsBody";
+import Speed from "../../components/Speed";
 import { INPUT_EVENT_TYPES } from "./InputListener";
 
 // TODO: jests
-class MovementController extends System {
+class MovementControl extends System {
   constructor(engine: Engine) {
     super(engine);
   }
@@ -16,7 +15,7 @@ class MovementController extends System {
   start(): void {}
 
   update(): void {
-    this.engine.queryN(this.filterInputEvents, INPUT_EVENT);
+    this.engine.queryN(this.filterInputEvents, InputEvent);
   }
 
   destroy(): void {}
@@ -25,10 +24,10 @@ class MovementController extends System {
     const [inputEvent] = querySet as [InputEvent];
 
     this.engine.withComponents(
-      components => this.applyInputEvent(inputEvent, ...(components as [PhysicsBody, Speed])),
+      (components: [PhysicsBody, Speed]) => this.applyInputEvent(inputEvent, ...components),
       inputEvent.targetEntityId,
-      PHYSICS_BODY,
-      SPEED
+      PhysicsBody,
+      Speed
     );
   };
 
@@ -88,4 +87,4 @@ class MovementController extends System {
   // };
 }
 
-export default MovementController;
+export default MovementControl;

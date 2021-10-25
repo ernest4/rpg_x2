@@ -1,9 +1,9 @@
 import { Engine } from "../../ecs";
 import System from "../../ecs/System";
 import { EntityId, QuerySet } from "../../ecs/types";
-import LoadSpriteEvent from "../components/LoadSpriteEvent";
+import LoadSpriteEvent from "../../components/LoadSpriteEvent";
 import Buffer from "../../ecs/utils/Buffer";
-import { Sprite } from "../components";
+import { Sprite } from "../../components";
 import Phaser from "phaser";
 
 type LoadEvent = {
@@ -98,8 +98,8 @@ class SpriteLoader extends System {
 
   private addSpriteComponent = (key: string, targetEntityId: EntityId) => {
     const phaserSprite = this._scene.add.sprite(0, 0, key);
-    // const sprite = new Sprite(targetEntityId, phaserSprite);
-    // this.engine.addComponent(sprite);
+    const sprite = new Sprite(targetEntityId, phaserSprite);
+    this.engine.addComponent(sprite);
   };
 }
 

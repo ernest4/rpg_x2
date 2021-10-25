@@ -14,10 +14,13 @@ class SpriteRender extends PhaserSystem {
   update(): void {
     // this.engine.queryInOrder(this.updateSprites, SPRITE, TRANSFORM);
     this.benchmarkSubject("query", () => {
-      this.engine.query(this.updateSprites, SPRITE, TRANSFORM);
+      this.engine.queryN(this.updateSprites, SPRITE, TRANSFORM);
     });
-    this.benchmarkSubject("query 2", () => {
-      this.engine.query2(this.updateSprites, SPRITE, TRANSFORM);
+    // this.benchmarkSubject("query 2", () => {
+    //   this.engine.query2(this.updateSprites, SPRITE, TRANSFORM);
+    // });
+    this.benchmarkSubject("query two 2.0", () => {
+      this.engine.queryTwo(this.updateSpritesTwo, SPRITE, TRANSFORM);
     });
   }
 
@@ -25,6 +28,22 @@ class SpriteRender extends PhaserSystem {
 
   private updateSprites = (querySet: QuerySet) => {
     const [sprite, { position, rotation, scale }] = querySet as [Sprite, Transform];
+    let { phaserSprite } = sprite;
+
+    if (!this.phaserSpriteReady(phaserSprite)) {
+      if (this.isPhaserTexturePresent(sprite.url)) {
+        phaserSprite = this.replacePhaserSprite(sprite);
+      } else return this.initLoad(sprite);
+    }
+
+    phaserSprite.x = position.x;
+    phaserSprite.y = position.y;
+    phaserSprite.angle = rotation.z;
+    phaserSprite.scaleX = scale.x;
+    phaserSprite.scaleY = scale.y;
+  };
+
+  private updateSpritesTwo = (sprite: Sprite, { position, rotation, scale }: Transform) => {
     let { phaserSprite } = sprite;
 
     if (!this.phaserSpriteReady(phaserSprite)) {

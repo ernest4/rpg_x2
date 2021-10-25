@@ -340,7 +340,8 @@ class Engine {
   //   shortestComponentList.stream(processComponent);
   // };
 
-  query = (callback: QueryCallback, ...queryTags: number[]) => {
+  // NOTE: most general, slowest query
+  queryN = (callback: QueryCallback, ...queryTags: number[]) => {
     const componentsLists = this._componentLists;
     // NOTE: finding shortest component list
     let shortestComponentListIndex = 0;
@@ -381,45 +382,38 @@ class Engine {
     shortestComponentList.stream(processComponent);
   };
 
-  query2 = (callback: QueryCallback, ...queryTags: number[]) => {
+  queryTwo = <C1 extends Component, C2 extends Component>(
+    callback: (component1: C1, component2: C2) => void,
+    queryTag1: number,
+    queryTag2: number
+  ) => {
     const componentsLists = this._componentLists;
     // NOTE: finding shortest component list
-    let shortestComponentListIndex = 0;
-    let shortestComponentList = componentsLists[queryTags[shortestComponentListIndex]];
-    if (!shortestComponentList) return;
+    const tag1ComponentList = componentsLists[queryTag1];
+    if (!tag1ComponentList) return;
+    const tag2ComponentList = componentsLists[queryTag2];
+    if (!tag2ComponentList) return;
 
-    let nextShortestComponentList;
-    const componentClassesLength = queryTags.length;
-    for (let i = 0; i < componentClassesLength; i++) {
-      nextShortestComponentList = componentsLists[queryTags[i]];
+    let tag1Component: C1;
+    let tag2Component: C2;
 
-      if (nextShortestComponentList && shortestComponentList) {
-        if (nextShortestComponentList.size < shortestComponentList.size) {
-          shortestComponentList = nextShortestComponentList;
-          shortestComponentListIndex = i;
-        }
-      }
+    if (tag1ComponentList.size < tag2ComponentList.size) {
+      const processComponent = component => {
+        tag2Component = <C2>tag2ComponentList.get(component.id);
+        if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+
+        callback(component, tag2Component);
+      };
+      tag1ComponentList.stream(processComponent);
+    } else {
+      const processComponent = component => {
+        tag1Component = <C1>tag1ComponentList.get(component.id);
+        if (!tag1Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+
+        callback(tag1Component, component);
+      };
+      tag2ComponentList.stream(processComponent);
     }
-
-    // NOTE: cycling through the shortest component list
-
-    // NOTE: pre-made function to avoid creating new one on each iteration
-    // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
-    // it could be defined outside. But still, defining function once per query [O(1)] is much
-    // better than defining it once per iteration [O(n)]
-    let querySet: QuerySet = [];
-    let anotherComponent: Component;
-    const processComponent = component => {
-      for (let i = 0; i < componentClassesLength; i++) {
-        anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
-
-        if (!anotherComponent) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-        querySet[i] = anotherComponent;
-      }
-      callback(querySet);
-    };
-
-    shortestComponentList.stream(processComponent);
   };
 
   // NOTE: faster query that assumes first QueryTag is the shortest list
@@ -456,7 +450,7 @@ class Engine {
     shortestComponentList.stream(processComponent);
   };
 
-  querySingle = <T extends Component>(callback: (component: T) => void, queryTag: number) => {
+  queryOne = <T extends Component>(callback: (component: T) => void, queryTag: number) => {
     (<SparseSet<T>>(<any>this._componentLists[queryTag]))?.stream(callback);
   };
 

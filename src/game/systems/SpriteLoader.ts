@@ -23,7 +23,7 @@ class SpriteLoader extends PhaserSystem {
   start(): void {}
 
   update(): void {
-    this.engine.query(this.queueLoadEvents, LOAD_SPRITE_EVENT);
+    this.engine.queryN(this.queueLoadEvents, LOAD_SPRITE_EVENT);
     // start loading (can call this over and over, even when already loading...no harm)
     this.scene.load.start();
   }

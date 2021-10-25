@@ -8,7 +8,6 @@ import { PHYSICS_BODY, PLAYER, SPEED, SPRITE, TRANSFORM } from "../components/qu
 
 // TODO: jests
 
-// NOTE: max decently playable Entity count, 5 components each with 6 core systems: 30k
 class Manager extends System {
   start(): void {
     // TODO: remove, testing

@@ -65,7 +65,7 @@ class InputListener extends PhaserSystem {
 
   update(): void {
     this.engine.removeComponentsOfTag(INPUT_EVENT);
-    this.engine.querySingle(this.createInputEvents, PLAYER);
+    this.engine.queryOne(this.createInputEvents, PLAYER);
   }
 
   destroy(): void {}

@@ -1,28 +1,26 @@
 import { context } from "../../../../tests/jestHelpers";
-import Component from "../../Component";
 import SparseSet, { SparseSetItem } from "../../utils/SparseSet";
-import NumberComponent from "../helpers/components/NumberComponent";
 
 describe(SparseSet, () => {
   const entityId1 = 123;
   const entityId2 = 456;
   const entityId3 = 789;
 
-  let numberComponent1: NumberComponent;
-  let numberComponent2: NumberComponent;
-  let numberComponent3: NumberComponent;
+  let sparseSetItem1: SparseSetItem;
+  let sparseSetItem2: SparseSetItem;
+  let sparseSetItem3: SparseSetItem;
 
-  let subject: SparseSet<Component>;
+  let subject: SparseSet;
 
   beforeEach(() => {
     subject = new SparseSet();
 
-    numberComponent1 = new NumberComponent(entityId1);
-    numberComponent2 = new NumberComponent(entityId2);
-    numberComponent3 = new NumberComponent(entityId3);
+    sparseSetItem1 = new SparseSetItem(entityId1);
+    sparseSetItem2 = new SparseSetItem(entityId2);
+    sparseSetItem3 = new SparseSetItem(entityId3);
 
-    subject.add(numberComponent1);
-    subject.add(numberComponent2);
+    subject.add(sparseSetItem1);
+    subject.add(sparseSetItem2);
   });
 
   describe("#add", () => {
@@ -32,17 +30,17 @@ describe(SparseSet, () => {
 
     beforeEach(() => {
       previousSizeBeforeAdd = subject.size;
-      addResult = subject.add(numberComponent3);
+      addResult = subject.add(sparseSetItem3);
       previousSizeAfterAdd = subject.size;
     });
 
     context("when item doesn't already exist", () => {
       it("adds the component", () => {
-        expect(subject.get(numberComponent3.id)).toBe(numberComponent3);
+        expect(subject.get(sparseSetItem3.id)).toBe(sparseSetItem3);
       });
 
       it("returns the added item", () => {
-        expect(addResult).toEqual(numberComponent3);
+        expect(addResult).toEqual(sparseSetItem3);
       });
 
       it("increases size", () => {
@@ -52,17 +50,17 @@ describe(SparseSet, () => {
 
     context("when item already exists", () => {
       it("return and does not replace component", () => {
-        subject.add(numberComponent3);
-        expect(subject.get(numberComponent3.id)).toBe(numberComponent3);
+        subject.add(sparseSetItem3);
+        expect(subject.get(sparseSetItem3.id)).toBe(sparseSetItem3);
       });
 
       it("returns null", () => {
-        addResult = subject.add(numberComponent3);
+        addResult = subject.add(sparseSetItem3);
         expect(addResult).toEqual(null);
       });
 
       it("does not increase size", () => {
-        subject.add(numberComponent3);
+        subject.add(sparseSetItem3);
         expect(subject.size).toEqual(previousSizeAfterAdd);
       });
     });
@@ -75,7 +73,7 @@ describe(SparseSet, () => {
 
     context("when entity has the component", () => {
       it("returns the component", () => {
-        expect(getComponentForEntity).toBe(numberComponent1);
+        expect(getComponentForEntity).toBe(sparseSetItem1);
         expect(getComponentForEntity?.id).toEqual(entityId1);
       });
     });
@@ -91,15 +89,15 @@ describe(SparseSet, () => {
 
       context("when component was added", () => {
         beforeEach(() => {
-          numberComponent1 = new NumberComponent(entityId1);
-          numberComponent2 = new NumberComponent(entityId2);
+          sparseSetItem1 = new SparseSetItem(entityId1);
+          sparseSetItem2 = new SparseSetItem(entityId2);
 
-          subject.add(numberComponent1);
-          subject.add(numberComponent2);
+          subject.add(sparseSetItem1);
+          subject.add(sparseSetItem2);
         });
 
         context("when component was removed", () => {
-          beforeEach(() => subject.remove(numberComponent1));
+          beforeEach(() => subject.remove(sparseSetItem1));
 
           it("returns null", () => {
             expect(subject.get(entityId1)).toEqual(null);
@@ -124,7 +122,7 @@ describe(SparseSet, () => {
       beforeEach(() => (previousSize = subject.size));
 
       it("returns removed component's original entityId", () => {
-        expect(subject.remove(numberComponent1)).toEqual(entityId1);
+        expect(subject.remove(sparseSetItem1)).toEqual(entityId1);
       });
 
       it("allows you to remove component by id", () => {
@@ -132,7 +130,7 @@ describe(SparseSet, () => {
       });
 
       it("reduces list size", () => {
-        subject.remove(numberComponent1);
+        subject.remove(sparseSetItem1);
         expect(subject.size).toEqual(previousSize - 1);
       });
     });
@@ -140,36 +138,36 @@ describe(SparseSet, () => {
     context("when entity does not have the component", () => {
       beforeEach(() => {
         subject = new SparseSet();
-        numberComponent1 = new NumberComponent(entityId1);
+        sparseSetItem1 = new SparseSetItem(entityId1);
       });
 
       context("when component never existed", () => {
         it("returns null", () => {
-          expect(subject.remove(numberComponent1)).toEqual(null);
+          expect(subject.remove(sparseSetItem1)).toEqual(null);
         });
       });
 
       context("when component was added", () => {
         beforeEach(() => {
-          numberComponent1 = new NumberComponent(entityId1);
-          numberComponent2 = new NumberComponent(entityId2);
+          sparseSetItem1 = new SparseSetItem(entityId1);
+          sparseSetItem2 = new SparseSetItem(entityId2);
 
-          subject.add(numberComponent1);
-          subject.add(numberComponent2);
+          subject.add(sparseSetItem1);
+          subject.add(sparseSetItem2);
         });
 
         context("when component was removed", () => {
-          beforeEach(() => subject.remove(numberComponent1));
+          beforeEach(() => subject.remove(sparseSetItem1));
 
           context("when removing it again", () => {
             it("returns null", () => {
-              expect(subject.remove(numberComponent1)).toEqual(null);
+              expect(subject.remove(sparseSetItem1)).toEqual(null);
             });
           });
 
           context("when removing a component with same entityId (before it was even added)", () => {
             it("returns null", () => {
-              expect(subject.remove(new NumberComponent(entityId1))).toEqual(null);
+              expect(subject.remove(new SparseSetItem(entityId1))).toEqual(null);
             });
           });
         });
@@ -178,7 +176,7 @@ describe(SparseSet, () => {
           beforeEach(() => subject.clear());
 
           it("returns null", () => {
-            expect(subject.remove(numberComponent1)).toEqual(null);
+            expect(subject.remove(sparseSetItem1)).toEqual(null);
           });
         });
       });
@@ -202,34 +200,34 @@ describe(SparseSet, () => {
     it("returns the number of components in the list", () => {
       expect(subject.size).toEqual(2);
 
-      subject.add(numberComponent3);
+      subject.add(sparseSetItem3);
       expect(subject.size).toEqual(3);
 
-      subject.remove(numberComponent1);
+      subject.remove(sparseSetItem1);
       expect(subject.size).toEqual(2);
 
-      subject.remove(numberComponent2);
+      subject.remove(sparseSetItem2);
       expect(subject.size).toEqual(1);
 
-      subject.remove(numberComponent3);
+      subject.remove(sparseSetItem3);
       expect(subject.size).toEqual(0);
     });
   });
 
   describe("#stream", () => {
-    beforeEach(() => subject.add(numberComponent3));
+    beforeEach(() => subject.add(sparseSetItem3));
 
     it("streams all the items", () => {
       let items: any[] = [];
 
       subject.stream((item: any) => items.push(item));
-      expect(items).toEqual([numberComponent1, numberComponent2, numberComponent3]);
+      expect(items).toEqual([sparseSetItem1, sparseSetItem2, sparseSetItem3]);
 
-      subject.remove(numberComponent2);
+      subject.remove(sparseSetItem2);
 
       items = [];
       subject.stream((item: any) => items.push(item));
-      expect(items).toEqual([numberComponent1, numberComponent3]);
+      expect(items).toEqual([sparseSetItem1, sparseSetItem3]);
     });
   });
 });
