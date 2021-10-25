@@ -369,16 +369,13 @@ class Engine {
     let querySet: QuerySet = [];
     let anotherComponent: Component;
     const processComponent = component => {
-      querySet = [];
-
       for (let i = 0; i < componentClassesLength; i++) {
         anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
 
-        if (anotherComponent) querySet.push(anotherComponent);
-        else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-        if (i + 1 === componentClassesLength) callback(querySet);
+        if (!anotherComponent) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+        querySet[i] = anotherComponent;
       }
+      callback(querySet);
     };
 
     shortestComponentList.stream(processComponent);
@@ -413,16 +410,13 @@ class Engine {
     let querySet: QuerySet = [];
     let anotherComponent: Component;
     const processComponent = component => {
-      querySet = [];
-
       for (let i = 0; i < componentClassesLength; i++) {
         anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
 
-        if (anotherComponent) querySet.push(anotherComponent);
-        else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-        if (i + 1 === componentClassesLength) callback(querySet);
+        if (!anotherComponent) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
+        querySet[i] = anotherComponent;
       }
+      callback(querySet);
     };
 
     shortestComponentList.stream(processComponent);
