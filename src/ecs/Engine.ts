@@ -293,53 +293,6 @@ class Engine {
     // this.updateComplete.dispatch(); // TODO: signals??
   };
 
-  // query = (callback: QueryCallback, ...componentClasses: ComponentClass<any>[]) => {
-  //   // NOTE: finding shortest component list
-  //   let shortestComponentListIndex = 0;
-
-  //   let shortestComponentList =
-  //     this._componentLists[componentClasses[shortestComponentListIndex].className()];
-
-  //   if (!shortestComponentList) return;
-
-  //   componentClasses.forEach((componentClass, index) => {
-  //     const nextShortestComponentList = this._componentLists[componentClass.className()];
-
-  //     if (nextShortestComponentList && shortestComponentList) {
-  //       if (nextShortestComponentList.size < shortestComponentList.size) {
-  //         shortestComponentList = nextShortestComponentList;
-  //         shortestComponentListIndex = index;
-  //       }
-  //     }
-  //   });
-
-  //   // NOTE: cycling through the shortest component list
-
-  //   // NOTE: pre-made function to avoid creating new one on each iteration
-  //   // NOTE: defined once per query to enclose the variables in the rest of this function, otherwise
-  //   // it could be defined outside. But still, defining function once per query [O(1)] is much
-  //   // better than defining it once per iteration [O(n)]
-  //   const processComponent = component => {
-  //     const entityId = component.id;
-
-  //     // TODO: optimize by caching querySet array ??
-  //     const querySet: QuerySet = [];
-
-  //     const componentClassesLength = componentClasses.length;
-  //     for (let i = 0; i < componentClassesLength; i++) {
-  //       const componentClassName = componentClasses[i].className();
-  //       const anotherComponent = this._componentLists[componentClassName]?.get(entityId);
-
-  //       if (anotherComponent) querySet.push(anotherComponent as Component);
-  //       else break; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-  //       if (i + 1 === componentClassesLength) callback(querySet);
-  //     }
-  //   };
-
-  //   shortestComponentList.stream(processComponent);
-  // };
-
   // NOTE: most general, slowest query
   queryN = (callback: QueryCallback, ...queryTags: number[]) => {
     const componentsLists = this._componentLists;
@@ -347,7 +300,7 @@ class Engine {
     let shortestComponentList = componentsLists[queryTags[shortestComponentListIndex]];
     if (!shortestComponentList) return;
 
-    let nextShortestComponentList;
+    let nextShortestComponentList: SparseSet<Component>;
     const componentClassesLength = queryTags.length;
     for (let i = 0; i < componentClassesLength; i++) {
       nextShortestComponentList = componentsLists[queryTags[i]];
