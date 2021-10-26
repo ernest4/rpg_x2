@@ -79,8 +79,10 @@ class InputListener extends PhaserSystem {
 
   private createInputEvents = ({ entityId: playerEntityId }: Player) => {
     this._inputsBuffer.process(([type, key]) => {
-      const inputEvent = new InputEvent(this.newEntityId(), type, key, playerEntityId);
-      this.engine.addComponent(INPUT_EVENT, inputEvent);
+      this.engine.addComponent(
+        INPUT_EVENT,
+        new InputEvent(this.newEntityId(), type, key, playerEntityId)
+      );
     });
   };
 }

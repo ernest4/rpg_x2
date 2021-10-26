@@ -369,25 +369,34 @@ class Engine {
 
     let tag1Component: C1;
     let tag2Component: C2;
+    let component;
+    const tag1elementCount = tag1ComponentList._elementCount;
+    const tag2elementCount = tag2ComponentList._elementCount;
 
-    if (tag1ComponentList.size < tag2ComponentList.size) {
+    if (tag1elementCount < tag2elementCount) {
       const tag2ComponentList_get = tag2ComponentList.get;
-      const processComponent = component => {
+      const denseList = tag1ComponentList._denseList;
+      let i = 0;
+      while (i < tag1elementCount) {
+        component = denseList[i];
         tag2Component = <C2>tag2ComponentList_get(component.id);
         if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
 
         callback(component, tag2Component);
-      };
-      tag1ComponentList.stream(processComponent);
+        i++;
+      }
     } else {
-      const processComponent = component => {
-        const tag1ComponentList_get = tag1ComponentList.get;
+      const tag1ComponentList_get = tag1ComponentList.get;
+      const denseList = tag2ComponentList._denseList;
+      let i = 0;
+      while (i < tag2elementCount) {
+        component = denseList[i];
         tag1Component = <C1>tag1ComponentList_get(component.id);
         if (!tag1Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
 
         callback(tag1Component, component);
-      };
-      tag2ComponentList.stream(processComponent);
+        i++;
+      }
     }
   };
 
