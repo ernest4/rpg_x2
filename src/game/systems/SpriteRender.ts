@@ -10,35 +10,98 @@ import PhaserSystem, { __MISSING } from "./abstract/PhaserSystem";
 
 class SpriteRender extends PhaserSystem {
   private _a: any;
+  _aX: number[];
+  _aY: number[];
+  _aZ: number[];
 
   start(): void {
     this._a = Array.from(Array(300000).keys());
-    this._a = this._a.map(i => (this._a[i] = { components: 0b110011 }));
+    this._aX = Array.from(Array(300000).keys());
+    this._aY = Array.from(Array(300000).keys());
+    this._aZ = Array.from(Array(300000).keys());
   }
 
   update(): void {
     // this.benchmarkSubject("query two in order", () => {
     // });
-    // this.benchmarkSubject("array while", () => {
-    //   const _a = this._a;
-    //   const a_length = this._a.length;
-    //   let i = 0;
-    //   while (i < a_length) {
-    //     if (_a[i].components & 0b110011) {
-    //       //
-    //       // this.updateSprites(
-    //       // this.engine.getComponentById(500, SPRITE);
-    //       // this.engine.getComponentById(500, TRANSFORM);
-    //       // this.engine.getComponentById(500, PLAYER);
-    //       // );
-    //     }
-    //     i++;
-    //   }
-    // });
+    this.benchmarkSubject("array component while", () => {
+      const _a = this._a;
+      const a_length = this._a.length;
+      let i = 0;
+      const this_engine_getComponentById = this.engine.getComponentById;
+      let transformPosition;
+      while (i < a_length) {
+        if (50 < i && i < 29000) {
+          //
+          // this.updateSprites(
+          // this.engine.getComponentById(500, SPRITE);
+          transformPosition = this_engine_getComponentById<Transform>(i, TRANSFORM).position;
+          transformPosition.x = i;
+          transformPosition.y = i;
+          transformPosition.z = i;
+          // this.engine.getComponentById(500, PLAYER);
+          // );
+        }
+        i++;
+      }
+    });
+    this.benchmarkSubject("array component direct access, no get", () => {
+      let i = 0;
+      const transformComponentList = this.engine._componentLists[TRANSFORM];
+      if (!transformComponentList) return;
+      const elementCount = transformComponentList._elementCount;
+      const denseList = transformComponentList._denseList;
+      let transformPosition;
+      while (i < elementCount) {
+        if (50 < i && i < 29000) {
+          //
+          // this.updateSprites(
+          // this.engine.getComponentById(500, SPRITE);
+          transformPosition = (<Transform>denseList[i]).position;
+          transformPosition.x = i;
+          transformPosition.y = i;
+          transformPosition.z = i;
+          // this.engine.getComponentById(500, PLAYER);
+          // );
+        }
+        i++;
+      }
+    });
+    this.benchmarkSubject("array component direct access, no get, stream", () => {
+      let i = 0;
+      const transformComponentList = this.engine._componentLists[TRANSFORM];
+      if (!transformComponentList) return;
+      const callback = ({position}) => {
+        position.x = i;
+        position.y = i;
+        position.z = i;
+        i++;
+      }
+      // @ts-ignore
+      transformComponentList.stream(callback);
+    });
+    this.benchmarkSubject("array raw while", () => {
+      const _aX = this._aX;
+      const _aY = this._aY;
+      const _aZ = this._aZ;
+      const aX_length = this._aX.length;
+      let i = 0;
+      while (i < aX_length) {
+        if (50 < i && i < 29000) {
+          _aX[i] && (_aX[i] = i);
+          _aY[i] && (_aY[i] = i);
+          _aZ[i] && (_aZ[i] = i);
+        }
+        i++;
+      }
+    });
 
-    // this.benchmarkSubject("queryTwoInOrder", () => {
-    // });
-    this.engine.queryTwoInOrder(this.updateSprites, SPRITE, TRANSFORM);
+    this.benchmarkSubject("queryTwoInOrder", () => {
+      this.engine.queryTwoInOrder(this.updateSprites, SPRITE, TRANSFORM);
+    });
+    this.benchmarkSubject("queryTwoInOrderUnchecked", () => {
+      this.engine.queryTwoInOrderUnchecked(this.updateSprites, SPRITE, TRANSFORM);
+    });
   }
 
   destroy(): void {}

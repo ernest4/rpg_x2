@@ -12,7 +12,25 @@ class Movement extends System {
   start(): void {}
 
   update(): void {
-    this.engine.queryTwoInOrder(this.updateTransforms, PHYSICS_BODY, TRANSFORM);
+    // this.benchmarkSubject("queryTwoInOrderUnchecked", () => {
+    //   this.engine.queryTwoInOrderUnchecked(this.updateTransforms, PHYSICS_BODY, TRANSFORM);
+    // });
+    // this.benchmarkSubject("raw query", () => {
+    // });
+    // this.engine.queryTwoInOrderUnchecked(this.updateTransforms, PHYSICS_BODY, TRANSFORM);
+    const pbComponentList = this.engine._componentLists[PHYSICS_BODY];
+    const tComponentList = this.engine._componentLists[TRANSFORM];
+    if (!pbComponentList) return;
+    const elementCount = pbComponentList._elementCount;
+    const denseList = pbComponentList._denseList;
+    // let pbLinearVelocity;
+    for (let i = 0; i < elementCount; i++) {
+      // pbLinearVelocity = (<PhysicsBody>denseList[i]).linearVelocity;
+      // pbLinearVelocity.x = i;
+      // pbLinearVelocity.y = i;
+      // pbLinearVelocity.z = i;
+      this.updateTransforms(<PhysicsBody>denseList[i], <Transform>tComponentList.getUnchecked(i));
+    }
   }
 
   destroy(): void {}

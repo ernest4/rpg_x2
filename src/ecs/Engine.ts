@@ -26,7 +26,7 @@ class Engine {
   // (-> system -> update)
   // _systemUpdateFunctions: ((engine: Engine, deltaTime: DeltaTime) => void)[];
   private _systems: System[] = []; // NOTE: handle onn system to call start() and destroy()
-  private _componentLists: SparseSet<Component>[] = [];
+  _componentLists: SparseSet<Component>[] = [];
   private _debug: boolean | undefined;
   private _entityIdAliases: SparseSet<EntityIdAlias>;
   readonly entityIdPool: EntityIdPool;
@@ -424,6 +424,30 @@ class Engine {
         if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
 
         callback(component, tag2Component);
+        i++;
+      }
+    }
+  };
+
+  // TODO: jests
+  queryTwoInOrderUnchecked = <C1 extends Component, C2 extends Component>(
+    callback: (component1: C1, component2: C2) => void,
+    queryTag1: number,
+    queryTag2: number
+  ) => {
+    const componentsLists = this._componentLists;
+    const tag2ComponentList = componentsLists[queryTag2];
+
+    const tag2ComponentList_getUnchecked = tag2ComponentList.getUnchecked;
+    const tag1ComponentList = componentsLists[queryTag1];
+    if (tag1ComponentList) {
+      let component;
+      const elementCount = tag1ComponentList._elementCount;
+      const denseList = tag1ComponentList._denseList;
+      let i = 0;
+      while (i < elementCount) {
+        component = denseList[i];
+        callback(component, <C2>tag2ComponentList_getUnchecked(component.id));
         i++;
       }
     }

@@ -58,6 +58,9 @@ class SparseSet<T extends SparseSetItem = SparseSetItem> {
     return denseList[denseListIndex];
   };
 
+  // TODO: jests
+  getUnchecked = (id: number): T | null => this._denseList[this._sparseList[id]];
+
   // Inserts a new element into set
   add = (item: T): T | null => {
     const itemId = item.id;

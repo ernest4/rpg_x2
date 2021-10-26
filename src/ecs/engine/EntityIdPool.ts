@@ -16,7 +16,7 @@ class EntityIdPool {
   // along with the rest of the games entities...
   constructor() {
     this._lastUsedEntityId = -1;
-    this._reclaimedEntityIdPool = []; // TODO: optimize with ArrayBuffer
+    this._reclaimedEntityIdPool = [];
     this._reclaimedEntityIdPoolSize = 0;
   }
 
