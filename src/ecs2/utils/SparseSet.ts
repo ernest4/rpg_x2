@@ -73,6 +73,8 @@ class SparseSet<T> {
   };
 
   clear = () => (this._elementCount = 0);
+
+  iterable = (): [T[], number] => [this.denseItemList, this._elementCount];
 }
 
 export default SparseSet;
