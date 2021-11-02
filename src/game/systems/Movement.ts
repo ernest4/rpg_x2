@@ -57,29 +57,31 @@ class Movement extends System {
 
     // components will have signature ids (NOT ENTITY IDS!)
     // const Transform = {id: componentID, x: 123, y: 123, z:123} // auto generated ID
-    const Positions = { x: 123, y: 123, z: 123 }; // auto generated ID
-    this.engine.defineComponents(Positions);
+    const schema = { x: 123, y: 123, z: 123 }; // auto generated ID
+    this.engine.defineComponent("Positions", schema);
+
+    // this.engine.components[POSITION]
 
     // auto generated ID
-    this.engine.defineComponents(new Positions({ x: 123, y: 123, z: 123 }));
-    this.engine.defineComponents(new Positions("x,y,z"));
+    this.engine.defineComponents(new Position({ x: 123, y: 123, z: 123 }));
+    this.engine.defineComponents(new Position("x,y,z"));
 
     const LinearVelocities = { dx: 123, dy: 123, dz: 123 }; // auto generated ID
     this.engine.defineComponents(LinearVelocities);
 
     // true for full owning
-    this.engine.defineQueryGroup(true, Positions, LinearVelocities);
+    this.engine.defineQueryGroup(true, Position, LinearVelocities);
 
     // full owning sub group
-    this.engine.defineQueryGroup(true, Positions, LinearVelocities, Sprite);
+    this.engine.defineQueryGroup(true, Position, LinearVelocities, Sprite);
 
     // partial owning group (slower, avoid)
-    this.engine.defineQueryGroup(false, Positions, Sprites);
+    this.engine.defineQueryGroup(false, Position, Sprites);
 
     // how add/remove ? look like
-    this.engine.addComponent(Positions, { entityId: 123, x: 1, y: 2, z: 3 });
-    // OR
-    this.engine.addComponent(Positions.new({ x: 1, y: 2, z: 3 }));
+    // this.engine.addComponent(Position, { entityId: 123, x: 1, y: 2, z: 3 });
+    // // OR
+    // this.engine.addComponent(Position.new({ x: 1, y: 2, z: 3 }));
     // OR
     this.engine.Positions.add({ entityId: 123, x: 1, y: 2, z: 3 });
     // OR
@@ -90,9 +92,9 @@ class Movement extends System {
     this.engine.Positions.set(entityId, { x: 1 });
 
     // starting to look like DB table :D
-    const { x, y, z, dx, dy, dz } = this.engine.Positions.joins(this.engine.LinearVelocities).get(
-      entityId
-    );
+    // const { x, y, z, dx, dy, dz } = this.engine.Positions.joins(this.engine.LinearVelocities).get(
+    //   entityId
+    // );
   }
 
   update(): void {

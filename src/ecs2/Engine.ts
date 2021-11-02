@@ -1,7 +1,7 @@
 import { ComponentClass, DeltaTime, EntityId, QueryCallback, QuerySet } from "./types";
 import EntityIdPool, { EntityIdPoolParams } from "./engine/EntityIdPool";
-import Component from "./Component";
-import SparseSet, { SparseSetItem } from "./utils/SparseSet";
+import Component, { ComponentSchema } from "./Component";
+import SparseSet from "./utils/SparseSet";
 import System from "./System";
 import { isNumber } from "./utils/Number";
 import Entity from "./Entity";
@@ -9,14 +9,14 @@ import Stats from "./utils/Stats";
 import { Schema } from "./utils/types";
 
 // TODO: move out to own class?
-class EntityIdAlias extends SparseSetItem {
-  entityId: EntityId;
+// class EntityIdAlias extends SparseSetItem {
+//   entityId: EntityId;
 
-  constructor(aliasId: EntityId, entityId: EntityId) {
-    super(aliasId);
-    this.entityId = entityId;
-  }
-}
+//   constructor(aliasId: EntityId, entityId: EntityId) {
+//     super(aliasId);
+//     this.entityId = entityId;
+//   }
+// }
 
 // TODO: jest tests !!!!
 class Engine {
@@ -34,6 +34,7 @@ class Engine {
   private _stats: Stats;
   components: {};
   _componentLists: any;
+  lastComponentSignatureId: number;
 
   constructor(schema: Schema, debug?: boolean) {
     this._debug = debug;
@@ -45,18 +46,9 @@ class Engine {
     // this._events = {
     //   removedComponent: (component: Component, oldEntityId: EntityId) => {},
     // };
-    this.components = {};
 
-    const parseValues = values => {
-      //
-    };
-
-    Object.entries(schema).forEach(
-      ([componentId, componentIdValue]: [number, { [property: string]: any }]) => {
-        // this.components[componentId] = typeof {} === 'object'
-        this.components[componentId] = parseValues(componentIdValue);
-      }
-    );
+    // move to helper class, some "increasing number generator" ?
+    this.lastComponentSignatureId = 0;
   }
 
   // TODO: jests
@@ -107,6 +99,13 @@ class Engine {
   //   componentList.add(component);
   //   return component;
   // };
+
+  defineComponent = (componentName: string, componentSchema: ComponentSchema) => {
+    const signatureId = this.newComponentSignatureId(); // unique increasing numbers
+    this[componentName] = new Component(signatureId, componentSchema);
+  };
+
+  private newComponentSignatureId = () => ++this.lastComponentSignatureId;
 
   addComponent = <T extends Component>(tag: number, component: T) => {
     let componentList = this._componentLists[tag];
