@@ -2,7 +2,44 @@ import { Engine } from "../../ecs";
 import System from "../../ecs/System";
 import PhysicsBody from "../components/PhysicsBody";
 import { Components } from "../components/queryTags";
-import Transform from "../components/Transform";
+import Position from "../components/Transform";
+
+//
+// class Transform extends Component {
+//   constructor() {
+//     super();
+//     // TODO: will auto create componentTypeId...
+//     this.x; // flat params only ?!?
+//     this.y;
+//     // this.position.x // <= indirection too expensive, split into subcomponent?
+//   }
+// }
+
+// class Position extends Component { // TODO: will auto create componentTypeId...
+//   constructor() {
+//     super();
+//     this.x; // flat params only ?!?
+//     this.y;
+//   }
+// }
+// class LinearVelocity extends Component {}
+
+// what archetype looks like under the hood...?
+// class Archetype {
+//   constructor(...component: []){
+//     this.mask ...
+
+//     // for each component create key with arrays for values
+//     // this.positions = {x: [], y: [], z: []} ...
+//   }
+// }
+
+class Testy<T> {
+  constructor(params: T) {}
+  add = (params: T) => {};
+}
+
+new Testy({ x: 0, y: "s", z: new Object() }).add({ x: 5, y: "h", z: {} });
 
 class Movement extends System {
   constructor(engine: Engine) {
@@ -10,9 +47,52 @@ class Movement extends System {
   }
 
   start(): void {
-    this.Transform = this.components[Components.Transform];
-    this.PhysicsBody = this.components[Components.PhysicsBody];
-    this.query = this.createQuery(Components.Transform, Components.PhysicsBody);
+    // this.Transforms = this.components[Components.Transform];
+    // this.PhysicsBodies = this.components[Components.PhysicsBody];
+    // const [positions, linearVelocities] = this.getArchetype(Position, LinearVelocity);
+    // this.positions = positions;
+    // this.linearVelocities = linearVelocities;
+
+    // this.components[Components.Transform].x.add(entityId, 5)
+
+    // components will have signature ids (NOT ENTITY IDS!)
+    // const Transform = {id: componentID, x: 123, y: 123, z:123} // auto generated ID
+    const Positions = { x: 123, y: 123, z: 123 }; // auto generated ID
+    this.engine.defineComponents(Positions);
+
+    // auto generated ID
+    this.engine.defineComponents(new Positions({ x: 123, y: 123, z: 123 }));
+    this.engine.defineComponents(new Positions("x,y,z"));
+
+    const LinearVelocities = { dx: 123, dy: 123, dz: 123 }; // auto generated ID
+    this.engine.defineComponents(LinearVelocities);
+
+    // true for full owning
+    this.engine.defineQueryGroup(true, Positions, LinearVelocities);
+
+    // full owning sub group
+    this.engine.defineQueryGroup(true, Positions, LinearVelocities, Sprite);
+
+    // partial owning group (slower, avoid)
+    this.engine.defineQueryGroup(false, Positions, Sprites);
+
+    // how add/remove ? look like
+    this.engine.addComponent(Positions, { entityId: 123, x: 1, y: 2, z: 3 });
+    // OR
+    this.engine.addComponent(Positions.new({ x: 1, y: 2, z: 3 }));
+    // OR
+    this.engine.Positions.add({ entityId: 123, x: 1, y: 2, z: 3 });
+    // OR
+    this.engine.Positions.add(entityId, { x: 1, y: 2, z: 3 });
+    this.engine.Positions.remove(entityId);
+    const { x, y, z } = this.engine.Positions.get(entityId);
+    const x = this.engine.Positions.get(entityId, "x");
+    this.engine.Positions.set(entityId, { x: 1 });
+
+    // starting to look like DB table :D
+    const { x, y, z, dx, dy, dz } = this.engine.Positions.joins(this.engine.LinearVelocities).get(
+      entityId
+    );
   }
 
   update(): void {
@@ -23,15 +103,39 @@ class Movement extends System {
     // });
     const seconds = this.deltaTime / 1000;
 
-    const entities = this.query();
-    for (let i = 0; i < entities.length; i++) {
-      const entityId = entities[i];
+    // query gets the archetype matching component signatures
+    // const [positions, linearVelocities] = this.query(Position, LinearVelocity);
+    const [{ x, y, z }, { dx, dy, dz }, count] = this.queryGroup(Position, LinearVelocity);
+    // archetype based?
+    // const [transforms, physicsBodies] = this.query();
+    for (let i = 0; i < count; i++) {
+      // const tranform = transforms[i];
+      // const physicsBody = physicsBodies[i];
       // this.Position.x[entityId] += this.Velocity.x[entityId];
       // this.Position.y[entityId] += this.Velocity.y[entityId];
 
-      this.Transform.position.x[entityId] += this.PhysicsBody.linearVelocity.x[entityId] * seconds;
-      this.Transform.position.y[entityId] += this.PhysicsBody.linearVelocity.y[entityId] * seconds;
-      this.Transform.position.z[entityId] += this.PhysicsBody.linearVelocity.z[entityId] * seconds;
+      x[i] += dx[i] * seconds;
+      y[i] += dy[i] * seconds;
+      z[i] += dz[i] * seconds;
+
+      // const newRotationZ = rotation.z + angularVelocity.z * seconds;
+      // rotation.z = 360 < newRotationZ ? newRotationZ - 360 : newRotationZ;
+    }
+
+    // regular query
+
+    const [{ x, y, z }, { dx, dy, dz }, count] = this.query(Position, LinearVelocity);
+    // archetype based?
+    // const [transforms, physicsBodies] = this.query();
+    for (let i = 0; i < count; i++) {
+      // const tranform = transforms[i];
+      // const physicsBody = physicsBodies[i];
+      // this.Position.x[entityId] += this.Velocity.x[entityId];
+      // this.Position.y[entityId] += this.Velocity.y[entityId];
+
+      x[i] += dx[i] * seconds;
+      y[i] += dy[i] * seconds;
+      z[i] += dz[i] * seconds;
 
       // const newRotationZ = rotation.z + angularVelocity.z * seconds;
       // rotation.z = 360 < newRotationZ ? newRotationZ - 360 : newRotationZ;
