@@ -34,12 +34,12 @@ import Position from "../components/Transform";
 //   }
 // }
 
-class Testy<T> {
-  constructor(params: T) {}
-  add = (params: T) => {};
-}
+// class Testy<T> {
+//   constructor(params: T) {}
+//   add = (params: T) => {};
+// }
 
-new Testy({ x: 0, y: "s", z: new Object() }).add({ x: 5, y: "h", z: {} });
+// new Testy({ x: 0, y: "s", z: new Object() }).add({ x: 5, y: "h", z: {} });
 
 class Movement extends System {
   constructor(engine: Engine) {
@@ -58,7 +58,7 @@ class Movement extends System {
     // components will have signature ids (NOT ENTITY IDS!)
     // const Transform = {id: componentID, x: 123, y: 123, z:123} // auto generated ID
     const schema = { x: 123, y: 123, z: 123 }; // auto generated ID
-    this.engine.defineComponent("Positions", schema);
+    this.engine.defineComponent({ Position: schema });
 
     // this.engine.components[POSITION]
 

@@ -1,35 +1,5 @@
-import Component from "../../ecs/Component";
-import { EntityId } from "../../ecs/types";
-import Phaser from "phaser";
+import Component, { ComponentSchema, FieldTypes, Vector3 } from "../../ecs/Component";
 
-// TODO: when removing sprite, make sure to destroy the phaserSprite gameObject or it will leak memory!
-class Sprite extends Component {
-  static className = () => "Sprite";
-  static tag = () => 1;
+class Sprite<T extends ComponentSchema> extends Component<T> {}
 
-  private _phaserSprite: Phaser.GameObjects.Sprite;
-  url: string;
-  frameConfig: Phaser.Types.Loader.FileTypes.ImageFrameConfig;
-
-  constructor(
-    entityId: EntityId,
-    url: string,
-    frameConfig: Phaser.Types.Loader.FileTypes.ImageFrameConfig
-  ) {
-    super(entityId);
-    // this.frame = 0;
-    this.url = url;
-    this.frameConfig = frameConfig;
-  }
-
-  set phaserSprite(newPhaserSprite: Phaser.GameObjects.Sprite) {
-    this._phaserSprite?.destroy(); // NOTE: cleanup, don't leak phaser objects!
-    this._phaserSprite = newPhaserSprite;
-  }
-
-  get phaserSprite() {
-    return this._phaserSprite;
-  }
-}
-
-export default Sprite;
+export default new Sprite({ url: FieldTypes.String, frameWidth: FieldTypes.Number });

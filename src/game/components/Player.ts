@@ -1,19 +1,5 @@
-import Component from "../../ecs/Component";
-import { EntityId } from "../../ecs/types";
+import Component, { ComponentSchema, FieldTypes, Vector3 } from "../../ecs/Component";
 
-class Player extends Component {
-  static className = () => "Player";
+class Player<T extends ComponentSchema> extends Component<T> {}
 
-  constructor(entityId: EntityId) {
-    super(entityId);
-  }
-
-  serialize(): { [key: string]: any; entityId: EntityId } {
-    const { entityId } = this;
-    return { entityId };
-  }
-
-  deserialize(params: { [key: string]: any }): void {}
-}
-
-export default Player;
+export default new Player({ entityId: FieldTypes.Number });

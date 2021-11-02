@@ -1,15 +1,5 @@
-import Component from "../../ecs/Component";
-import { EntityId } from "../../ecs/types";
+import Component, { ComponentSchema, FieldTypes } from "../../ecs/Component";
 
-class Speed extends Component {
-  static className = () => "Speed";
+class Speed<T extends ComponentSchema> extends Component<T> {}
 
-  speed: number;
-
-  constructor(entityId: EntityId, speed: number) {
-    super(entityId);
-    this.speed = speed;
-  }
-}
-
-export default Speed;
+export default new Speed({ speed: FieldTypes.Number });

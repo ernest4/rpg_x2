@@ -9,7 +9,13 @@ import Movement from "../systems/Movement";
 import FpsCounter from "../../utils/FpsCounter";
 import { DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
+import { Vector3 } from "../../ecs/Component";
 // import FpsCounter from "./utils/FpsCounter";
+
+// TODO: move this to own file?
+export const componentsSchema = {
+  Position: Vector3,
+};
 
 export default class Main extends Phaser.Scene {
   // dudeQuads!: any[];
@@ -17,7 +23,6 @@ export default class Main extends Phaser.Scene {
   lastFrame: any;
   // fpsCounter!: FpsCounter;
   private _engine!: Engine;
-  private _webSocket: WebSocket;
   fpsCounter: FpsCounter;
 
   constructor(config) {
@@ -38,7 +43,7 @@ export default class Main extends Phaser.Scene {
   }
 
   private initECS = () => {
-    this._engine = new Engine(DEVELOPMENT);
+    this._engine = new Engine(componentsSchema, DEVELOPMENT);
     // TODO: test all systems.
     this._engine.addSystems(
       new Manager(this._engine),

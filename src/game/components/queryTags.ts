@@ -1,4 +1,4 @@
-import { i32, Vector3 } from "../../ecs2/utils/types";
+import { i32, Vector3 } from "../../ecs/utils/types";
 
 const EVENT = { targetEntityId: i32 };
 

@@ -1,3 +1,4 @@
+import { ComponentsSchema } from "./Component";
 import Engine from "./Engine";
 import { benchmarkSubject } from "./utils/benchmark";
 
