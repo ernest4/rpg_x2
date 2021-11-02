@@ -2,14 +2,14 @@ import { ComponentClass, EntityId } from "./types";
 import Serializable from "./component/interfaces/Serializable";
 import SparseSet from "./utils/SparseSet";
 
-export type ComponentSchema = { [key: string]: number | string | Object };
-// NOTE: custom components will extend this.
-// NOTE: NO OTHER METHODS ON COMPONENTS (except getters/setters) !!!
+export const FieldTypes = { Number: 0, String: "s", Object: new Object() };
+export type FieldType = typeof FieldTypes[keyof typeof FieldTypes];
+export type ComponentSchema = { [key: string]: FieldType };
 
 // TODO: jests
 class Component<T extends ComponentSchema> {
   signatureId: number;
-  private _values: { [key: string | number]: SparseSet<any> };
+  private _values: { [key: string | number]: SparseSet<FieldType> };
 
   constructor(signatureId, schema: T) {
     this.signatureId = signatureId;
@@ -44,16 +44,22 @@ class Component<T extends ComponentSchema> {
   get = (entityId: EntityId) => {
     const result = {}; // TODO: cachet this object on instance?
     const entries = Object.entries(this._values); // TODO: cache THIS after constructions of class ???
+    let field;
+    let sparseSet;
     for (let i = 0; i < entries.length; i++) {
-      const [field, sparseSet] = entries[i];
+      [field, sparseSet] = entries[i];
       result[field] = sparseSet.getItem(entityId);
     }
     return result;
   };
 
   // TODO: jests
-  set = () => {
-    //
+  set = (entityId: EntityId, params: { [key in keyof T]: any }) => {
+    const entries = Object.entries(params);
+    for (let i = 0; i < entries.length; i++) {
+      const [field, value] = entries[i];
+      this._values[field].set(entityId, value);
+    }
   };
 
   // // NOTE: bit dangerous as it bypasses the original constructor with constraints.

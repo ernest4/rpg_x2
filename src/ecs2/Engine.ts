@@ -107,17 +107,17 @@ class Engine {
 
   private newComponentSignatureId = () => ++this.lastComponentSignatureId;
 
-  addComponent = <T extends Component>(tag: number, component: T) => {
-    let componentList = this._componentLists[tag];
+  // addComponent = <T extends Component>(tag: number, component: T) => {
+  //   let componentList = this._componentLists[tag];
 
-    if (!componentList) {
-      componentList = new SparseSet();
-      this._componentLists[tag] = componentList;
-    }
+  //   if (!componentList) {
+  //     componentList = new SparseSet();
+  //     this._componentLists[tag] = componentList;
+  //   }
 
-    componentList.add(component);
-    return component;
-  };
+  //   componentList.add(component);
+  //   return component;
+  // };
 
   // addComponents = (...components: Component[]) => components.forEach(this.addComponent);
   // addComponents = (...components: Component[]) => components.forEach(this.addComponent);

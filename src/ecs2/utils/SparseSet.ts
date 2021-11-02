@@ -49,16 +49,24 @@ class SparseSet<T> {
   };
 
   // TODO: jests
-  remove = (number: number): void => {
+  set = (id: number, item: T): void => {
+    // if (!this.hasId(id)) return this.add(id, item);
+    if (!this.hasId(id)) return;
+
+    this.denseItemList[this._sparseList[id]] = item;
+  };
+
+  // TODO: jests
+  remove = (id: number): void => {
     const sparseList = this._sparseList;
     const denseIdList = this.denseIdList;
     const denseItemList = this.denseItemList;
     const elementCount = this._elementCount;
 
     // If x is not present
-    if (!this.hasId(number)) return;
+    if (!this.hasId(id)) return;
 
-    const denseListIndex = sparseList[number];
+    const denseListIndex = sparseList[id];
 
     const lastId = denseIdList[elementCount - 1]; // Take an element from end
     denseIdList[denseListIndex] = lastId; // Overwrite.
