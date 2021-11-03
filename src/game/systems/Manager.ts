@@ -28,20 +28,6 @@ class Manager extends System {
       Velocity.add(entityId, NullVector3);
       Sprite.add(entityId, { url: assetsPath("images/unit_T.png"), frameWidth: 32 });
 
-      // Speed.new(...).save()
-      // Speed.create()
-      // Speed.update()
-      // Speed.find(entityId)
-      // Speed.all()
-      // Speed.where(...).all()
-      // Speed.joins(Transform, Velocity).all()
-
-      // const [speeds, transforms, count] = query(Speed, Transform)
-
-      // for(let i = 0; i < count; i++) {
-      //   transforms.x[i] = speeds.speed[i]
-      // }
-
       // if (i === 1) this.engine.addComponent(PLAYER, new Player(entityId));
       // // this.engine.addComponent(PLAYER, new Player(entityId));
       // this.engine.addComponent(SPEED, new Speed(entityId, 100 + i));

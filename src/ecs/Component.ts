@@ -19,6 +19,11 @@ class Component<T extends ComponentSchema> {
   signatureId: number;
   private _soa: { [key: string | number]: SparseSet<FieldType> };
   private _valueSparseSets: SparseSet<FieldType>[];
+  private _referenceSparseSet: SparseSet<any>;
+  private _denseLists: any;
+  private _addCallback: (entityId: EntityId, params: T) => void;
+  private _removeCallback: (entityId: EntityId) => void;
+  private _queryGroup: QueryGroup<any, any>;
 
   constructor(schema: T) {
     this.signatureId = SignatureIdGenerator.newSignatureId();
@@ -35,7 +40,25 @@ class Component<T extends ComponentSchema> {
 
     // caching...
     this._valueSparseSets = Object.values(this._soa);
+    this._referenceSparseSet = Object.values(this._soa)[0];
   }
+
+  // // TODO: jests
+  // registerEventListener = (functionName: "add" | "remove", callback: (...any) => void) => {
+  //   this[`_${functionName}Callback`] = callback;
+  // };
+
+  // TODO: jests
+  registerAddEventListener = (callback: typeof this._addCallback) => {
+    this._addCallback = callback;
+  };
+
+  registerRemoveEventListener = (callback: typeof this._removeCallback) => {
+    this._removeCallback = callback;
+  };
+
+  // TODO: jests
+  hasId = (entityId: EntityId) => this._referenceSparseSet.hasId(entityId);
 
   // TODO: jests
   add = (entityId: EntityId, params: T) => {
@@ -46,6 +69,7 @@ class Component<T extends ComponentSchema> {
       [field, value] = entries[i];
       this._soa[field].add(entityId, value);
     }
+    if (this._addCallback) this._addCallback(entityId, params);
   };
 
   // TODO: jests
@@ -54,10 +78,11 @@ class Component<T extends ComponentSchema> {
     for (let i = 0; i < sparseSets.length; i++) {
       sparseSets[i].remove(entityId);
     }
+    if (this._removeCallback) this._removeCallback(entityId);
   };
 
   // TODO: jests
-  get = (entityId: EntityId) => {
+  get = (entityId: EntityId): ComponentSchema => {
     const result = {}; // TODO: cachet this object on instance?
     const entries = Object.entries(this._soa); // TODO: cache THIS after constructions of class ???
     let field;
@@ -94,21 +119,56 @@ class Component<T extends ComponentSchema> {
   //   //
   // };
 
-  all = () => {
+  all = (): [{ [key in keyof T]: any[] }, number] => {
+    if (this._denseLists) return [this._denseLists, this._referenceSparseSet._elementCount];
+
     // TODO: cache value count on instance.
-    const valueCount = Object.values(this._soa)[0]._elementCount;
-    return [this._soa, valueCount];
+    const valueCount = this._referenceSparseSet._elementCount;
+    const result = {}; // TODO: cachet this object on instance?
+    const entries = Object.entries(this._soa); // TODO: cache THIS after constructions of class ???
+    let field: string;
+    let sparseSet: SparseSet<FieldType>;
+    for (let i = 0; i < entries.length; i++) {
+      [field, sparseSet] = entries[i];
+      result[field] = sparseSet.denseItemList;
+    }
+    this._denseLists = result; // TODO: cleaner way to cache?
+    return [result, valueCount] as [{ [key in keyof T]: any[] }, number];
   };
 
   // query builder?
-  joins = (...components: Component<any>[]) => {
-    // ...
-  };
+  // joins = (...components: Component<any>[]) => {
+  //   // ...
+  // };
+  // joins = <K extends ComponentSchema>(component: Component<K>) => {
+  //   let matchCount = 0;
+  //   const valueCount = this._referenceSparseSet._elementCount;
+  //   const entityIds = this._referenceSparseSet.denseIdList;
+
+  //   for (let i = 0; i < valueCount; i++) {
+  //     if (component.hasId(entityIds[i])) matchCount++;
+  //   }
+
+  //   return [this.all(), matchCount] as const;
+  // };
 
   // group builder? (this would be cached)
   // runtime errors should pop up if groups are trying to share same components
-  group = (...components: Component<any>[]) => {
-    // ...
+  // group = (...components: Component<any>[]) => {
+  //   // ...
+  // };
+
+  // TODO: jests
+  group = <K extends ComponentSchema>(component: Component<K>) => {
+    if (this._queryGroup) return this._queryGroup;
+
+    return new QueryGroup(this, component);
+  };
+
+  setQueryGroup = <T extends ComponentSchema, K extends ComponentSchema>(
+    queryGroup: QueryGroup<T, K>
+  ) => {
+    this._queryGroup = queryGroup;
   };
 
   // // NOTE: bit dangerous as it bypasses the original constructor with constraints.
@@ -145,3 +205,45 @@ class Component<T extends ComponentSchema> {
 }
 
 export default Component;
+
+class QueryGroup<T extends ComponentSchema, K extends ComponentSchema> {
+  private _component1: Component<T>;
+  private _component2: Component<K>;
+  private _groupedItemsCount: number = 0;
+
+  constructor(component1: Component<T>, component2: Component<K>) {
+    this._component1 = component1;
+    this._component2 = component2;
+    this.registerEventListeners();
+    this.setQueryGroupOnComponents();
+  }
+
+  all = () => {
+    return [this._component1.all()[0], this._component2.all()[0], this._groupedItemsCount];
+  };
+
+  private registerEventListeners = () => {
+    this._component1.registerAddEventListener((entityId: EntityId, params: T) => {
+      if (this._component2.hasId(entityId)) {
+        // TODO: group...
+      }
+    });
+
+    this._component1.registerRemoveEventListener((entityId: EntityId) => {
+      // if grouped, ungroup
+    });
+
+    this._component2.registerAddEventListener((entityId: EntityId, params: K) => {
+      //
+    });
+
+    this._component2.registerRemoveEventListener((entityId: EntityId) => {
+      //
+    });
+  };
+
+  private setQueryGroupOnComponents = () => {
+    this._component1.setQueryGroup(this);
+    this._component2.setQueryGroup(this);
+  };
+}

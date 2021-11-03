@@ -18,12 +18,15 @@ class SparseSet<T> {
   };
 
   // TODO: jests
+  getUncheckedId = (id: number): number | null => this.denseIdList[this._sparseList[id]];
+
+  // TODO: jests
   getItem = (id: number): T | null => {
     return this.hasId(id) ? this.denseItemList[this._sparseList[id]] : null;
   };
 
   // TODO: jests
-  getUncheckedItem = (id: number): number | null => this.denseIdList[this._sparseList[id]];
+  getUncheckedItem = (id: number): T | null => this.denseItemList[this._sparseList[id]];
 
   // Inserts a new element into set
   add = (id: number, item: T): void => {
