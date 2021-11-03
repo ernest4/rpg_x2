@@ -29,7 +29,7 @@ class SparseSet<T> {
   getUncheckedItem = (id: number): T | null => this.denseItemList[this._sparseList[id]];
 
   // Inserts a new element into set
-  add = (id: number, item: T): void => {
+  add = (id: number, item: T): T | null => {
     const elementCount = this._elementCount;
 
     // Corner cases, x must not be out of
@@ -38,7 +38,7 @@ class SparseSet<T> {
     // if (x > maxValue) return;
     // if (n >= capacity) return;
     // if (this.get(itemId) !== null) return null;
-    if (this.hasId(id)) return;
+    if (this.hasId(id)) return null;
 
     // Inserting into array-dense[] at index 'n'.
     this.denseIdList[elementCount] = id;
@@ -49,6 +49,8 @@ class SparseSet<T> {
 
     // Increment count of elements in set
     this._elementCount = elementCount + 1;
+
+    return item;
   };
 
   // TODO: jests
@@ -60,14 +62,14 @@ class SparseSet<T> {
   };
 
   // TODO: jests
-  remove = (id: number): void => {
+  remove = (id: number): T | null => {
     const sparseList = this._sparseList;
     const denseIdList = this.denseIdList;
     const denseItemList = this.denseItemList;
     const elementCount = this._elementCount;
 
     // If x is not present
-    if (!this.hasId(id)) return;
+    if (!this.hasId(id)) return null;
 
     const denseListIndex = sparseList[id];
 
@@ -76,11 +78,13 @@ class SparseSet<T> {
     sparseList[lastId] = denseListIndex; // Overwrite.
 
     // Take last item from end and overwrite
+    const removedItem = denseItemList[denseListIndex];
     denseItemList[denseListIndex] = denseItemList[elementCount - 1];
 
     // Since one element has been deleted, we
     // decrement 'n' by 1.
     this._elementCount = elementCount - 1;
+    return removedItem;
   };
 
   clear = () => (this._elementCount = 0);

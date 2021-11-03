@@ -62,23 +62,25 @@ class Component<T extends ComponentSchema> {
 
   // TODO: jests
   add = (entityId: EntityId, params: T) => {
+    let added;
     const entries = Object.entries(params);
     let field;
     let value;
     for (let i = 0; i < entries.length; i++) {
       [field, value] = entries[i];
-      this._soa[field].add(entityId, value);
+      added = this._soa[field].add(entityId, value);
     }
-    if (this._addCallback) this._addCallback(entityId, params);
+    if (added !== null && this._addCallback) this._addCallback(entityId, params);
   };
 
   // TODO: jests
   remove = (entityId: EntityId) => {
+    let removed;
     const sparseSets = this._valueSparseSets;
     for (let i = 0; i < sparseSets.length; i++) {
-      sparseSets[i].remove(entityId);
+      removed = sparseSets[i].remove(entityId);
     }
-    if (this._removeCallback) this._removeCallback(entityId);
+    if (removed !== null && this._removeCallback) this._removeCallback(entityId);
   };
 
   // TODO: jests
