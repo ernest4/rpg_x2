@@ -2,6 +2,7 @@ import { ComponentClass, EntityId } from "./types";
 import Serializable from "./component/interfaces/Serializable";
 import SparseSet from "./utils/SparseSet";
 import SignatureIdGenerator from "./component/SignatureIdGenerator";
+import QueryGroup from "./component/QueryGroup";
 
 export const FieldTypes = { Number: 0, String: "s", Object: new Object() };
 export type FieldType = typeof FieldTypes[keyof typeof FieldTypes];
@@ -53,6 +54,7 @@ class Component<T extends ComponentSchema> {
     this._addCallback = callback;
   };
 
+  // TODO: jests
   registerRemoveEventListener = (callback: typeof this._removeCallback) => {
     this._removeCallback = callback;
   };
@@ -162,6 +164,7 @@ class Component<T extends ComponentSchema> {
 
   // TODO: jests
   group = <K extends ComponentSchema>(component: Component<K>) => {
+    // TODO: error/warn about trying to set other query groups (sharing components)?
     if (this._queryGroup) return this._queryGroup;
 
     return new QueryGroup(this, component);
@@ -207,45 +210,3 @@ class Component<T extends ComponentSchema> {
 }
 
 export default Component;
-
-class QueryGroup<T extends ComponentSchema, K extends ComponentSchema> {
-  private _component1: Component<T>;
-  private _component2: Component<K>;
-  private _groupedItemsCount: number = 0;
-
-  constructor(component1: Component<T>, component2: Component<K>) {
-    this._component1 = component1;
-    this._component2 = component2;
-    this.registerEventListeners();
-    this.setQueryGroupOnComponents();
-  }
-
-  all = () => {
-    return [this._component1.all()[0], this._component2.all()[0], this._groupedItemsCount];
-  };
-
-  private registerEventListeners = () => {
-    this._component1.registerAddEventListener((entityId: EntityId, params: T) => {
-      if (this._component2.hasId(entityId)) {
-        // TODO: group...
-      }
-    });
-
-    this._component1.registerRemoveEventListener((entityId: EntityId) => {
-      // if grouped, ungroup
-    });
-
-    this._component2.registerAddEventListener((entityId: EntityId, params: K) => {
-      //
-    });
-
-    this._component2.registerRemoveEventListener((entityId: EntityId) => {
-      //
-    });
-  };
-
-  private setQueryGroupOnComponents = () => {
-    this._component1.setQueryGroup(this);
-    this._component2.setQueryGroup(this);
-  };
-}

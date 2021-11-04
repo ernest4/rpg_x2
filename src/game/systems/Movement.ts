@@ -42,6 +42,16 @@ class Movement extends System {
       y[i] += dy[i] * seconds;
       z[i] += dz[i] * seconds;
     }
+
+    // archetype query?
+    const archetypes = this.query(Velocity, Position);
+    for (const [{ x: dx, y: dy, z: dz }, { x, y, z }, count] of archetypes) {
+      for (let i = 0; i < count; i++) {
+        x[i] += dx[i] * seconds;
+        y[i] += dy[i] * seconds;
+        z[i] += dz[i] * seconds;
+      }
+    }
   }
 
   destroy(): void {}
