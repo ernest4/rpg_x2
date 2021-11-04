@@ -5,38 +5,57 @@ class QueryGroup<T extends ComponentSchema, K extends ComponentSchema> {
   private _component1: Component<T>;
   private _component2: Component<K>;
   private _groupedItemsCount: number = 0;
+  _componentGroupPointer: number = 0;
 
   constructor(component1: Component<T>, component2: Component<K>) {
     this._component1 = component1;
     this._component2 = component2;
     this.registerEventListeners();
+    this.initializeGrouping();
     this.setQueryGroupOnComponents();
   }
 
   all = () => {
-    return [this._component1.all()[0], this._component2.all()[0], this._groupedItemsCount];
+    return [this._component1.all()[0], this._component2.all()[0], this._groupedItemsCount] as const;
+  };
+
+  private initializeGrouping = () => {
+    // TODO: initially move the components into group if there are any...
   };
 
   private registerEventListeners = () => {
     this._component1.registerAddEventListener((entityId: EntityId, params: T) => {
-      if (this._component2.hasId(entityId)) {
-        // TODO: group...
-      }
+      if (this._component2.hasId(entityId)) this.addToGroup(entityId);
     });
 
     this._component1.registerRemoveEventListener((entityId: EntityId) => {
-      if (this._component2.hasId(entityId)) {
-        // TODO: if grouped, ungroup
-      }
+      if (this._component2.hasId(entityId)) this.removeFromGroup();
     });
 
     this._component2.registerAddEventListener((entityId: EntityId, params: K) => {
-      //
+      if (this._component1.hasId(entityId)) this.addToGroup(entityId);
     });
 
     this._component2.registerRemoveEventListener((entityId: EntityId) => {
-      //
+      if (this._component1.hasId(entityId)) this.removeFromGroup();
     });
+  };
+
+  private addToGroup = (entityId: EntityId) => {
+    this._component1.swap(
+      // TODO: cache this denseIdList ?!?!
+      this._component1._referenceSparseSet.denseIdList[this._componentGroupPointer],
+      entityId
+    );
+    this._component2.swap(
+      this._component2._referenceSparseSet.denseIdList[this._componentGroupPointer],
+      entityId
+    );
+    this._groupedItemsCount++;
+  };
+
+  private removeFromGroup = () => {
+    //
   };
 
   private setQueryGroupOnComponents = () => {
