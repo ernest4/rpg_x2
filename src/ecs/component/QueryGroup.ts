@@ -10,7 +10,6 @@ class QueryGroup<T extends ComponentSchema, K extends ComponentSchema> {
   constructor(component1: Component<T>, component2: Component<K>) {
     this._component1 = component1;
     this._component2 = component2;
-    this.registerEventListeners();
     this.initializeGrouping();
     this.setQueryGroupOnComponents();
   }
@@ -23,25 +22,11 @@ class QueryGroup<T extends ComponentSchema, K extends ComponentSchema> {
     // TODO: initially move the components into group if there are any...
   };
 
-  private registerEventListeners = () => {
-    this._component1.registerAddEventListener((entityId: EntityId, params: T) => {
-      if (this._component2.hasId(entityId)) this.addToGroup(entityId);
-    });
-
-    this._component1.registerRemoveEventListener((entityId: EntityId) => {
-      if (this._component2.hasId(entityId)) this.removeFromGroup();
-    });
-
-    this._component2.registerAddEventListener((entityId: EntityId, params: K) => {
-      if (this._component1.hasId(entityId)) this.addToGroup(entityId);
-    });
-
-    this._component2.registerRemoveEventListener((entityId: EntityId) => {
-      if (this._component1.hasId(entityId)) this.removeFromGroup();
-    });
+  entityInGroup = (entityId: EntityId) => {
+    return this._component1.hasId(entityId) && this._component2.hasId(entityId);
   };
 
-  private addToGroup = (entityId: EntityId) => {
+  addToGroup = (entityId: EntityId) => {
     this._component1.swap(
       // TODO: cache this denseIdList ?!?!
       this._component1._referenceSparseSet.denseIdList[this._componentGroupPointer],
@@ -54,8 +39,17 @@ class QueryGroup<T extends ComponentSchema, K extends ComponentSchema> {
     this._groupedItemsCount++;
   };
 
-  private removeFromGroup = () => {
-    //
+  removeFromGroup = (entityId: EntityId) => {
+    this._component1.swap(
+      // TODO: cache this denseIdList ?!?!
+      this._component1._referenceSparseSet.denseIdList[this._componentGroupPointer - 1],
+      entityId
+    );
+    this._component2.swap(
+      this._component2._referenceSparseSet.denseIdList[this._componentGroupPointer - 1],
+      entityId
+    );
+    this._groupedItemsCount--;
   };
 
   private setQueryGroupOnComponents = () => {

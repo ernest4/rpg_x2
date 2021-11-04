@@ -66,34 +66,35 @@ class Component<T extends ComponentSchema> {
 
   // TODO: jests
   add = (entityId: EntityId, params: { [key in keyof T]: T[key] }) => {
-    let added;
+    if (this._referenceSparseSet.hasId(entityId)) return;
+
     const entries = Object.entries(params);
     for (let i = 0; i < entries.length; i++) {
       const [field, value] = entries[i];
-      added = this._soa[field].add(entityId, value);
+      this._soa[field].addUnchecked(entityId, value);
     }
-    if (added === null) return;
-    if (!this._queryGroup) return;
-    if (!this._queryGroup.entityInGroup(entityId)) return;
 
-    this.swap(
-      this._referenceSparseSet.denseIdList[this._queryGroup._componentGroupPointer],
-      entityId
-    );
+    if (!this._queryGroup) return;
+    if (this._queryGroup.entityInGroup(entityId)) this._queryGroup.addToGroup(entityId);
   };
 
   // TODO: jests
   remove = (entityId: EntityId) => {
-    let removed;
+    if (!this._referenceSparseSet.hasId(entityId)) return;
+    if (this._queryGroup.entityInGroup(entityId)) this._queryGroup.removeFromGroup(entityId);
+
     const sparseSets = this._valueSparseSets;
     for (let i = 0; i < sparseSets.length; i++) {
-      removed = sparseSets[i].remove(entityId);
+      sparseSets[i].remove(entityId);
     }
-    if (removed !== null && this._removeCallback) this._removeCallback(entityId);
   };
 
-  swap = (destinationEntityId: EntityId, sourceEntityId: EntityId) => {
-    //
+  // TODO: jests
+  swap = (EntityIdA: EntityId, EntityIdB: EntityId) => {
+    const sparseSets = this._valueSparseSets;
+    for (let i = 0; i < sparseSets.length; i++) {
+      sparseSets[i].swap(EntityIdA, EntityIdB);
+    }
   };
 
   // TODO: jests
@@ -187,21 +188,6 @@ class Component<T extends ComponentSchema> {
   ) => {
     this._queryGroup = queryGroup;
   };
-
-  // // TODO: jests
-  // // TODO: subgroups
-  // group = <K extends ComponentSchema>(component: Component<K>): QueryGroup<T, K> => {
-  //   // TODO: error/warn about trying to set other query groups (sharing components)?
-  //   if (this._queryGroup) return this._queryGroup;
-
-  //   return new QueryGroup(this, component);
-  // };
-
-  // setQueryGroup = <T extends ComponentSchema, K extends ComponentSchema>(
-  //   queryGroup: QueryGroup<T, K>
-  // ) => {
-  //   this._queryGroup = queryGroup;
-  // };
 
   // // NOTE: bit dangerous as it bypasses the original constructor with constraints.
   // // use sparingly and only when necessary

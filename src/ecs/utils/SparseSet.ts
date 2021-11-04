@@ -54,6 +54,24 @@ class SparseSet<T> {
   };
 
   // TODO: jests
+  // Inserts a new element into set
+  addUnchecked = (id: number, item: T): T | null => {
+    const elementCount = this._elementCount;
+
+    // Inserting into array-dense[] at index 'n'.
+    this.denseIdList[elementCount] = id;
+    this.denseItemList[elementCount] = item;
+
+    // Mapping it to sparse[] array.
+    this._sparseList[id] = elementCount;
+
+    // Increment count of elements in set
+    this._elementCount = elementCount + 1;
+
+    return item;
+  };
+
+  // TODO: jests
   set = (id: number, item: T): void => {
     // if (!this.hasId(id)) return this.add(id, item);
     if (!this.hasId(id)) return;
@@ -85,6 +103,51 @@ class SparseSet<T> {
     // decrement 'n' by 1.
     this._elementCount = elementCount - 1;
     return removedItem;
+  };
+
+  // TODO: jests
+  removeUnchecked = (id: number): T | null => {
+    const sparseList = this._sparseList;
+    const denseIdList = this.denseIdList;
+    const denseItemList = this.denseItemList;
+    const elementCount = this._elementCount;
+
+    const denseListIndex = sparseList[id];
+
+    const lastId = denseIdList[elementCount - 1]; // Take an element from end
+    denseIdList[denseListIndex] = lastId; // Overwrite.
+    sparseList[lastId] = denseListIndex; // Overwrite.
+
+    // Take last item from end and overwrite
+    const removedItem = denseItemList[denseListIndex];
+    denseItemList[denseListIndex] = denseItemList[elementCount - 1];
+
+    // Since one element has been deleted, we
+    // decrement 'n' by 1.
+    this._elementCount = elementCount - 1;
+    return removedItem;
+  };
+
+  // TODO: jests
+  swap = (idA: number, idB: number) => {
+    // TODO: safe checks?
+    const sparseList = this._sparseList;
+    const denseIdList = this.denseIdList;
+    const denseItemList = this.denseItemList;
+
+    // swap denseListIds
+    const denseListIndexB = sparseList[idB];
+    const denseListIndexA = sparseList[idA];
+    denseIdList[denseListIndexA] = idB;
+    sparseList[idB] = denseListIndexA;
+    denseIdList[denseListIndexB] = idA;
+    sparseList[idA] = denseListIndexB;
+
+    // swap denseListItems
+    const itemB = denseItemList[denseListIndexB];
+    const itemA = denseItemList[denseListIndexA];
+    denseItemList[denseListIndexA] = itemB;
+    denseItemList[denseListIndexB] = itemA;
   };
 
   clear = () => (this._elementCount = 0);
