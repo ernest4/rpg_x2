@@ -104,7 +104,7 @@ class Component<T extends ComponentSchema> {
   };
 
   // TODO: jests
-  set = (entityId: EntityId, params: { [key in keyof T]: any }) => {
+  set = (entityId: EntityId, params: { [key in keyof T]: T[key] }) => {
     const entries = Object.entries(params);
     let field;
     let value;
@@ -123,7 +123,7 @@ class Component<T extends ComponentSchema> {
   //   //
   // };
 
-  all = (): [{ [key in keyof T]: any[] }, number] => {
+  all = (): [{ [key in keyof T]: T[key][] }, number] => {
     if (this._denseLists) return [this._denseLists, this._referenceSparseSet._elementCount];
 
     // TODO: cache value count on instance.
@@ -137,7 +137,7 @@ class Component<T extends ComponentSchema> {
       result[field] = sparseSet.denseItemList;
     }
     this._denseLists = result; // TODO: cleaner way to cache?
-    return [result, valueCount] as [{ [key in keyof T]: any[] }, number];
+    return [result, valueCount] as [{ [key in keyof T]: T[key][] }, number];
   };
 
   // query builder?
