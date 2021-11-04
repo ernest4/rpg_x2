@@ -22,8 +22,6 @@ class Component<T extends ComponentSchema> {
   private _valueSparseSets: SparseSet<FieldType>[];
   _referenceSparseSet: SparseSet<any>;
   private _denseLists: any;
-  private _addCallback: (entityId: EntityId, params: T) => void;
-  private _removeCallback: (entityId: EntityId) => void;
   private _queryGroup: QueryGroup<any, any>;
 
   constructor(schema: T) {
@@ -46,21 +44,6 @@ class Component<T extends ComponentSchema> {
     this._referenceSparseSet = Object.values(this._soa)[0];
   }
 
-  // // TODO: jests
-  // registerEventListener = (functionName: "add" | "remove", callback: (...any) => void) => {
-  //   this[`_${functionName}Callback`] = callback;
-  // };
-
-  // TODO: jests
-  registerAddEventListener = (callback: typeof this._addCallback) => {
-    this._addCallback = callback;
-  };
-
-  // TODO: jests
-  registerRemoveEventListener = (callback: typeof this._removeCallback) => {
-    this._removeCallback = callback;
-  };
-
   // TODO: jests
   hasId = (entityId: EntityId) => this._referenceSparseSet.hasId(entityId);
 
@@ -81,7 +64,9 @@ class Component<T extends ComponentSchema> {
   // TODO: jests
   remove = (entityId: EntityId) => {
     if (!this._referenceSparseSet.hasId(entityId)) return;
-    if (this._queryGroup.entityInGroup(entityId)) this._queryGroup.removeFromGroup(entityId);
+    if (this._queryGroup && this._queryGroup.entityInGroup(entityId)) {
+      this._queryGroup.removeFromGroup(entityId);
+    }
 
     const sparseSets = this._valueSparseSets;
     for (let i = 0; i < sparseSets.length; i++) {
@@ -98,14 +83,16 @@ class Component<T extends ComponentSchema> {
   };
 
   // TODO: jests
-  get = (entityId: EntityId): { [key in keyof T]: T[key] } => {
+  get = (entityId: EntityId): { [key in keyof T]: T[key] } | null => {
+    if (!this._referenceSparseSet.hasId(entityId)) return null;
+
     const result = {}; // TODO: cachet this object on instance?
     const entries = Object.entries(this._soa); // TODO: cache THIS after constructions of class ???
     let field;
     let sparseSet;
     for (let i = 0; i < entries.length; i++) {
       [field, sparseSet] = entries[i];
-      result[field] = sparseSet.getItem(entityId);
+      result[field] = sparseSet.addUnchecked(entityId);
     }
     return result as { [key in keyof T]: T[key] };
   };
@@ -135,8 +122,14 @@ class Component<T extends ComponentSchema> {
   //   //
   // };
 
-  all = (): [{ [key in keyof T]: T[key][] }, number] => {
-    if (this._denseLists) return [this._denseLists, this._referenceSparseSet._elementCount];
+  all = (): [{ [key in keyof T]: T[key][] }, number, number[]] => {
+    if (this._denseLists) {
+      return [
+        this._denseLists,
+        this._referenceSparseSet._elementCount,
+        this._referenceSparseSet.denseIdList,
+      ];
+    }
 
     // TODO: cache value count on instance.
     const valueCount = this._referenceSparseSet._elementCount;
@@ -149,7 +142,11 @@ class Component<T extends ComponentSchema> {
       result[field] = sparseSet.denseItemList;
     }
     this._denseLists = result; // TODO: cleaner way to cache?
-    return [result, valueCount] as [{ [key in keyof T]: T[key][] }, number];
+    return [result, valueCount, this._referenceSparseSet.denseIdList] as [
+      { [key in keyof T]: T[key][] },
+      number,
+      number[]
+    ];
   };
 
   clear = () => {

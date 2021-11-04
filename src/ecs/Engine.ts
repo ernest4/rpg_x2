@@ -29,7 +29,7 @@ class Engine {
   // _componentLists: SparseSet<Component>[] = [];
   private _debug: boolean | undefined;
   // private _entityIdAliases: SparseSet<EntityIdAlias>;
-  readonly entityIdPool: EntityIdPool;
+  readonly entityIdPool: EntityIdPool = new EntityIdPool();
   private _stats: Stats;
   components: { [key: string]: Component<any> };
   _componentLists: any;
