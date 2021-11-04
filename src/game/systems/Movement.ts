@@ -29,19 +29,19 @@ class Movement extends System {
     // z[i] += dz[i] * seconds;
     // }
 
-    const [{ x, y, z }, count] = Velocity.all();
-    for (let i = 0; i < count; i++) {
-      console.log(x[i]);
-      console.log(y[i]);
-      console.log(z[i]);
-    }
-
-    // const [{ x: dx, y: dy, z: dz }, { x, y, z }, count] = Velocity.group(Position).all();
+    // const [{ x, y, z }, count] = Velocity.all();
     // for (let i = 0; i < count; i++) {
-    //   x[i] += dx[i] * seconds;
-    //   y[i] += dy[i] * seconds;
-    //   z[i] += dz[i] * seconds;
+    //   console.log(x[i]);
+    //   console.log(y[i]);
+    //   console.log(z[i]);
     // }
+
+    const [{ x: dx, y: dy, z: dz }, { x, y, z }, count] = Velocity.group(Position).all();
+    for (let i = 0; i < count; i++) {
+      x[i] += dx[i] * seconds;
+      y[i] += dy[i] * seconds;
+      z[i] += dz[i] * seconds;
+    }
 
     // archetype query?
     // const archetypes = this.query(Velocity, Position);

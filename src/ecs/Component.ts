@@ -18,7 +18,7 @@ export type ComponentsSchema = { [key: string]: ComponentSchema };
 // TODO: jests
 class Component<T extends ComponentSchema> {
   signatureId: number;
-  private _soa: { [key: string | number]: SparseSet<FieldType> };
+  private _soa: { [key in keyof T]: SparseSet<T[key]> };
   private _valueSparseSets: SparseSet<FieldType>[];
   private _referenceSparseSet: SparseSet<any>;
   private _denseLists: any;
@@ -29,13 +29,15 @@ class Component<T extends ComponentSchema> {
   constructor(schema: T) {
     this.signatureId = SignatureIdGenerator.newSignatureId();
 
+    // @ts-ignore
     this._soa = {}; // private
 
-    const entries = Object.entries(schema);
+    const entries: [keyof T, FieldType][] = Object.entries(schema);
     let field;
     let type;
     for (let i = 0; i < entries.length; i++) {
       [field, type] = entries[i];
+      // @ts-ignore
       this._soa[field] = new SparseSet();
     }
 
@@ -86,7 +88,7 @@ class Component<T extends ComponentSchema> {
   };
 
   // TODO: jests
-  get = (entityId: EntityId): ComponentSchema => {
+  get = (entityId: EntityId): { [key in keyof T]: T[key] } => {
     const result = {}; // TODO: cachet this object on instance?
     const entries = Object.entries(this._soa); // TODO: cache THIS after constructions of class ???
     let field;
@@ -95,12 +97,12 @@ class Component<T extends ComponentSchema> {
       [field, sparseSet] = entries[i];
       result[field] = sparseSet.getItem(entityId);
     }
-    return result;
+    return result as { [key in keyof T]: T[key] };
   };
 
   // TODO: jests
-  getField = (entityId: EntityId, field: string) => {
-    this._soa[field].getItem(entityId);
+  getField = (entityId: EntityId, field: keyof T) => {
+    return this._soa[field].getItem(entityId);
   };
 
   // TODO: jests
