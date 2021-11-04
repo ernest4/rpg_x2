@@ -19,7 +19,11 @@ class QueryGroup<T extends ComponentSchema, K extends ComponentSchema> {
   };
 
   private initializeGrouping = () => {
-    // TODO: initially move the components into group if there are any...
+    const entityIds = this._component1._referenceSparseSet.denseIdList;
+    const count = this._component1._referenceSparseSet._elementCount;
+    for (let i = 0; i < count; i++) {
+      if (this.entityInGroup(entityIds[i])) this.addToGroup(entityIds[i]);
+    }
   };
 
   entityInGroup = (entityId: EntityId) => {
