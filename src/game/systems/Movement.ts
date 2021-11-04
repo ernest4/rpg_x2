@@ -12,40 +12,13 @@ class Movement extends System {
   start(): void {}
 
   update(): void {
-    // this.benchmarkSubject("queryTwoInOrderUnchecked", () => {
-    //   this.engine.queryTwoInOrderUnchecked(this.updateTransforms, PHYSICS_BODY, TRANSFORM);
-    // });
-    // this.benchmarkSubject("raw query", () => {
+    // this.benchmarkSubject("archetype query", () => {
     // });
     const seconds = this.deltaTime / 1000;
 
-    // const [positions, velocities] = this.query(Position, LinearVelocity);
-    // const [{ x, y, z }, { dx, dy, dz }, count] = this.queryGroup(Position, Velocity);
-    // const [{ x: dx, y: dy, z: dz }, count] = Velocity.joins(Position);
-    // for (let i = 0; i < count; i++) {
-    //   const { x, y, z } = Position.get();
-    // x[i] += dx[i] * seconds;
-    // y[i] += dy[i] * seconds;
-    // z[i] += dz[i] * seconds;
-    // }
-
-    // const [{ x, y, z }, count] = Velocity.all();
-    // for (let i = 0; i < count; i++) {
-    //   console.log(x[i]);
-    //   console.log(y[i]);
-    //   console.log(z[i]);
-    // }
-
-    const [{ x: dx, y: dy, z: dz }, { x, y, z }, count] = Velocity.group(Position).all();
-    for (let i = 0; i < count; i++) {
-      x[i] += dx[i] * seconds;
-      y[i] += dy[i] * seconds;
-      z[i] += dz[i] * seconds;
-    }
-
-    // archetype query?
     const archetypes = this.query(Velocity, Position);
-    for (const [{ x: dx, y: dy, z: dz }, { x, y, z }, count] of archetypes) {
+    for (let j = 0, l = archetypes.length; j < l; j++) {
+      const [{ x: dx, y: dy, z: dz }, { x, y, z }, count] = archetypes[j];
       for (let i = 0; i < count; i++) {
         x[i] += dx[i] * seconds;
         y[i] += dy[i] * seconds;

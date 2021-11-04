@@ -13,8 +13,13 @@ import { Vector3 } from "../../ecs/Component";
 // import FpsCounter from "./utils/FpsCounter";
 
 // TODO: move this to own file?
+// export const componentsSchema = {
+//   Position: Vector3,
+// };
+
+POSITION = 0; // ???
 export const componentsSchema = {
-  Position: Vector3,
+  [POSITION]: Vector3,
 };
 
 export default class Main extends Phaser.Scene {

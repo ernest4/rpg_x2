@@ -6,6 +6,7 @@ import System from "./System";
 import { isNumber } from "./utils/Number";
 import Entity from "./Entity";
 import Stats from "./utils/Stats";
+import Archetype from "./Archetype";
 
 // TODO: move out to own class?
 // class EntityIdAlias extends SparseSetItem {
@@ -49,10 +50,14 @@ class Engine {
     // move to helper class, some "increasing number generator" ?
     this.lastComponentSignatureId = 0;
 
-    Object.entries(componentsSchema).forEach(([componentName, componentSchema]) => {
-      const signatureId = this.newComponentSignatureId(); // unique increasing numbers
-      this.components[componentName] = new Component(signatureId, componentSchema);
-    });
+    // Object.entries(componentsSchema).forEach(([componentName, componentSchema]) => {
+    //   const signatureId = this.newComponentSignatureId(); // unique increasing numbers
+    //   this.components[componentName] = new Component(signatureId, componentSchema);
+    // });
+
+    // TODO: optimize, maybe use arrays?
+    // or cache line optimized search of keys anyway?
+    this._archetypes = {};
   }
 
   // TODO: jests
@@ -347,160 +352,23 @@ class Engine {
   //   shortestComponentList.stream(processComponent);
   // };
 
-  // // TODO: jests
-  // // NOTE: faster query that assumes first QueryTag is the shortest list
-  // // This heuristic is accurate for heaviest and most predictable systems e.g.
-  // // like movement [Transform, PhysicsBody] & render [Transform, Sprite]
-  // // where PhysicsBody and Sprite are the shorter lists
-  // queryNInOrder = (callback: QueryCallback, ...queryTags: number[]) => {
-  //   const componentsLists = this._componentLists;
-
-  //   let querySet: QuerySet = [];
-  //   let anotherComponent: Component;
-  //   const componentClassesLength = queryTags.length;
-  //   const processComponent = component => {
-  //     for (let i = 1; i < componentClassesLength; i++) {
-  //       anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
-
-  //       if (!anotherComponent) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-  //       querySet[i - 1] = anotherComponent;
-  //     }
-  //     callback([component, ...querySet]);
-  //   };
-
-  //   componentsLists[queryTags[0]]?.stream(processComponent);
-  // };
-
-  // // TODO: jests
-  // // NOTE: most systems query 1 to 2 components. Heavy optimization available
-  // queryTwo = <C1 extends Component, C2 extends Component>(
-  //   callback: (component1: C1, component2: C2) => void,
-  //   queryTag1: number,
-  //   queryTag2: number
-  // ) => {
-  //   const componentsLists = this._componentLists;
-  //   // NOTE: finding shortest component list
-  //   const tag1ComponentList = componentsLists[queryTag1];
-  //   if (!tag1ComponentList) return;
-  //   const tag2ComponentList = componentsLists[queryTag2];
-  //   if (!tag2ComponentList) return;
-
-  //   let tag1Component: C1;
-  //   let tag2Component: C2;
-  //   let component;
-  //   const tag1elementCount = tag1ComponentList._elementCount;
-  //   const tag2elementCount = tag2ComponentList._elementCount;
-
-  //   if (tag1elementCount < tag2elementCount) {
-  //     const tag2ComponentList_get = tag2ComponentList.get;
-  //     const denseList = tag1ComponentList._denseList;
-  //     let i = 0;
-  //     while (i < tag1elementCount) {
-  //       component = denseList[i];
-  //       tag2Component = <C2>tag2ComponentList_get(component.id);
-  //       if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-  //       callback(component, tag2Component);
-  //       i++;
-  //     }
-  //   } else {
-  //     const tag1ComponentList_get = tag1ComponentList.get;
-  //     const denseList = tag2ComponentList._denseList;
-  //     let i = 0;
-  //     while (i < tag2elementCount) {
-  //       component = denseList[i];
-  //       tag1Component = <C1>tag1ComponentList_get(component.id);
-  //       if (!tag1Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-  //       callback(tag1Component, component);
-  //       i++;
-  //     }
-  //   }
-  // };
-
-  // // TODO: jests
-  // queryTwoInOrder = <C1 extends Component, C2 extends Component>(
-  //   callback: (component1: C1, component2: C2) => void,
-  //   queryTag1: number,
-  //   queryTag2: number
-  // ) => {
-  //   const componentsLists = this._componentLists;
-  //   const tag2ComponentList = componentsLists[queryTag2];
-  //   if (!tag2ComponentList) return;
-
-  //   let tag2Component: C2;
-  //   const tag2ComponentList_get = tag2ComponentList.get;
-  //   const tag1ComponentList = componentsLists[queryTag1];
-  //   if (tag1ComponentList) {
-  //     let component;
-  //     const elementCount = tag1ComponentList._elementCount;
-  //     const denseList = tag1ComponentList._denseList;
-  //     let i = 0;
-  //     while (i < elementCount) {
-  //       component = denseList[i];
-  //       tag2Component = <C2>tag2ComponentList_get(component.id);
-  //       if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-  //       callback(component, tag2Component);
-  //       i++;
-  //     }
-  //   }
-  // };
-
-  // // TODO: jests
-  // queryTwoInOrderUnchecked = <C1 extends Component, C2 extends Component>(
-  //   callback: (component1: C1, component2: C2) => void,
-  //   queryTag1: number,
-  //   queryTag2: number
-  // ) => {
-  //   const componentsLists = this._componentLists;
-  //   const tag2ComponentList = componentsLists[queryTag2];
-
-  //   const tag2ComponentList_getUnchecked = tag2ComponentList.getUnchecked;
-  //   const tag1ComponentList = componentsLists[queryTag1];
-  //   if (tag1ComponentList) {
-  //     let component;
-  //     const elementCount = tag1ComponentList._elementCount;
-  //     const denseList = tag1ComponentList._denseList;
-  //     let i = 0;
-  //     while (i < elementCount) {
-  //       component = denseList[i];
-  //       callback(component, <C2>tag2ComponentList_getUnchecked(component.id));
-  //       i++;
-  //     }
-  //   }
-  // };
-
-  // // TODO: jests
-  // // For systems that query 1 component, can't be faster than this!
-  // queryOne = <T extends Component>(callback: (component: T) => void, queryTag: number) => {
-  //   (<SparseSet<T>>(<any>this._componentLists[queryTag]))?.stream(callback);
-  // };
-
   // TODO: jests
   // For systems that query 1 component, can't be faster than this!
   // queryOne = <T extends Component>(queryTag: number): [T[], number] => {
   //   return (<SparseSet<T>>this._componentLists[queryTag]).iterable();
   // };
 
-  // TODO: new queries + grouping
-  queryN = () => {
-    //
+  query = (...component: Component<any>[]): Archetype[] => {
+    const resultArchetypes: Archetype[] = [];
+    // TODO:
+    // each archetype will be found via bitmasks https://github.com/EnderShadow8/wolf-ecs/blob/73b2097b8cebc28db63bf6b2d293ca22f45a4b62/src/ecs.ts#L75
+    // for (let i = 0; (l = archetypes.length), i < l; i++) {
+    //     // some bitmaks magic to select archetype
+    //     if (right archetype) resultArchetypes.push(archetype)
+    // }
+    // }
+    return resultArchetypes;
   };
-
-  queryOne = () => {
-    //
-  };
-
-  // try to optimize for this...
-  queryGroup = () => {
-    //
-  };
-
-  // or maybe do these methods ON components?
-  // (active record pattern)
-
-
 
   get deltaTime() {
     return this._deltaTime;

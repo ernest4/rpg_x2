@@ -1,13 +1,16 @@
-import { ComponentsSchema } from "./Component";
+import Archetype from "./Archetype";
+import Component, { ComponentsSchema } from "./Component";
 import Engine from "./Engine";
 import { benchmarkSubject } from "./utils/benchmark";
 
 // TODO: jest tests !!!!
 abstract class System {
   private readonly _engine: Engine;
+  query: (...component: Component<any>[]) => Archetype[];
 
   constructor(engine: Engine) {
     this._engine = engine;
+    this.query = this.engine.query;
   }
 
   // TODO: init stuff, engine should run this when system right after system is added
