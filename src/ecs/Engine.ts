@@ -35,7 +35,7 @@ class Engine {
   _componentLists: any;
   lastComponentSignatureId: number;
 
-  constructor(componentsSchema: ComponentsSchema, debug?: boolean) {
+  constructor(debug?: boolean) {
     this._debug = debug;
     if (debug) this._stats = new Stats();
     // this._systemUpdateFunctions = [];
@@ -48,11 +48,6 @@ class Engine {
 
     // move to helper class, some "increasing number generator" ?
     this.lastComponentSignatureId = 0;
-
-    Object.entries(componentsSchema).forEach(([componentName, componentSchema]) => {
-      const signatureId = this.newComponentSignatureId(); // unique increasing numbers
-      this.components[componentName] = new Component(signatureId, componentSchema);
-    });
   }
 
   // TODO: jests
@@ -499,8 +494,6 @@ class Engine {
 
   // or maybe do these methods ON components?
   // (active record pattern)
-
-
 
   get deltaTime() {
     return this._deltaTime;

@@ -47,9 +47,9 @@ describe(Engine, () => {
   let queryCallBackFunction: jest.Mock<any, any>;
   let queryCallBackFunction2: jest.Mock<any, any>;
 
-  let component: Component;
-  let component2: Component;
-  let component3: Component;
+  // let component: Component;
+  // let component2: Component;
+  // let component3: Component;
 
   beforeEach(() => {
     engine = new Engine();

@@ -12,11 +12,6 @@ import { Engine } from "../../ecs";
 import { Vector3 } from "../../ecs/Component";
 // import FpsCounter from "./utils/FpsCounter";
 
-// TODO: move this to own file?
-export const componentsSchema = {
-  Position: Vector3,
-};
-
 export default class Main extends Phaser.Scene {
   // dudeQuads!: any[];
   lastDeltaTime: any;
@@ -43,7 +38,7 @@ export default class Main extends Phaser.Scene {
   }
 
   private initECS = () => {
-    this._engine = new Engine(componentsSchema, DEVELOPMENT);
+    this._engine = new Engine(DEVELOPMENT);
     // TODO: test all systems.
     this._engine.addSystems(
       new Manager(this._engine),

@@ -6,7 +6,7 @@ import Transform from "../components/Transform";
 import { assetsPath } from "../../utils/environment";
 import Component, { ComponentsSchema, FieldTypes, NullVector3, Vector3 } from "../../ecs/Component";
 import { Engine } from "../../ecs";
-import { componentsSchema } from "../scenes/Main";
+// import { componentsSchema } from "../scenes/Main";
 import Position from "../components/Position";
 import Velocity from "../components/Velocity";
 

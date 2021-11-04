@@ -152,6 +152,10 @@ class Component<T extends ComponentSchema> {
     return [result, valueCount] as [{ [key in keyof T]: T[key][] }, number];
   };
 
+  clear = () => {
+    // TODO: ... clear all components
+  };
+
   // query builder?
   // joins = (...components: Component<any>[]) => {
   //   // ...
