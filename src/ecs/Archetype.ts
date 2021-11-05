@@ -2,13 +2,15 @@ import Component, { ComponentsSchema, FieldType } from "./Component";
 import { EntityId } from "./types";
 
 export type Mask = number[];
+type ComponentIds = number[];
+type Fields = string[];
+type Values = any[];
 
+// this is optimized version of sparseSet...
 // TODO: jests !!!
-
-// TODO: this will be optimized version of sparseSet
 class Archetype {
   mask: Mask;
-  componentIds: number[];
+  componentIds: ComponentIds;
 
   elementCount: number = 0; // No elements initially
   denseEntityIdList: EntityId[] = [];
@@ -79,15 +81,40 @@ class Archetype {
     this.elementCount++;
   };
 
-  remove = (entityId: EntityId): { [componentId: number]: { [componentField: string]: any } } => {
-    //
-    // serialization scheme?
-    // [componentId, field, value, componentId, field, value... ]
-    // OR
-    // soa!
-    // [componentId, componentId, componentId...]
-    // [field, field, field...]
-    // [value, value, value, value...]
+  remove = (entityId: EntityId): [ComponentIds, Fields, Values] => {
+    // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
+
+    const { _sparseEntityIdList, elementCount, denseEntityIdList } = this;
+    // [1, 1, 2,...]
+    // [x, y, name,...]
+    // [123, 456, 'abc',...]
+    const componentIds: ComponentIds = [];
+    const fields: Fields = [];
+    const values: Values = [];
+
+    const denseListIndex = _sparseEntityIdList[entityId];
+
+    for (let i = 0, l = this.componentIds.length; i < l; i++) {
+      const componentId = this.componentIds[i];
+      const componentEntries = Object.entries(this.components[componentId]);
+      for (let j = 0, ll = componentEntries.length; i < ll; i++) {
+        // capture data
+        componentIds.push(componentId);
+        const [field, valuesDenseList] = componentEntries[j];
+        fields.push(field);
+        values.push(valuesDenseList[denseListIndex]);
+        // replace with last item to 'delete' but keep list packed
+        valuesDenseList[denseListIndex] = valuesDenseList[elementCount - 1];
+      }
+    }
+
+    // swap ids of last entity with deleted entity to overwrite
+    const lastEntityId = denseEntityIdList[elementCount - 1];
+    denseEntityIdList[denseListIndex] = lastEntityId;
+    _sparseEntityIdList[lastEntityId] = denseListIndex;
+
+    this.elementCount--;
+    return [componentIds, fields, values];
   };
 
   get = () => {

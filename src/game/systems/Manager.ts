@@ -21,14 +21,14 @@ type sch = { [key: number]: readonly string[] };
 
 // const func = <K extends sch, N extends number, T extends readonly [] | readonly any[]>(
 const func = <K extends sch, N extends number, T extends K[N]>(
-  schema: K,
+  // schema: K,
   componentId: N,
   keys: T,
   values: { [K in keyof T]: any } // this enforces same length of the two arrays
 ) => {};
 
-func(SCH, C.Pos, ["x", "y", "z"], [0, 0, 0]);
-func(SCH, C.Pos, SCH[C.Pos], [0, 0, 0]);
+// func(SCH, C.Pos, ["x", "y", "z"], [0, 0, 0]);
+func(C.Pos, SCH[C.Pos], [0, 0, 0]);
 
 // this.addComponent(Component.Position, ["x", "y", "z"], [0, 0, 0])
 
