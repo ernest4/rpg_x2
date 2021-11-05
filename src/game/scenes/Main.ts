@@ -13,14 +13,16 @@ import { Vector3 } from "../../ecs/Component";
 // import FpsCounter from "./utils/FpsCounter";
 
 // TODO: move this to own file?
-// export const componentsSchema = {
-//   Position: Vector3,
-// };
+export const enum Components {
+  Position,
+  Velocity,
+}
 
-POSITION = 0; // ???
-export const componentsSchema = {
-  [POSITION]: Vector3,
-};
+// TODO: move this to own file?
+export const SCHEMA = {
+  [Components.Position]: Vector3,
+  [Components.Velocity]: Vector3,
+} as const;
 
 export default class Main extends Phaser.Scene {
   // dudeQuads!: any[];
@@ -48,7 +50,7 @@ export default class Main extends Phaser.Scene {
   }
 
   private initECS = () => {
-    this._engine = new Engine(componentsSchema, DEVELOPMENT);
+    this._engine = new Engine(SCHEMA, DEVELOPMENT);
     // TODO: test all systems.
     this._engine.addSystems(
       new Manager(this._engine),

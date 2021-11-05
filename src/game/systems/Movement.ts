@@ -4,23 +4,16 @@ import System from "../../ecs/System";
 import PhysicsBody from "../components/PhysicsBody";
 import Position from "../components/Position";
 import Velocity from "../components/Velocity";
-
-const enum Components {
-  Position,
-  Velocity,
-}
-
-const Schema = {
-  [Components.Position]: Vector3,
-  [Components.Velocity]: Vector3,
-} as const;
+import { Components, SCHEMA } from "../scenes/Main";
 
 class Movement extends System {
   constructor(engine: Engine) {
     super(engine);
   }
 
-  start(): void {}
+  start(): void {
+    this.engine.addComponent(SCHEMA, Components.Position, 123, { x: 0, y: 0, z: 0 });
+  }
 
   update(): void {
     // this.benchmarkSubject("archetype query", () => {

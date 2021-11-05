@@ -13,7 +13,7 @@ export const Vector3 = { z: FieldTypes.Number, ...Vector2 };
 export const NullVector2 = { x: 0, y: 0 };
 export const NullVector3 = { z: 0, ...NullVector2 };
 
-export type ComponentsSchema = { [key: string]: ComponentSchema };
+export type ComponentsSchema = { [key: number]: ComponentSchema };
 
 // TODO: jests
 abstract class Component<T extends ComponentSchema> {

@@ -6,7 +6,7 @@ import System from "./System";
 import { isNumber } from "./utils/Number";
 import Entity from "./Entity";
 import Stats from "./utils/Stats";
-import Archetype from "./Archetype";
+import Archetype, { Mask } from "./Archetype";
 
 // TODO: move out to own class?
 // class EntityIdAlias extends SparseSetItem {
@@ -36,6 +36,7 @@ class Engine {
   _componentLists: any;
   lastComponentSignatureId: number;
   private _archetypes: Archetype[];
+  _componentsSchema: ComponentsSchema;
 
   constructor(componentsSchema: ComponentsSchema, debug?: boolean) {
     this._debug = debug;
@@ -55,6 +56,8 @@ class Engine {
     //   const signatureId = this.newComponentSignatureId(); // unique increasing numbers
     //   this.components[componentName] = new Component(signatureId, componentSchema);
     // });
+
+    this._componentsSchema = componentsSchema;
 
     // TODO: optimize, maybe use arrays?
     // or cache line optimized search of keys anyway?
@@ -129,34 +132,60 @@ class Engine {
   //   return component;
   // };
 
-  addComponent = <T extends ComponentSchema>(
-    tag: number,
+  // addComponent = <T extends ComponentSchema>(
+  //   componentId: keyof typeof this._componentsSchema,
+  //   entityId: EntityId,
+  //   values: { [key in keyof T]: T[key] }
+  // ) => {
+  addComponent = <N extends number, K extends ComponentsSchema, C extends K[N]>(
+    schema: K,
+    componentId: N,
     entityId: EntityId,
-    componentSchema: T
+    values: { [key in keyof C]: C[key] }
   ) => {
-    // TODO:
-    // 1. fetch the archetype entity belongs to now
-    // 2. check if component belongs to archetype
-    // 2.A if yes update component
-    // 2.B if not, find the next archetype / create one and transfer all components there
+    const currentArchetype = this.getEntityArchetype(entityId);
+    const mask = this.createMask(currentArchetype.mask, componentId);
+    const newArchetype = this.getOrCreateArchetype(mask);
+    this.changeEntityArchetype(currentArchetype, newArchetype, entityId, values);
+  };
 
-    let currentArchetype: Archetype;
+  getEntityArchetype = (entityId: EntityId): Archetype => {
+    // TODO: this loop could both find the current AND the next archetype in one go!
     for (let i = 0, l = this._archetypes.length; i < l; i++) {
-      if (this._archetypes[i].has(entityId)) {
-        currentArchetype = this._archetypes[i];
-        break;
+      if (this._archetypes[i].hasEntity(entityId)) {
+        return this._archetypes[i];
       }
     }
+  };
 
-    // TODO: ...
+  createMask = (mask: Mask, componentId: number): Mask => {
+    const newMask = [...mask];
+    newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
+    return newMask;
+  };
 
-    // let componentList = this._componentLists[tag];
-    // if (!componentList) {
-    //   componentList = new SparseSet();
-    //   this._componentLists[tag] = componentList;
-    // }
-    // componentList.add(component);
-    // return component;
+  getOrCreateArchetype = (mask: Mask): Archetype => {
+    // TODO: array buffers for mask https://github.com/EnderShadow8/wolf-ecs/blob/73b2097b8cebc28db63bf6b2d293ca22f45a4b62/src/ecs.ts#L75
+    return this.getArchetype(mask) || this.createArchetype(mask);
+  };
+
+  getArchetype = (mask: Mask): Archetype => {
+    for (let i = 0, l = this._archetypes.length; i < l; i++) {
+      if (this._archetypes[i].maskMatches(mask)) return this._archetypes[i];
+    }
+  };
+
+  createArchetype = (mask: Mask): Archetype => {
+    return new Archetype(mask);
+  };
+
+  changeEntityArchetype = <T extends ComponentSchema>(
+    currentArchetype: Archetype,
+    newArchetype: Archetype,
+    entityId: EntityId,
+    newComponent?: { [key in keyof T]: T[key] }
+  ) => {
+    //
   };
 
   // addComponents = (...components: Component[]) => components.forEach(this.addComponent);
