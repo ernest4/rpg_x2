@@ -169,7 +169,7 @@ class Engine {
     return this.getArchetype(mask) || this.createArchetype(mask);
   };
 
-  getArchetype = (mask: Mask): Archetype => {
+  getArchetype = (mask: Mask): Archetype | void => {
     for (let i = 0, l = this._archetypes.length; i < l; i++) {
       if (this._archetypes[i].maskMatches(mask)) return this._archetypes[i];
     }
@@ -183,7 +183,7 @@ class Engine {
     currentArchetype: Archetype,
     newArchetype: Archetype,
     entityId: EntityId,
-    newComponent?: { [key in keyof T]: T[key] }
+    newComponent?: any
   ) => {
     //
   };
@@ -418,7 +418,7 @@ class Engine {
   //   return (<SparseSet<T>>this._componentLists[queryTag]).iterable();
   // };
 
-  query = (...component: Component<any>[]): Archetype[] => {
+  query = (...componentIds: number[]): Archetype[] => {
     const resultArchetypes: Archetype[] = [];
     // TODO:
     // each archetype will be found via bitmasks https://github.com/EnderShadow8/wolf-ecs/blob/73b2097b8cebc28db63bf6b2d293ca22f45a4b62/src/ecs.ts#L75

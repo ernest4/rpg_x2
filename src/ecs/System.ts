@@ -6,7 +6,7 @@ import { benchmarkSubject } from "./utils/benchmark";
 // TODO: jest tests !!!!
 abstract class System {
   private readonly _engine: Engine;
-  query: (...component: Component<any>[]) => Archetype[];
+  query: (...componentIds: number[]) => Archetype[];
 
   constructor(engine: Engine) {
     this._engine = engine;

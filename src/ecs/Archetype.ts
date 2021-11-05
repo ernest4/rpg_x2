@@ -1,19 +1,29 @@
-import Component from "./Component";
+import Component, { ComponentsSchema, FieldType } from "./Component";
 import { EntityId } from "./types";
 
 export type Mask = number[];
 
 // TODO: this will be optimized version of sparseSet
 class Archetype {
-  components: Component<any>[];
   mask: Mask;
 
-  _elementCount: number = 0; // No elements initially
+  elementCount: number = 0; // No elements initially
   denseEntityIdList: EntityId[] = [];
   private _sparseEntityIdList: number[] = [];
+  components: { [componentId: number]: { [componentField: string]: any[] } };
 
-  constructor(mask: Mask, ...components: Component<any>[]) {
-    // this.components = components; // TODO: create denseItemList for each field of the components
+  constructor(mask: Mask, componentsSchema: ComponentsSchema, ...componentIds: number[]) {
+    this.components = {};
+
+    let soa: { [componentField: string]: FieldType[] };
+    for (let i = 0, l = componentIds.length; i < l; i++) {
+      const componentSchemaEntries = Object.entries(componentsSchema[i]);
+      for (let j = 0, ll = componentSchemaEntries.length; j < ll; j++) {
+        const [field, fieldType] = componentSchemaEntries[j];
+        soa[field] = []; // denseList per field
+      }
+      this.components[i] = soa;
+    }
     this.mask = mask;
   }
 
@@ -26,14 +36,9 @@ class Archetype {
 
   hasEntity = (entityId: EntityId) => {
     return (
-      this._sparseEntityIdList[entityId] < this._elementCount &&
+      this._sparseEntityIdList[entityId] < this.elementCount &&
       this.denseEntityIdList[this._sparseEntityIdList[entityId]] === entityId
     );
-  };
-
-  iterable = () => {
-    // const count = this.components[0].all()[1];
-    // return [...this.components, count];
   };
 }
 

@@ -20,10 +20,17 @@ class Movement extends System {
     // });
     const seconds = this.deltaTime / 1000;
 
-    const archetypes = this.query(Velocity, Position);
+    const archetypes = this.query(Components.Velocity, Components.Position);
     for (let j = 0, l = archetypes.length; j < l; j++) {
-      const [{ x: dx, y: dy, z: dz }, { x, y, z }, count] = archetypes[j];
-      for (let i = 0; i < count; i++) {
+      const {
+        components: {
+          [Components.Velocity]: { x: dx, y: dy, z: dz },
+          [Components.Position]: { x, y, z },
+        },
+        elementCount,
+      } = archetypes[j];
+
+      for (let i = 0; i < elementCount; i++) {
         x[i] += dx[i] * seconds;
         y[i] += dy[i] * seconds;
         z[i] += dz[i] * seconds;
