@@ -22,7 +22,7 @@ class Manager extends System {
     Array.from(Array(30000).keys()).forEach(i => {
       const entityId = this.newEntityId();
 
-      if (i == 1) this.addComponent(SCHEMA, Components.Player, entityId, {});
+      if (i === 1) this.addComponent(SCHEMA, Components.Player, entityId, {});
       this.addComponent(SCHEMA, Components.Speed, entityId, { speed: 100 + i });
       this.addComponent(SCHEMA, Components.Position, entityId, {
         x: 200 + i,

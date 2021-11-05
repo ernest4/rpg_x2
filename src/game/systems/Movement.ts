@@ -11,9 +11,7 @@ class Movement extends System {
     super(engine);
   }
 
-  start(): void {
-    this.engine.addComponent(SCHEMA, Components.Position, 123, { x: 0, y: 0, z: 0 });
-  }
+  start(): void {}
 
   update(): void {
     // this.benchmarkSubject("archetype query", () => {

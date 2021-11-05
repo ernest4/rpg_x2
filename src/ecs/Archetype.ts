@@ -3,6 +3,8 @@ import { EntityId } from "./types";
 
 export type Mask = number[];
 
+// TODO: jests !!!
+
 // TODO: this will be optimized version of sparseSet
 class Archetype {
   mask: Mask;
@@ -48,6 +50,27 @@ class Archetype {
       this._sparseEntityIdList[entityId] < this.elementCount &&
       this.denseEntityIdList[this._sparseEntityIdList[entityId]] === entityId
     );
+  };
+
+  add = (
+    entityId: EntityId,
+    components: { [componentId: number]: { [componentField: string]: any } }
+  ): void => {
+    const { elementCount, denseEntityIdList, _sparseEntityIdList } = this;
+
+    denseEntityIdList[elementCount] = entityId;
+    // components...
+
+    _sparseEntityIdList[entityId] = elementCount;
+    this.elementCount++;
+  };
+
+  remove = (entityId: EntityId): { [componentId: number]: { [componentField: string]: any } } => {
+    //
+  };
+
+  get = () => {
+    //
   };
 }
 

@@ -136,7 +136,7 @@ class Engine {
     schema: K,
     componentId: N,
     entityId: EntityId,
-    values: { [key in keyof C]: C[key] }
+    componentValues: { [key in keyof C]: C[key] }
   ) => {
     const currentArchetype = this.getEntityArchetype(entityId);
     const newMask = this.createNewMask(currentArchetype.mask, componentId);
@@ -144,7 +144,9 @@ class Engine {
     if (!newArchetype) {
       newArchetype = this.createArchetype(newMask, ...currentArchetype.componentIds, componentId);
     }
-    this.changeEntityArchetype(currentArchetype, newArchetype, entityId, values);
+    this.changeEntityArchetype(currentArchetype, newArchetype, entityId, {
+      [componentId]: componentValues,
+    });
   };
 
   getEntityArchetype = (entityId: EntityId): Archetype => {
@@ -172,13 +174,14 @@ class Engine {
     return new Archetype(mask, this._componentsSchema, ...componentIds);
   };
 
-  changeEntityArchetype = <T extends ComponentSchema>(
+  changeEntityArchetype = <C extends ComponentSchema>(
     currentArchetype: Archetype,
     newArchetype: Archetype,
     entityId: EntityId,
-    newComponent?: any
+    newComponent: { [key: number]: { [key in keyof C]: C[key] } }
   ) => {
-    //
+    const oldComponentsValues = currentArchetype.remove(entityId);
+    newArchetype.add(entityId, { ...oldComponentsValues, ...newComponent });
   };
 
   // addComponents = (...components: Component[]) => components.forEach(this.addComponent);
@@ -215,6 +218,10 @@ class Engine {
   //   componentList.remove(component);
   //   if (isNumber(oldEntityId)) this.reclaimEntityIdIfFree(oldEntityId);
   // };
+
+  removeComponent = (componentId: number, entityId: EntityId) => {
+    //
+  };
 
   // removeComponents = (...components: Component[]) => components.forEach(this.removeComponent);
 
