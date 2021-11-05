@@ -132,11 +132,6 @@ class Engine {
   //   return component;
   // };
 
-  // addComponent = <T extends ComponentSchema>(
-  //   componentId: keyof typeof this._componentsSchema,
-  //   entityId: EntityId,
-  //   values: { [key in keyof T]: T[key] }
-  // ) => {
   addComponent = <N extends number, K extends ComponentsSchema, C extends K[N]>(
     schema: K,
     componentId: N,
@@ -144,8 +139,11 @@ class Engine {
     values: { [key in keyof C]: C[key] }
   ) => {
     const currentArchetype = this.getEntityArchetype(entityId);
-    const mask = this.createMask(currentArchetype.mask, componentId);
-    const newArchetype = this.getOrCreateArchetype(mask);
+    const newMask = this.createNewMask(currentArchetype.mask, componentId);
+    let newArchetype = this.getArchetype(newMask);
+    if (!newArchetype) {
+      newArchetype = this.createArchetype(newMask, ...currentArchetype.componentIds, componentId);
+    }
     this.changeEntityArchetype(currentArchetype, newArchetype, entityId, values);
   };
 
@@ -158,15 +156,10 @@ class Engine {
     }
   };
 
-  createMask = (mask: Mask, componentId: number): Mask => {
+  createNewMask = (mask: Mask, componentId: number): Mask => {
     const newMask = [...mask];
     newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
     return newMask;
-  };
-
-  getOrCreateArchetype = (mask: Mask): Archetype => {
-    // TODO: array buffers for mask https://github.com/EnderShadow8/wolf-ecs/blob/73b2097b8cebc28db63bf6b2d293ca22f45a4b62/src/ecs.ts#L75
-    return this.getArchetype(mask) || this.createArchetype(mask);
   };
 
   getArchetype = (mask: Mask): Archetype | void => {
@@ -175,8 +168,8 @@ class Engine {
     }
   };
 
-  createArchetype = (mask: Mask): Archetype => {
-    return new Archetype(mask);
+  createArchetype = (mask: Mask, ...componentIds: number[]): Archetype => {
+    return new Archetype(mask, this._componentsSchema, ...componentIds);
   };
 
   changeEntityArchetype = <T extends ComponentSchema>(
@@ -420,14 +413,22 @@ class Engine {
 
   query = (...componentIds: number[]): Archetype[] => {
     const resultArchetypes: Archetype[] = [];
-    // TODO:
-    // each archetype will be found via bitmasks https://github.com/EnderShadow8/wolf-ecs/blob/73b2097b8cebc28db63bf6b2d293ca22f45a4b62/src/ecs.ts#L75
-    // for (let i = 0; (l = archetypes.length), i < l; i++) {
-    //     // some bitmaks magic to select archetype
-    //     if (right archetype) resultArchetypes.push(archetype)
-    // }
-    // }
+    const searchMask = this.createMaskFromComponentIds(...componentIds);
+
+    for (let i = 0, l = this._archetypes.length; i < l; i++) {
+      if (this._archetypes[i].maskContains(searchMask)) resultArchetypes.push(this._archetypes[i]);
+    }
+
     return resultArchetypes;
+  };
+
+  createMaskFromComponentIds = (...componentIds: number[]) => {
+    const newMask = [];
+    for (let i = 0, l = componentIds.length; i < l; i++) {
+      const componentId = componentIds[i];
+      newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
+    }
+    return newMask;
   };
 
   get deltaTime() {

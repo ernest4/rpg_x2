@@ -6,6 +6,7 @@ export type Mask = number[];
 // TODO: this will be optimized version of sparseSet
 class Archetype {
   mask: Mask;
+  componentIds: number[];
 
   elementCount: number = 0; // No elements initially
   denseEntityIdList: EntityId[] = [];
@@ -13,8 +14,10 @@ class Archetype {
   components: { [componentId: number]: { [componentField: string]: any[] } };
 
   constructor(mask: Mask, componentsSchema: ComponentsSchema, ...componentIds: number[]) {
-    this.components = {};
+    this.mask = mask;
+    this.componentIds = componentIds;
 
+    this.components = {};
     let soa: { [componentField: string]: FieldType[] };
     for (let i = 0, l = componentIds.length; i < l; i++) {
       const componentSchemaEntries = Object.entries(componentsSchema[i]);
@@ -24,12 +27,18 @@ class Archetype {
       }
       this.components[i] = soa;
     }
-    this.mask = mask;
   }
 
   maskMatches = (mask: Mask): boolean => {
     for (let i = 0, l = this.mask.length; i < l; i++) {
       if (this.mask[i] !== mask[i]) return false;
+    }
+    return true;
+  };
+
+  maskContains = (subMask: Mask) => {
+    for (let i = 0, l = subMask.length; i < l; i++) {
+      if (this.mask[i] !== subMask[i]) return false;
     }
     return true;
   };
