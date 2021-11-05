@@ -54,12 +54,20 @@ class Archetype {
 
   add = (
     entityId: EntityId,
-    components: { [componentId: number]: { [componentField: string]: any } }
+    newComponents: { [componentId: number]: { [componentField: string]: any } }
   ): void => {
-    const { elementCount, denseEntityIdList, _sparseEntityIdList } = this;
+    const { elementCount, denseEntityIdList, _sparseEntityIdList, components } = this;
 
     denseEntityIdList[elementCount] = entityId;
-    // components...
+    const newComponentsEntries = Object.entries(newComponents);
+    for (let i = 0, l = newComponentsEntries.length; i < l; i++) {
+      const [newComponentId, newComponentValues] = newComponentsEntries[i];
+      const newComponentEntries = Object.entries(newComponentValues);
+      for (let j = 0, ll = newComponentEntries.length; j < ll; j++) {
+        const [field, value] = newComponentEntries[j];
+        components[newComponentId][field][elementCount] = value;
+      }
+    }
 
     _sparseEntityIdList[entityId] = elementCount;
     this.elementCount++;
