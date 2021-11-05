@@ -22,16 +22,18 @@ class Manager extends System {
     Array.from(Array(30000).keys()).forEach(i => {
       const entityId = this.newEntityId();
 
-      // if (i === 1) Player.add(entityId, { entityId }); // TODO: simplify components like this so passing entityId in schema not needed?
-      // Speed.add(entityId, { speed: 100 + i });
-      this.engine.addComponent(SCHEMA, Components.Position, entityId, {
+      if (i == 1) this.addComponent(SCHEMA, Components.Player, entityId, {});
+      this.addComponent(SCHEMA, Components.Speed, entityId, { speed: 100 + i });
+      this.addComponent(SCHEMA, Components.Position, entityId, {
         x: 200 + i,
         y: 200 + i,
         z: 0,
       });
-      // Position.add(entityId, { x: 200 + i, y: 200 + i, z: 0 });
-      // Velocity.add(entityId, NullVector3);
-      // Sprite.add(entityId, { url: assetsPath("images/unit_T.png"), frameWidth: 32 });
+      this.addComponent(SCHEMA, Components.Velocity, entityId, { x: 0, y: 0, z: 0 });
+      this.addComponent(SCHEMA, Components.Sprite, entityId, {
+        url: assetsPath("images/unit_T.png"),
+        frameWidth: 32,
+      });
 
       // if (i === 1) Player.add(entityId, { entityId }); // TODO: simplify components like this so passing entityId in schema not needed?
       // Speed.add(entityId, { speed: 100 + i });
@@ -39,15 +41,15 @@ class Manager extends System {
       // Velocity.add(entityId, NullVector3);
       // Sprite.add(entityId, { url: assetsPath("images/unit_T.png"), frameWidth: 32 });
 
-      // if (i === 1) this.engine.addComponent(PLAYER, new Player(entityId));
-      // // this.engine.addComponent(PLAYER, new Player(entityId));
-      // this.engine.addComponent(SPEED, new Speed(entityId, 100 + i));
-      // this.engine.addComponent(
+      // if (i === 1) this.addComponent(PLAYER, new Player(entityId));
+      // // this.addComponent(PLAYER, new Player(entityId));
+      // this.addComponent(SPEED, new Speed(entityId, 100 + i));
+      // this.addComponent(
       //   TRANSFORM,
       //   new Transform(entityId, { x: 200 + i, y: 200 + i, z: 0 })
       // );
-      // this.engine.addComponent(PHYSICS_BODY, new PhysicsBody(entityId));
-      // this.engine.addComponent(
+      // this.addComponent(PHYSICS_BODY, new PhysicsBody(entityId));
+      // this.addComponent(
       //   SPRITE,
       //   new Sprite(entityId, assetsPath("images/unit_T.png"), { frameWidth: 32 })
       // );

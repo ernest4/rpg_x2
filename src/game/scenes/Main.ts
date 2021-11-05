@@ -9,19 +9,25 @@ import Movement from "../systems/Movement";
 import FpsCounter from "../../utils/FpsCounter";
 import { DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import { Vector3 } from "../../ecs/Component";
+import { FieldTypes, Vector3 } from "../../ecs/Component";
 // import FpsCounter from "./utils/FpsCounter";
 
 // TODO: move this to own file?
 export const enum Components {
   Position,
   Velocity,
+  Speed,
+  Player,
+  Sprite,
 }
 
 // TODO: move this to own file?
 export const SCHEMA = {
   [Components.Position]: Vector3,
   [Components.Velocity]: Vector3,
+  [Components.Speed]: { speed: FieldTypes.Number },
+  [Components.Player]: {},
+  [Components.Sprite]: { url: FieldTypes.String, frameWidth: FieldTypes.Number },
 } as const;
 
 export default class Main extends Phaser.Scene {

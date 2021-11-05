@@ -1,16 +1,24 @@
 import Archetype from "./Archetype";
 import Component, { ComponentsSchema } from "./Component";
 import Engine from "./Engine";
+import { EntityId } from "./types";
 import { benchmarkSubject } from "./utils/benchmark";
 
 // TODO: jest tests !!!!
 abstract class System {
   private readonly _engine: Engine;
   query: (...componentIds: number[]) => Archetype[];
+  addComponent: <N extends number, K extends ComponentsSchema, C extends K[N]>(
+    schema: K,
+    componentId: N,
+    entityId: EntityId,
+    values: { [key in keyof C]: C[key] }
+  ) => void;
 
   constructor(engine: Engine) {
     this._engine = engine;
     this.query = this.engine.query;
+    this.addComponent = this.engine.addComponent;
   }
 
   // TODO: init stuff, engine should run this when system right after system is added
