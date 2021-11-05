@@ -1,8 +1,19 @@
 import { Engine } from "../../ecs";
+import { Vector3 } from "../../ecs/Component";
 import System from "../../ecs/System";
 import PhysicsBody from "../components/PhysicsBody";
 import Position from "../components/Position";
 import Velocity from "../components/Velocity";
+
+const enum Components {
+  Position,
+  Velocity,
+}
+
+const Schema = {
+  [Components.Position]: Vector3,
+  [Components.Velocity]: Vector3,
+} as const;
 
 class Movement extends System {
   constructor(engine: Engine) {

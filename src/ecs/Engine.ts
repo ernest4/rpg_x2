@@ -35,6 +35,7 @@ class Engine {
   components: { [key: string]: Component<any> };
   _componentLists: any;
   lastComponentSignatureId: number;
+  private _archetypes: Archetype[];
 
   constructor(componentsSchema: ComponentsSchema, debug?: boolean) {
     this._debug = debug;
@@ -57,7 +58,7 @@ class Engine {
 
     // TODO: optimize, maybe use arrays?
     // or cache line optimized search of keys anyway?
-    this._archetypes = {};
+    this._archetypes = [];
   }
 
   // TODO: jests
@@ -127,6 +128,36 @@ class Engine {
   //   componentList.add(component);
   //   return component;
   // };
+
+  addComponent = <T extends ComponentSchema>(
+    tag: number,
+    entityId: EntityId,
+    componentSchema: T
+  ) => {
+    // TODO:
+    // 1. fetch the archetype entity belongs to now
+    // 2. check if component belongs to archetype
+    // 2.A if yes update component
+    // 2.B if not, find the next archetype / create one and transfer all components there
+
+    let currentArchetype: Archetype;
+    for (let i = 0, l = this._archetypes.length; i < l; i++) {
+      if (this._archetypes[i].has(entityId)) {
+        currentArchetype = this._archetypes[i];
+        break;
+      }
+    }
+
+    // TODO: ...
+
+    // let componentList = this._componentLists[tag];
+    // if (!componentList) {
+    //   componentList = new SparseSet();
+    //   this._componentLists[tag] = componentList;
+    // }
+    // componentList.add(component);
+    // return component;
+  };
 
   // addComponents = (...components: Component[]) => components.forEach(this.addComponent);
   // addComponents = (...components: Component[]) => components.forEach(this.addComponent);

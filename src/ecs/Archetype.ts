@@ -15,3 +15,6 @@ class Archetype {
 }
 
 export default Archetype;
+
+// TODO: need to get soa archetype working
+// only chance to get good perf...
