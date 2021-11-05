@@ -52,6 +52,11 @@ class Archetype {
     );
   };
 
+  // TODO: refactor this? more linear arrays
+  // array of component ids?
+  // array of fields?
+  // array of values?
+  // less of this object decomposing into arrays stuff...
   add = (
     entityId: EntityId,
     newComponents: { [componentId: number]: { [componentField: string]: any } }
@@ -59,6 +64,7 @@ class Archetype {
     const { elementCount, denseEntityIdList, _sparseEntityIdList, components } = this;
 
     denseEntityIdList[elementCount] = entityId;
+
     const newComponentsEntries = Object.entries(newComponents);
     for (let i = 0, l = newComponentsEntries.length; i < l; i++) {
       const [newComponentId, newComponentValues] = newComponentsEntries[i];
@@ -75,6 +81,13 @@ class Archetype {
 
   remove = (entityId: EntityId): { [componentId: number]: { [componentField: string]: any } } => {
     //
+    // serialization scheme?
+    // [componentId, field, value, componentId, field, value... ]
+    // OR
+    // soa!
+    // [componentId, componentId, componentId...]
+    // [field, field, field...]
+    // [value, value, value, value...]
   };
 
   get = () => {

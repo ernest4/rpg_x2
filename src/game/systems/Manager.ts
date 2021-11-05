@@ -4,13 +4,33 @@ import PhysicsBody from "../components/PhysicsBody";
 import Speed from "../components/Speed";
 import Transform from "../components/Transform";
 import { assetsPath } from "../../utils/environment";
-import Component, { ComponentsSchema, FieldTypes, NullVector3, Vector3 } from "../../ecs/Component";
 import { Engine } from "../../ecs";
-import { Components, componentsSchema, SCHEMA } from "../scenes/Main";
-import Position from "../components/Position";
-import Velocity from "../components/Velocity";
+import { Components, SCHEMA } from "../scenes/Main";
 
 // TODO: jests
+
+const enum C {
+  Pos,
+}
+
+const SCH = {
+  [C.Pos]: ["x", "y", "z"],
+} as const;
+
+type sch = { [key: number]: readonly string[] };
+
+// const func = <K extends sch, N extends number, T extends readonly [] | readonly any[]>(
+const func = <K extends sch, N extends number, T extends K[N]>(
+  schema: K,
+  componentId: N,
+  keys: T,
+  values: { [K in keyof T]: any } // this enforces same length of the two arrays
+) => {};
+
+func(SCH, C.Pos, ["x", "y", "z"], [0, 0, 0]);
+func(SCH, C.Pos, SCH[C.Pos], [0, 0, 0]);
+
+// this.addComponent(Component.Position, ["x", "y", "z"], [0, 0, 0])
 
 class Manager extends System {
   constructor(engine: Engine) {
@@ -22,6 +42,11 @@ class Manager extends System {
     Array.from(Array(30000).keys()).forEach(i => {
       const entityId = this.newEntityId();
 
+      // this.removeComponent(Components.Player, entityId);
+
+      // ALT way??
+      // this.addComponent(Component.Position, ["x", "y", "z"], [0, 0, 0])
+      // this.addComponent(Component.Position, ["z"], [0])
       if (i === 1) this.addComponent(SCHEMA, Components.Player, entityId, {});
       this.addComponent(SCHEMA, Components.Speed, entityId, { speed: 100 + i });
       this.addComponent(SCHEMA, Components.Position, entityId, {
