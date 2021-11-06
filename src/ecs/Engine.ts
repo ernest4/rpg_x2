@@ -1,12 +1,12 @@
 import { ComponentClass, DeltaTime, EntityId, QueryCallback, QuerySet } from "./types";
 import EntityIdPool, { EntityIdPoolParams } from "./engine/EntityIdPool";
-import Component, { ComponentSchema, ComponentsSchema } from "./Component";
+import Component, { ComponentSchema } from "./Component";
 import SparseSet from "./utils/SparseSet";
 import System from "./System";
 import { isNumber } from "./utils/Number";
 import Entity from "./Entity";
 import Stats from "./utils/Stats";
-import Archetype, { Fields, Mask, Values } from "./Archetype";
+import Archetype, { ComponentsSchema, Fields, Mask, Values } from "./Archetype";
 
 // TODO: move out to own class?
 // class EntityIdAlias extends SparseSetItem {
@@ -30,7 +30,7 @@ class Engine {
   // _componentLists: SparseSet<Component>[] = [];
   private _debug: boolean | undefined;
   // private _entityIdAliases: SparseSet<EntityIdAlias>;
-  readonly entityIdPool: EntityIdPool;
+  readonly entityIdPool: EntityIdPool = new EntityIdPool();
   private _stats: Stats;
   components: { [key: string]: Component<any> };
   _componentLists: any;
@@ -139,12 +139,13 @@ class Engine {
     values: { [key in keyof F]: any }
   ) => {
     const currentArchetype = this.getEntityArchetype(entityId);
-    const unionMask = this.createMaskWithComponentBitFlip(currentArchetype.mask, componentId);
+    const currentArchetypeMask = currentArchetype?.mask || []; // first component wont have any archetypes
+    const unionMask = this.createMaskWithComponentBitFlip(currentArchetypeMask, componentId);
     let nextArchetype = this.getArchetype(unionMask);
     if (!nextArchetype) {
       nextArchetype = this.createArchetype(
         unionMask,
-        ...currentArchetype.componentIds,
+        ...(currentArchetype?.componentIds || []), // first component wont have any archetypes
         componentId
       );
     }
@@ -184,7 +185,9 @@ class Engine {
   };
 
   createArchetype = (mask: Mask, ...componentIds: number[]): Archetype => {
-    return new Archetype(mask, this._componentsSchema, ...componentIds);
+    const newArchetype = new Archetype(mask, this._componentsSchema, ...componentIds);
+    this._archetypes.push(newArchetype);
+    return newArchetype;
   };
 
   changeUpEntityArchetype = (
@@ -195,7 +198,7 @@ class Engine {
     newComponentFields: Fields,
     newComponentValues: Values
   ) => {
-    const [componentIds, fields, values] = currentArchetype.remove(entityId);
+    const [componentIds, fields, values] = currentArchetype?.remove(entityId) || [[], [], []]; // first component wont have any archetypes
 
     // combine new and old components in single data stream
     for (let i = 0, l = newComponentFields.length; i < l; i++) {
@@ -244,6 +247,16 @@ class Engine {
 
   removeComponent = (componentId: number, entityId: EntityId) => {
     const currentArchetype = this.getEntityArchetype(entityId);
+
+    // if last component...
+    if (currentArchetype.componentIds.length === 1) {
+      // TODO: some error case?
+      if (currentArchetype.componentIds[0] === componentId) {
+        currentArchetype.remove(entityId); // TODO: use more efficient remove that doesnt return values?
+        this.entityIdPool.reclaimId(entityId);
+      }
+    }
+
     const differenceMask = this.createMaskWithComponentBitFlip(currentArchetype.mask, componentId);
     let nextArchetype = this.getArchetype(differenceMask);
     if (!nextArchetype) {
@@ -398,6 +411,12 @@ class Engine {
   //   Object.values(this._componentLists).forEach(componentList => componentList.remove(entityId));
   //   this.entityIdPool.reclaimId(entityId);
   // };
+
+  removeEntity = (entityId: EntityId) => {
+    const currentArchetype = this.getEntityArchetype(entityId);
+    currentArchetype.remove(entityId); // TODO: use more efficient remove that doesnt return values?
+    this.entityIdPool.reclaimId(entityId);
+  };
 
   // // NOTE: fast O(1) bulk operations
   // removeAllComponents = () => {

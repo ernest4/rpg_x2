@@ -14,11 +14,13 @@ abstract class System {
     fields: F,
     values: { [key in keyof F]: any }
   ) => void;
+  removeComponent: (componentId: number, entityId: EntityId) => void;
 
   constructor(engine: Engine) {
     this._engine = engine;
     this.query = this.engine.query;
     this.addComponent = this.engine.addComponent;
+    this.removeComponent = this.engine.removeComponent;
   }
 
   // TODO: init stuff, engine should run this when system right after system is added

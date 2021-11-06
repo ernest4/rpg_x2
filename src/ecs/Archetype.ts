@@ -1,10 +1,10 @@
-import Component, { ComponentsSchema, FieldType } from "./Component";
 import { EntityId } from "./types";
 
 export type Mask = number[];
 type ComponentIds = number[];
 export type Fields = string[];
 export type Values = any[];
+export type ComponentsSchema = { [key: number]: readonly string[] };
 
 // this is optimized version of sparseSet...
 // TODO: jests !!!
@@ -22,12 +22,11 @@ class Archetype {
     this.componentIds = componentIds;
 
     this.components = {};
-    let soa: { [componentField: string]: FieldType[] };
+    let soa: { [componentField: string]: any[] } = {};
     for (let i = 0, l = componentIds.length; i < l; i++) {
-      const componentSchemaEntries = Object.entries(componentsSchema[i]);
-      for (let j = 0, ll = componentSchemaEntries.length; j < ll; j++) {
-        const [field, fieldType] = componentSchemaEntries[j];
-        soa[field] = []; // denseList per field
+      const componentFields = componentsSchema[i];
+      for (let j = 0, ll = componentFields.length; j < ll; j++) {
+        soa[componentFields[j]] = []; // denseList per field
       }
       this.components[i] = soa;
     }
@@ -47,6 +46,7 @@ class Archetype {
     return true;
   };
 
+  // TODO: optimize with tombstone lookup https://skypjack.github.io/2020-08-02-ecs-baf-part-9/
   hasEntity = (entityId: EntityId) => {
     return (
       this._sparseEntityIdList[entityId] < this.elementCount &&
