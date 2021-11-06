@@ -6,7 +6,7 @@ import System from "./System";
 import { isNumber } from "./utils/Number";
 import Entity from "./Entity";
 import Stats from "./utils/Stats";
-import Archetype, { Mask } from "./Archetype";
+import Archetype, { Fields, Mask, Values } from "./Archetype";
 
 // TODO: move out to own class?
 // class EntityIdAlias extends SparseSetItem {
@@ -132,11 +132,11 @@ class Engine {
   //   return component;
   // };
 
-  addComponent = <N extends number, K extends ComponentsSchema, C extends K[N]>(
-    schema: K,
-    componentId: N,
+  addComponent = <F extends readonly [] | readonly any[]>(
     entityId: EntityId,
-    componentValues: { [key in keyof C]: C[key] }
+    componentId: number,
+    fields: F,
+    values: { [key in keyof F]: any }
   ) => {
     const currentArchetype = this.getEntityArchetype(entityId);
     const newMask = this.createNewMask(currentArchetype.mask, componentId);
@@ -144,9 +144,15 @@ class Engine {
     if (!newArchetype) {
       newArchetype = this.createArchetype(newMask, ...currentArchetype.componentIds, componentId);
     }
-    this.changeEntityArchetype(currentArchetype, newArchetype, entityId, {
-      [componentId]: componentValues,
-    });
+    this.changeEntityArchetype(
+      currentArchetype,
+      newArchetype,
+      entityId,
+      componentId,
+      // @ts-ignore
+      fields,
+      values
+    );
   };
 
   getEntityArchetype = (entityId: EntityId): Archetype => {
@@ -174,14 +180,24 @@ class Engine {
     return new Archetype(mask, this._componentsSchema, ...componentIds);
   };
 
-  changeEntityArchetype = <C extends ComponentSchema>(
+  changeEntityArchetype = (
     currentArchetype: Archetype,
     newArchetype: Archetype,
     entityId: EntityId,
-    newComponent: { [key: number]: { [key in keyof C]: C[key] } }
+    componentId: number,
+    newComponentFields: Fields,
+    newComponentValues: Values
   ) => {
-    const oldComponentsValues = currentArchetype.remove(entityId);
-    newArchetype.add(entityId, { ...oldComponentsValues, ...newComponent });
+    const [componentIds, fields, values] = currentArchetype.remove(entityId);
+
+    // combine new and old components in single data stream
+    for (let i = 0, l = newComponentFields.length; i < l; i++) {
+      componentIds.push(componentId);
+      fields.push(newComponentFields[i]);
+      values.push(newComponentValues[i]);
+    }
+
+    newArchetype.add(entityId, componentIds, fields, values);
   };
 
   // addComponents = (...components: Component[]) => components.forEach(this.addComponent);

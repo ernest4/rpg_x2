@@ -5,7 +5,7 @@ import Speed from "../components/Speed";
 import Transform from "../components/Transform";
 import { assetsPath } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import { Components, SCHEMA } from "../scenes/Main";
+import { Components, SCHEMA, NullVector3 } from "../scenes/Main";
 
 // TODO: jests
 
@@ -19,12 +19,12 @@ const SCH = {
 
 type sch = { [key: number]: readonly string[] };
 
-// const func = <K extends sch, N extends number, T extends readonly [] | readonly any[]>(
-const func = <K extends sch, N extends number, T extends K[N]>(
+const func = <T extends readonly [] | readonly any[]>(
+  // const func = <K extends sch, N extends number, T extends K[N]>(
   // schema: K,
-  componentId: N,
+  componentId: number,
   keys: T,
-  values: { [K in keyof T]: any } // this enforces same length of the two arrays
+  values: { [key in keyof T]: any } // this enforces same length of the two arrays
 ) => {};
 
 // func(SCH, C.Pos, ["x", "y", "z"], [0, 0, 0]);
@@ -44,22 +44,31 @@ class Manager extends System {
 
       // this.removeComponent(Components.Player, entityId);
 
-      // ALT way??
-      // this.addComponent(Component.Position, ["x", "y", "z"], [0, 0, 0])
-      // this.addComponent(Component.Position, ["z"], [0])
-      if (i === 1) this.addComponent(SCHEMA, Components.Player, entityId, {});
-      this.addComponent(SCHEMA, Components.Speed, entityId, { speed: 100 + i });
-      this.addComponent(SCHEMA, Components.Position, entityId, {
-        x: 200 + i,
-        y: 200 + i,
-        z: 0,
-      });
-      this.addComponent(SCHEMA, Components.Velocity, entityId, { x: 0, y: 0, z: 0 });
-      this.addComponent(SCHEMA, Components.Sprite, entityId, {
-        url: assetsPath("images/unit_T.png"),
-        frameWidth: 32,
-      });
+      if (i === 1) this.addComponent(entityId, Components.Player, SCHEMA[Components.Player], []);
+      this.addComponent(entityId, Components.Speed, SCHEMA[Components.Speed], [100 + i]);
+      this.addComponent(entityId, Components.Position, SCHEMA[Components.Position], [
+        200 + i,
+        200 + i,
+        0,
+      ]);
+      this.addComponent(entityId, Components.Velocity, SCHEMA[Components.Velocity], NullVector3);
+      this.addComponent(entityId, Components.Sprite, SCHEMA[Components.Sprite], [
+        assetsPath("images/unit_T.png"),
+        32,
+      ]);
 
+      // if (i === 1) this.addComponent(SCHEMA, Components.Player, entityId, {});
+      // this.addComponent(SCHEMA, Components.Speed, entityId, { speed: 100 + i });
+      // this.addComponent(SCHEMA, Components.Position, entityId, {
+      //   x: 200 + i,
+      //   y: 200 + i,
+      //   z: 0,
+      // });
+      // this.addComponent(SCHEMA, Components.Velocity, entityId, { x: 0, y: 0, z: 0 });
+      // this.addComponent(SCHEMA, Components.Sprite, entityId, {
+      //   url: assetsPath("images/unit_T.png"),
+      //   frameWidth: 32,
+      // });
       // if (i === 1) Player.add(entityId, { entityId }); // TODO: simplify components like this so passing entityId in schema not needed?
       // Speed.add(entityId, { speed: 100 + i });
       // Position.add(entityId, { x: 200 + i, y: 200 + i, z: 0 });

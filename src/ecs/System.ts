@@ -8,11 +8,11 @@ import { benchmarkSubject } from "./utils/benchmark";
 abstract class System {
   private readonly _engine: Engine;
   query: (...componentIds: number[]) => Archetype[];
-  addComponent: <N extends number, K extends ComponentsSchema, C extends K[N]>(
-    schema: K,
-    componentId: N,
+  addComponent: <F extends readonly [] | readonly any[]>(
     entityId: EntityId,
-    values: { [key in keyof C]: C[key] }
+    componentId: number,
+    fields: F,
+    values: { [key in keyof F]: any }
   ) => void;
 
   constructor(engine: Engine) {

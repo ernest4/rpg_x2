@@ -3,8 +3,8 @@ import { EntityId } from "./types";
 
 export type Mask = number[];
 type ComponentIds = number[];
-type Fields = string[];
-type Values = any[];
+export type Fields = string[];
+export type Values = any[];
 
 // this is optimized version of sparseSet...
 // TODO: jests !!!
@@ -54,27 +54,16 @@ class Archetype {
     );
   };
 
-  // TODO: refactor this? more linear arrays
-  // array of component ids?
-  // array of fields?
-  // array of values?
-  // less of this object decomposing into arrays stuff...
-  add = (
-    entityId: EntityId,
-    newComponents: { [componentId: number]: { [componentField: string]: any } }
-  ): void => {
+  add = (entityId: EntityId, componentIds: ComponentIds, fields: Fields, values: Values): void => {
+    // if (this.hasEntity(entityId)) return; // TODO: is this needed?
     const { elementCount, denseEntityIdList, _sparseEntityIdList, components } = this;
 
     denseEntityIdList[elementCount] = entityId;
 
-    const newComponentsEntries = Object.entries(newComponents);
-    for (let i = 0, l = newComponentsEntries.length; i < l; i++) {
-      const [newComponentId, newComponentValues] = newComponentsEntries[i];
-      const newComponentEntries = Object.entries(newComponentValues);
-      for (let j = 0, ll = newComponentEntries.length; j < ll; j++) {
-        const [field, value] = newComponentEntries[j];
-        components[newComponentId][field][elementCount] = value;
-      }
+    // TODO: can optimize this further by reducing indirection?
+    // pass in another array that specifies how many iterations per componentId?
+    for (let i = 0, l = componentIds.length; i < l; i++) {
+      components[componentIds[i]][fields[i]][elementCount] = values[i];
     }
 
     _sparseEntityIdList[entityId] = elementCount;
@@ -88,12 +77,15 @@ class Archetype {
     // [1, 1, 2,...]
     // [x, y, name,...]
     // [123, 456, 'abc',...]
-    const componentIds: ComponentIds = [];
-    const fields: Fields = [];
+
+    // TODO: caching!!
+    const componentIds: ComponentIds = []; // TODO: cache on class no initialization
+    const fields: Fields = []; // TODO: cache on class no initialization
     const values: Values = [];
 
     const denseListIndex = _sparseEntityIdList[entityId];
 
+    // TODO: once above cached, i think this can become single for loop
     for (let i = 0, l = this.componentIds.length; i < l; i++) {
       const componentId = this.componentIds[i];
       const componentEntries = Object.entries(this.components[componentId]);

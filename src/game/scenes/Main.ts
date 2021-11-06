@@ -9,9 +9,11 @@ import Movement from "../systems/Movement";
 import FpsCounter from "../../utils/FpsCounter";
 import { DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import { FieldTypes, Vector3 } from "../../ecs/Component";
+import { FieldTypes } from "../../ecs/Component";
 // import FpsCounter from "./utils/FpsCounter";
 
+const Vector3 = ["x", "y", "z"] as const;
+export const NullVector3 = [0, 0, 0] as const;
 // TODO: move this to own file?
 export const enum Components {
   Position,
@@ -25,9 +27,9 @@ export const enum Components {
 export const SCHEMA = {
   [Components.Position]: Vector3,
   [Components.Velocity]: Vector3,
-  [Components.Speed]: { speed: FieldTypes.Number },
-  [Components.Player]: {},
-  [Components.Sprite]: { url: FieldTypes.String, frameWidth: FieldTypes.Number },
+  [Components.Speed]: ["speed"],
+  [Components.Player]: [],
+  [Components.Sprite]: ["url", "frameWidth"],
 } as const;
 
 export default class Main extends Phaser.Scene {
