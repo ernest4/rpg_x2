@@ -63,7 +63,9 @@ class Archetype {
     // TODO: can optimize this further by reducing indirection?
     // pass in another array that specifies how many iterations per componentId?
     for (let i = 0, l = componentIds.length; i < l; i++) {
-      components[componentIds[i]][fields[i]][elementCount] = values[i];
+      const component = components[componentIds[i]];
+      if (!component) continue;
+      component[fields[i]][elementCount] = values[i];
     }
 
     _sparseEntityIdList[entityId] = elementCount;

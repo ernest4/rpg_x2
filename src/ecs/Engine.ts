@@ -139,14 +139,18 @@ class Engine {
     values: { [key in keyof F]: any }
   ) => {
     const currentArchetype = this.getEntityArchetype(entityId);
-    const newMask = this.createNewMask(currentArchetype.mask, componentId);
-    let newArchetype = this.getArchetype(newMask);
-    if (!newArchetype) {
-      newArchetype = this.createArchetype(newMask, ...currentArchetype.componentIds, componentId);
+    const unionMask = this.createMaskWithComponentBitFlip(currentArchetype.mask, componentId);
+    let nextArchetype = this.getArchetype(unionMask);
+    if (!nextArchetype) {
+      nextArchetype = this.createArchetype(
+        unionMask,
+        ...currentArchetype.componentIds,
+        componentId
+      );
     }
-    this.changeEntityArchetype(
+    this.changeUpEntityArchetype(
       currentArchetype,
-      newArchetype,
+      nextArchetype,
       entityId,
       componentId,
       // @ts-ignore
@@ -164,8 +168,11 @@ class Engine {
     }
   };
 
-  createNewMask = (mask: Mask, componentId: number): Mask => {
+  createMaskWithComponentBitFlip = (mask: Mask, componentId: number): Mask => {
     const newMask = [...mask];
+    // NOTE: when component bit is missing, this will add it
+    // when it's already there, it will take it away
+    // Therefore can call this function to both add new bit and remove existing
     newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
     return newMask;
   };
@@ -180,7 +187,7 @@ class Engine {
     return new Archetype(mask, this._componentsSchema, ...componentIds);
   };
 
-  changeEntityArchetype = (
+  changeUpEntityArchetype = (
     currentArchetype: Archetype,
     newArchetype: Archetype,
     entityId: EntityId,
@@ -236,7 +243,24 @@ class Engine {
   // };
 
   removeComponent = (componentId: number, entityId: EntityId) => {
-    //
+    const currentArchetype = this.getEntityArchetype(entityId);
+    const differenceMask = this.createMaskWithComponentBitFlip(currentArchetype.mask, componentId);
+    let nextArchetype = this.getArchetype(differenceMask);
+    if (!nextArchetype) {
+      nextArchetype = this.createArchetype(
+        differenceMask,
+        ...currentArchetype.componentIds.filter(id => id !== componentId)
+      );
+    }
+    this.changeDownEntityArchetype(currentArchetype, nextArchetype, entityId);
+  };
+
+  changeDownEntityArchetype = (
+    currentArchetype: Archetype,
+    newArchetype: Archetype,
+    entityId: EntityId
+  ) => {
+    newArchetype.add(entityId, ...currentArchetype.remove(entityId));
   };
 
   // removeComponents = (...components: Component[]) => components.forEach(this.removeComponent);
