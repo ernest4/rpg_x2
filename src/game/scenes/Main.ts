@@ -10,6 +10,7 @@ import FpsCounter from "../../utils/FpsCounter";
 import { DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
 import { FieldTypes } from "../../ecs/Component";
+import { Vector3f } from "../../ecs/Engine";
 // import FpsCounter from "./utils/FpsCounter";
 
 const Vector3 = ["x", "y", "z"] as const;
@@ -25,11 +26,11 @@ export const enum Components {
 
 // TODO: move this to own file?
 export const SCHEMA = {
-  [Components.Position]: Vector3,
-  [Components.Velocity]: Vector3,
-  [Components.Speed]: ["speed"],
-  [Components.Player]: [],
-  [Components.Sprite]: ["url", "frameWidth"],
+  [Components.Position]: Vector3f,
+  // [Components.Velocity]: Vector3,
+  // [Components.Speed]: ["speed"],
+  // [Components.Player]: [],
+  // [Components.Sprite]: ["url", "frameWidth"],
 } as const;
 
 export default class Main extends Phaser.Scene {

@@ -1,6 +1,5 @@
 import Archetype from "./Archetype";
-import Component, { ComponentsSchema } from "./Component";
-import Engine from "./Engine";
+import Engine, { ComponentsSchema } from "./Engine";
 import { EntityId } from "./types";
 import { benchmarkSubject } from "./utils/benchmark";
 
@@ -8,11 +7,11 @@ import { benchmarkSubject } from "./utils/benchmark";
 abstract class System {
   private readonly _engine: Engine;
   query: (...componentIds: number[]) => Archetype[];
-  addComponent: <F extends readonly [] | readonly any[]>(
+  addComponent: <T extends K[N], K extends ComponentsSchema, N extends number>(
+    schema: K,
+    componentId: N,
     entityId: EntityId,
-    componentId: number,
-    fields: F,
-    values: { [key in keyof F]: any }
+    values: T
   ) => void;
   removeComponent: (componentId: number, entityId: EntityId) => void;
 

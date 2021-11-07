@@ -23,12 +23,19 @@ export const enum Type {
   f32,
   i32,
 }
+// const f32 = 0 as const;
+// const i32 = 1 as const;
+// export const Vector2i = { x: i32, y: i32 };
+// export const Vector2f = { x: f32, y: f32 };
+// export const Vector3i = { z: i32, ...Vector2i };
+// export const Vector3f = { z: f32, ...Vector2f };
 export const Vector2i = { x: Type.i32, y: Type.i32 };
 export const Vector2f = { x: Type.f32, y: Type.f32 };
 export const Vector3i = { z: Type.i32, ...Vector2i };
 export const Vector3f = { z: Type.f32, ...Vector2f };
 
-export type ComponentsSchema = { [componentId: number]: { [key: string]: Type } };
+type KeyAndType = string;
+export type ComponentsSchema = { [componentId: number]: KeyAndType[] };
 
 // TODO: jest tests !!!!
 class Engine {
@@ -71,6 +78,7 @@ class Engine {
     //   this.components[componentName] = new Component(signatureId, componentSchema);
     // });
 
+    // TODO: validate schema!
     this._componentsSchema = componentsSchema;
 
     // TODO: optimize, maybe use arrays?
@@ -146,11 +154,11 @@ class Engine {
   //   return component;
   // };
 
-  addComponent = <F extends readonly [] | readonly any[]>(
+  addComponent = <T extends K, K extends { [key: string]: Type }, N extends number>(
+    schema: K,
+    componentId: N,
     entityId: EntityId,
-    componentId: number,
-    fields: F,
-    values: { [key in keyof F]: any }
+    values: T
   ) => {
     // let benchReport: any = [];
     // let currentArchetype;

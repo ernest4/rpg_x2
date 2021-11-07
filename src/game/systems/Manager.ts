@@ -31,28 +31,50 @@ const enum C {
 // // func(SCH, C.Pos, ["x", "y", "z"], [0, 0, 0]);
 // func(C.Pos, SCH[C.Pos], [0, 0, 0]);
 
-const enum Types {
-  f32,
-  i32,
-}
+// const enum Types {
+//   f32 = "f32",
+//   i32 = "i32",
+// }
 
-const SCH = {
-  [C.Pos]: { x: Types.f32, y: Types.f32, z: Types.f32 },
-  [C.Vel]: { x: Types.f32, y: Types.f32 },
-} as const;
+// const SCH = {
+//   [C.Pos]: { x: Types.f32, y: Types.f32, z: Types.f32 },
+//   [C.Vel]: { x: Types.f32, y: Types.f32 },
+// } as const;
 
-type sch = { [key: number]: { [key: string]: Types } };
+// type sch = { [key: number]: { [key: string]: Types } };
 
-const func = <T extends K[N], K extends sch, N extends number>(
-  // const func = <K extends sch, N extends number, T extends K[N]>(
-  schema: K,
-  componentId: N,
-  values: T // this enforces same length of the two arrays
-) => {};
+// const func = <T extends K[N], K extends sch, N extends number>(
+//   // const func = <K extends sch, N extends number, T extends K[N]>(
+//   schema: K,
+//   componentId: N,
+//   values: T // this enforces same length of the two arrays
+// ) => {};
 
-func(SCH, C.Pos, { x: 7, y: 0, z: 3 });
+// func(SCH, C.Pos, { x: 7, y: 0, z: 3 });
 
 // this.addComponent(Component.Position, ["x", "y", "z"], [0, 0, 0])
+
+// helper functions
+const i32 = <T extends string>(field: T) => `${field}_i32` as const;
+
+const SCH = {
+  // [C.Pos]: ["x_i32", "y_i32", "z"], // No type assumes i32 ?
+  [C.Pos]: [i32("x"), "y_i32", "z_i32"],
+  [C.Vel]: ["x_f32", "y_f32"],
+} as const;
+
+type sch = { [key: number]: readonly string[] };
+
+const func = <T extends readonly [] | readonly any[]>(
+  // const func = <K extends sch, N extends number, T extends K[N]>(
+  // schema: K,
+  componentId: number,
+  keys: T,
+  values: { [key in keyof T]: any } // this enforces same length of the two arrays
+) => {};
+
+// func(SCH, C.Pos, ["x", "y", "z"], [0, 0, 0]);
+func(C.Pos, SCH[C.Pos], [0, 0, 0]);
 
 class Manager extends System {
   constructor(engine: Engine) {
@@ -66,18 +88,29 @@ class Manager extends System {
 
       // this.removeComponent(Components.Player, entityId);
 
-      if (i === 1) this.addComponent(entityId, Components.Player, SCHEMA[Components.Player], []);
-      this.addComponent(entityId, Components.Speed, SCHEMA[Components.Speed], [100 + i]);
-      this.addComponent(entityId, Components.Position, SCHEMA[Components.Position], [
-        200 + i,
-        200 + i,
-        0,
-      ]);
-      this.addComponent(entityId, Components.Velocity, SCHEMA[Components.Velocity], NullVector3);
-      this.addComponent(entityId, Components.Sprite, SCHEMA[Components.Sprite], [
-        assetsPath("images/unit_T.png"),
-        32,
-      ]);
+      if (i === 1) this.engine.addComponent(SCHEMA, Components.Player, entityId, []);
+      this.addComponent(SCHEMA, Components.Speed, entityId, [100 + i]);
+      // this.addComponent(SCHEMA, Components.Position, entityId, { x: 200 + i, y: 200 + i, z: 0 });
+      this.engine.addComponent(SCHEMA[Components.Position], Components.Position, entityId, {
+        x: 200 + i,
+        y: 200 + i,
+        z: 0,
+      });
+      this.addComponent(SCHEMA, Components.Velocity, entityId, NullVector3);
+      this.addComponent(SCHEMA, Components.Sprite, entityId, [assetsPath("images/unit_T.png"), 32]);
+
+      // if (i === 1) this.addComponent(entityId, Components.Player, SCHEMA[Components.Player], []);
+      // this.addComponent(entityId, Components.Speed, SCHEMA[Components.Speed], [100 + i]);
+      // this.addComponent(entityId, Components.Position, SCHEMA[Components.Position], [
+      //   200 + i,
+      //   200 + i,
+      //   0,
+      // ]);
+      // this.addComponent(entityId, Components.Velocity, SCHEMA[Components.Velocity], NullVector3);
+      // this.addComponent(entityId, Components.Sprite, SCHEMA[Components.Sprite], [
+      //   assetsPath("images/unit_T.png"),
+      //   32,
+      // ]);
 
       // if (i === 1) this.addComponent(SCHEMA, Components.Player, entityId, {});
       // this.addComponent(SCHEMA, Components.Speed, entityId, { speed: 100 + i });
