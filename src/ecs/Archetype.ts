@@ -62,9 +62,10 @@ class Archetype {
 
   // TODO: optimize with tombstone lookup https://skypjack.github.io/2020-08-02-ecs-baf-part-9/
   hasEntity = (entityId: EntityId) => {
+    const { _sparseEntityIdList } = this;
     return (
-      this._sparseEntityIdList[entityId] < this.elementCount &&
-      this.denseEntityIdList[this._sparseEntityIdList[entityId]] === entityId
+      _sparseEntityIdList[entityId] < this.elementCount &&
+      this.denseEntityIdList[_sparseEntityIdList[entityId]] === entityId
     );
   };
 

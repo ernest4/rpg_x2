@@ -7,6 +7,7 @@ import { isNumber } from "./utils/Number";
 import Entity from "./Entity";
 import Stats from "./utils/Stats";
 import Archetype, { ComponentsSchema, Fields, Mask, Values } from "./Archetype";
+import { benchmarkSubject } from "./utils/benchmark";
 
 // TODO: move out to own class?
 // class EntityIdAlias extends SparseSetItem {
@@ -138,7 +139,11 @@ class Engine {
     fields: F,
     values: { [key in keyof F]: any }
   ) => {
-    const currentArchetype = this.getEntityArchetype(entityId);
+    let currentArchetype;
+    benchmarkSubject("getEntityArchetype", () => {
+      currentArchetype = this.getEntityArchetype(entityId);
+    });
+    // const currentArchetype = this.getEntityArchetype(entityId);
     const currentArchetypeMask = currentArchetype?.mask || []; // first component wont have any archetypes
     const unionMask = this.createMaskWithComponentBitFlip(currentArchetypeMask, componentId);
     let nextArchetype = this.getArchetype(unionMask);
@@ -161,10 +166,11 @@ class Engine {
   };
 
   getEntityArchetype = (entityId: EntityId): Archetype => {
+    const { _archetypes } = this;
     // TODO: this loop could both find the current AND the next archetype in one go!
-    for (let i = 0, l = this._archetypes.length; i < l; i++) {
-      if (this._archetypes[i].hasEntity(entityId)) {
-        return this._archetypes[i];
+    for (let i = 0, l = _archetypes.length; i < l; i++) {
+      if (_archetypes[i].hasEntity(entityId)) {
+        return _archetypes[i];
       }
     }
   };
@@ -179,8 +185,9 @@ class Engine {
   };
 
   getArchetype = (mask: Mask): Archetype | void => {
-    for (let i = 0, l = this._archetypes.length; i < l; i++) {
-      if (this._archetypes[i].maskMatches(mask)) return this._archetypes[i];
+    const { _archetypes } = this;
+    for (let i = 0, l = _archetypes.length; i < l; i++) {
+      if (_archetypes[i].maskMatches(mask)) return _archetypes[i];
     }
   };
 

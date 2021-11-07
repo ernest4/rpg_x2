@@ -35,42 +35,60 @@ class TestySystem extends System {
 // }
 
 describe(Engine, () => {
+  let componentId0 = 0;
+  let componentId1 = 1;
+  let componentId2 = 2;
+  let componentId3 = 3; // NOTE: not in schema by default
+
+  let schema = {
+    [componentId0]: ["x", "y"],
+    [componentId1]: ["dx", "dy"],
+    [componentId2]: ["u", "v", "t"],
+  };
+
   let engine: Engine;
-  let testySystem1: System;
-  let testySystem2: System;
-  let testySystem3: System;
+  // let testySystem1: System;
+  // let testySystem2: System;
+  // let testySystem3: System;
 
-  let entityId = 0;
-  let entityId2 = 1;
-  let entityId3 = 2;
+  // let entityId = 0;
+  // let entityId2 = 1;
+  // let entityId3 = 2;
 
-  let queryCallBackFunction: jest.Mock<any, any>;
-  let queryCallBackFunction2: jest.Mock<any, any>;
+  // let queryCallBackFunction: jest.Mock<any, any>;
+  // let queryCallBackFunction2: jest.Mock<any, any>;
 
-  let component: Component;
-  let component2: Component;
-  let component3: Component;
+  // let component: Component;
+  // let component2: Component;
+  // let component3: Component;
 
   beforeEach(() => {
-    engine = new Engine();
+    engine = new Engine(schema);
 
-    testySystem1 = new TestySystem(engine);
-    testySystem1.start = jest.fn();
-    testySystem1.update = jest.fn();
+    // testySystem1 = new TestySystem(engine);
+    // testySystem1.start = jest.fn();
+    // testySystem1.update = jest.fn();
 
-    testySystem2 = new TestySystem(engine);
-    testySystem2.start = jest.fn();
-    testySystem2.update = jest.fn();
+    // testySystem2 = new TestySystem(engine);
+    // testySystem2.start = jest.fn();
+    // testySystem2.update = jest.fn();
 
-    testySystem3 = new TestySystem(engine);
-    testySystem3.start = jest.fn();
-    testySystem3.update = jest.fn();
+    // testySystem3 = new TestySystem(engine);
+    // testySystem3.start = jest.fn();
+    // testySystem3.update = jest.fn();
 
-    queryCallBackFunction = jest.fn();
-    queryCallBackFunction2 = jest.fn();
+    // queryCallBackFunction = jest.fn();
+    // queryCallBackFunction2 = jest.fn();
   });
 
   it("placeholder", () => {});
+
+  describe("benchmarks", () => {
+    for (let i = 0; i < 4000; i++) {
+      const entityId = engine.newEntityId();
+      engine.addComponent(entityId, componentId0, schema[componentId0], [0, 0]);
+    }
+  });
 
   // describe("#addSystem", () => {
   //   beforeEach(() => {
