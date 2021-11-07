@@ -1,5 +1,6 @@
 import { context } from "../../../../tests/jestHelpers";
 import Archetype from "../../Archetype";
+import { Type, Vector2f } from "../../Engine";
 
 const createMaskForComponents = (mask: number[], ...componentIds: number[]) => {
   componentIds.forEach(id => (mask = createMaskForComponent(mask, id)));
@@ -22,9 +23,9 @@ describe(Archetype, () => {
   let componentId3 = 3; // NOTE: not in schema by default
 
   let schema = {
-    [componentId0]: ["x", "y"],
-    [componentId1]: ["dx", "dy"],
-    [componentId2]: ["u", "v", "t"],
+    [componentId0]: Vector2f,
+    [componentId1]: { dx: Type.f32, dy: Type.f32 },
+    [componentId2]: { u: Type.f32, v: Type.i32, t: Type.i32 },
   };
 
   let mask = [];
@@ -34,17 +35,25 @@ describe(Archetype, () => {
   let subject: Archetype;
 
   beforeEach(() => {
-    subject = new Archetype(generatedMask, schema, ...componentIds);
+    subject = new Archetype(generatedMask, schema, 1e6, ...componentIds);
   });
 
   describe("constructor", () => {
-    //
     it("creates components object", () => {
-      expect(subject.components).toEqual({
-        [componentId0]: { x: [], y: [] },
-        [componentId1]: { dx: [], dy: [] },
-        [componentId2]: { u: [], v: [], t: [] },
-      });
+      // expect(subject.components).toEqual({
+      //   [componentId0]: { x: [], y: [] },
+      //   [componentId1]: { dx: [], dy: [] },
+      //   [componentId2]: { u: [], v: [], t: [] },
+      // });
+
+      expect(Object.keys(subject.components)).toEqual(
+        [componentId0, componentId1, componentId2].map(i => i.toString())
+      );
+      expect(subject.components[componentId0].x).toBeInstanceOf(Float32Array);
+      expect(subject.components[componentId0].y).toBeInstanceOf(Float32Array);
+      expect(subject.components[componentId2].u).toBeInstanceOf(Float32Array);
+      expect(subject.components[componentId2].v).toBeInstanceOf(Int32Array);
+      expect(subject.components[componentId2].t).toBeInstanceOf(Int32Array);
     });
 
     it("stores componentIds", () => {

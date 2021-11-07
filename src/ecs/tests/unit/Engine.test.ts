@@ -1,6 +1,6 @@
 import { context } from "../../../../tests/jestHelpers";
-import Component from "../../Component";
-import Engine from "../../Engine";
+// import Component from "../../Component";
+import Engine, { Type, Vector2f } from "../../Engine";
 import System from "../../System";
 import { benchmark, benchmarkSubject } from "../../utils/benchmark";
 import SparseSet from "../../utils/SparseSet";
@@ -23,9 +23,9 @@ let componentId2 = 2;
 let componentId3 = 3; // NOTE: not in schema by default
 
 let schema = {
-  [componentId0]: ["x", "y"],
-  [componentId1]: ["dx", "dy"],
-  [componentId2]: ["u", "v", "t"],
+  [componentId0]: Vector2f,
+  [componentId1]: { dx: Type.f32, dy: Type.f32 },
+  [componentId2]: { u: Type.f32, v: Type.i32, t: Type.i32 },
 };
 
 class TestySystem extends System {
@@ -145,48 +145,48 @@ describe(Engine, () => {
     // });
 
     const queryIterations = 10000;
-    it("benchmarks query", () => {
-      console.log(
-        benchmarkSubject("setup", () => {
-          for (let i = 0; i < 40000; i++) {
-            const entityId = engine.newEntityId();
-            engine.addComponent(entityId, componentId0, schema[componentId0], [i, i + 1]);
-            engine.addComponent(entityId, componentId1, schema[componentId1], [i + 2, i + 3]);
-          }
-        })
-      );
+    // it("benchmarks query", () => {
+    //   console.log(
+    //     benchmarkSubject("setup", () => {
+    //       for (let i = 0; i < 40000; i++) {
+    //         const entityId = engine.newEntityId();
+    //         engine.addComponent(entityId, componentId0, schema[componentId0], [i, i + 1]);
+    //         engine.addComponent(entityId, componentId1, schema[componentId1], [i + 2, i + 3]);
+    //       }
+    //     })
+    //   );
 
-      // const queryId = engine.registerQuery(componentId0, componentId1);
-      // const archetypes = engine.queries[queryId];
+    //   // const queryId = engine.registerQuery(componentId0, componentId1);
+    //   // const archetypes = engine.queries[queryId];
 
-      let totalTimes = 0;
-      for (let i = 0; i < queryIterations; i++) {
-        totalTimes += benchmark(() => {
-          // const archetypes = engine.query(queryId);
-          // const archetypes = engine.queries[queryId];
-          const archetypes = engine.query(componentId1, componentId0);
-          for (let j = 0, l = archetypes.length; j < l; j++) {
-            const {
-              components: {
-                [componentId0]: { x, y },
-                [componentId1]: { dx, dy },
-              },
-              elementCount,
-            } = archetypes[j];
+    //   let totalTimes = 0;
+    //   for (let i = 0; i < queryIterations; i++) {
+    //     totalTimes += benchmark(() => {
+    //       // const archetypes = engine.query(queryId);
+    //       // const archetypes = engine.queries[queryId];
+    //       const archetypes = engine.query(componentId1, componentId0);
+    //       for (let j = 0, l = archetypes.length; j < l; j++) {
+    //         const {
+    //           components: {
+    //             [componentId0]: { x, y },
+    //             [componentId1]: { dx, dy },
+    //           },
+    //           elementCount,
+    //         } = archetypes[j];
 
-            // console.log(JSON.stringify([archetypes[j].components, elementCount]));
+    //         // console.log(JSON.stringify([archetypes[j].components, elementCount]));
 
-            for (let i = 0; i < elementCount; i++) {
-              x[i] += dx[i];
-              y[i] += dy[i];
-            }
-          }
-        });
-      }
+    //         for (let i = 0; i < elementCount; i++) {
+    //           x[i] += dx[i];
+    //           y[i] += dy[i];
+    //         }
+    //       }
+    //     });
+    //   }
 
-      const time = totalTimes / queryIterations;
-      console.log(`query: ${time}`);
-    });
+    //   const time = totalTimes / queryIterations;
+    //   console.log(`query: ${time}`);
+    // });
 
     it("baseline", () => {
       const x = [];

@@ -1,13 +1,18 @@
+import { ComponentsSchema, Type } from "./Engine";
 import { EntityId } from "./types";
 
 export type Mask = number[];
 type ComponentIds = number[];
 export type Fields = string[];
 export type Values = any[];
-export type ComponentsSchema = { [key: number]: readonly string[] };
+// export type ComponentsSchema = { [key: number]: readonly string[] };
+
+const TYPE_TO_ARRAY = {
+  [Type.f32]: Float32Array,
+  [Type.i32]: Int32Array,
+};
 
 // this is optimized version of sparseSet...
-// TODO: jests !!!
 class Archetype {
   mask: Mask;
   componentIds: ComponentIds;
@@ -15,8 +20,7 @@ class Archetype {
   elementCount: number = 0; // No elements initially
   denseEntityIdList: EntityId[] = [];
   private _sparseEntityIdList: number[] = [];
-  // components: { [componentId: number]: { [componentField: string]: any[] } };
-  components: { [componentId: number]: { [componentField: string]: Float32Array } };
+  components: { [componentId: number]: { [componentField: string]: ArrayBufferLike } };
   maxEntities: number;
 
   constructor(
@@ -31,13 +35,17 @@ class Archetype {
 
     this.components = {};
     for (let i = 0, l = componentIds.length; i < l; i++) {
-      // const soa: { [componentField: string]: any[] } = {};
-      const soa: { [componentField: string]: Float32Array } = {};
+      const soa: { [componentField: string]: ArrayBufferLike } = {};
       const componentId = componentIds[i];
-      const componentFields = componentsSchema[componentId];
-      for (let j = 0, ll = componentFields.length; j < ll; j++) {
-        // soa[componentFields[j]] = []; // denseList per field
-        soa[componentFields[j]] = new Float32Array(maxEntities); // denseList per field
+      // const componentFields = componentsSchema[componentId];
+      // for (let j = 0, ll = componentFields.length; j < ll; j++) {
+      //   soa[componentFields[j]] = new Float32Array(maxEntities); // denseList per field
+      // }
+      const componentSchema = componentsSchema[componentId];
+      const componentSchemaEntries = Object.entries(componentSchema);
+      for (let j = 0, ll = componentSchemaEntries.length; j < ll; j++) {
+        const [field, type] = componentSchemaEntries[j];
+        soa[field] = new TYPE_TO_ARRAY[type](maxEntities); // denseList per field
       }
       this.components[componentId] = soa;
     }
@@ -70,6 +78,7 @@ class Archetype {
     return true;
   };
 
+  // TODO: jests !!!
   // TODO: optimize with tombstone lookup https://skypjack.github.io/2020-08-02-ecs-baf-part-9/
   hasEntity = (entityId: EntityId) => {
     const { _sparseEntityIdList } = this;
@@ -79,6 +88,7 @@ class Archetype {
     );
   };
 
+  // TODO: jests !!!
   add = (entityId: EntityId, componentIds: ComponentIds, fields: Fields, values: Values): void => {
     // if (this.hasEntity(entityId)) return; // TODO: is this needed?
     const { elementCount, denseEntityIdList, _sparseEntityIdList, components } = this;
@@ -97,6 +107,7 @@ class Archetype {
     this.elementCount++;
   };
 
+  // TODO: jests !!!
   remove = (entityId: EntityId): [ComponentIds, Fields, Values] => {
     // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
@@ -136,6 +147,7 @@ class Archetype {
     return [componentIds, fields, values];
   };
 
+  // TODO: jests !!!
   get = () => {
     //
   };

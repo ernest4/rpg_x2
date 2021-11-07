@@ -11,24 +11,46 @@ import { Components, SCHEMA, NullVector3 } from "../scenes/Main";
 
 const enum C {
   Pos,
+  Vel,
+}
+
+// const SCH = {
+//   [C.Pos]: ["x", "y", "z"],
+// } as const;
+
+// type sch = { [key: number]: readonly string[] };
+
+// const func = <T extends readonly [] | readonly any[]>(
+//   // const func = <K extends sch, N extends number, T extends K[N]>(
+//   // schema: K,
+//   componentId: number,
+//   keys: T,
+//   values: { [key in keyof T]: any } // this enforces same length of the two arrays
+// ) => {};
+
+// // func(SCH, C.Pos, ["x", "y", "z"], [0, 0, 0]);
+// func(C.Pos, SCH[C.Pos], [0, 0, 0]);
+
+const enum Types {
+  f32,
+  i32,
 }
 
 const SCH = {
-  [C.Pos]: ["x", "y", "z"],
+  [C.Pos]: { x: Types.f32, y: Types.f32, z: Types.f32 },
+  [C.Vel]: { x: Types.f32, y: Types.f32 },
 } as const;
 
-type sch = { [key: number]: readonly string[] };
+type sch = { [key: number]: { [key: string]: Types } };
 
-const func = <T extends readonly [] | readonly any[]>(
+const func = <T extends K[N], K extends sch, N extends number>(
   // const func = <K extends sch, N extends number, T extends K[N]>(
-  // schema: K,
-  componentId: number,
-  keys: T,
-  values: { [key in keyof T]: any } // this enforces same length of the two arrays
+  schema: K,
+  componentId: N,
+  values: T // this enforces same length of the two arrays
 ) => {};
 
-// func(SCH, C.Pos, ["x", "y", "z"], [0, 0, 0]);
-func(C.Pos, SCH[C.Pos], [0, 0, 0]);
+func(SCH, C.Pos, { x: 7, y: 0, z: 3 });
 
 // this.addComponent(Component.Position, ["x", "y", "z"], [0, 0, 0])
 

@@ -1,12 +1,11 @@
 import { ComponentClass, DeltaTime, EntityId, QueryCallback, QuerySet } from "./types";
 import EntityIdPool, { EntityIdPoolParams } from "./engine/EntityIdPool";
-import Component, { ComponentSchema } from "./Component";
 import SparseSet from "./utils/SparseSet";
 import System from "./System";
 import { isNumber } from "./utils/Number";
 import Entity from "./Entity";
 import Stats from "./utils/Stats";
-import Archetype, { ComponentsSchema, Fields, Mask, Values } from "./Archetype";
+import Archetype, { Fields, Mask, Values } from "./Archetype";
 import { benchmarkSubject } from "./utils/benchmark";
 
 // TODO: move out to own class?
@@ -19,6 +18,18 @@ import { benchmarkSubject } from "./utils/benchmark";
 //   }
 // }
 
+// TODO: more number types?
+export const enum Type {
+  f32,
+  i32,
+}
+export const Vector2i = { x: Type.i32, y: Type.i32 };
+export const Vector2f = { x: Type.f32, y: Type.f32 };
+export const Vector3i = { z: Type.i32, ...Vector2i };
+export const Vector3f = { z: Type.f32, ...Vector2f };
+
+export type ComponentsSchema = { [componentId: number]: { [key: string]: Type } };
+
 // TODO: jest tests !!!!
 class Engine {
   private _deltaTime: DeltaTime = 0;
@@ -28,16 +39,13 @@ class Engine {
   // (-> system -> update)
   // _systemUpdateFunctions: ((engine: Engine, deltaTime: DeltaTime) => void)[];
   private _systems: System[] = []; // NOTE: handle onn system to call start() and destroy()
-  // _componentLists: SparseSet<Component>[] = [];
   private _debug: boolean | undefined;
   // private _entityIdAliases: SparseSet<EntityIdAlias>;
   readonly entityIdPool: EntityIdPool = new EntityIdPool();
   private _stats: Stats;
-  components: { [key: string]: Component<any> };
-  _componentLists: any;
-  lastComponentSignatureId: number;
+  // lastComponentSignatureId: number;
   private _archetypes: Archetype[];
-  _componentsSchema: ComponentsSchema;
+  private _componentsSchema: ComponentsSchema;
   // queries: Archetype[][] = [];
   private _queries: { [key: string]: Archetype[] } = {};
   readonly maxEntities: number;
@@ -56,7 +64,7 @@ class Engine {
     // };
 
     // move to helper class, some "increasing number generator" ?
-    this.lastComponentSignatureId = 0;
+    // this.lastComponentSignatureId = 0;
 
     // Object.entries(componentsSchema).forEach(([componentName, componentSchema]) => {
     //   const signatureId = this.newComponentSignatureId(); // unique increasing numbers
@@ -124,7 +132,7 @@ class Engine {
   //   this.components[componentName] = new Component(signatureId, componentSchema);
   // };
 
-  private newComponentSignatureId = () => ++this.lastComponentSignatureId;
+  // private newComponentSignatureId = () => ++this.lastComponentSignatureId;
 
   // addComponent = <T extends Component>(tag: number, component: T) => {
   //   let componentList = this._componentLists[tag];
