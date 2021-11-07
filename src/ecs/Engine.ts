@@ -139,13 +139,28 @@ class Engine {
     fields: F,
     values: { [key in keyof F]: any }
   ) => {
-    let currentArchetype;
-    benchmarkSubject("getEntityArchetype", () => {
-      currentArchetype = this.getEntityArchetype(entityId);
-    });
-    // const currentArchetype = this.getEntityArchetype(entityId);
+    // let benchReport: any = [];
+    // let currentArchetype;
+    // benchReport.push(
+    //   benchmarkSubject("getEntityArchetype", () => {
+    //     currentArchetype = this.getEntityArchetype(entityId);
+    //   })
+    // );
+    const currentArchetype = this.getEntityArchetype(entityId);
     const currentArchetypeMask = currentArchetype?.mask || []; // first component wont have any archetypes
+    // let unionMask;
+    // benchReport.push(
+    //   benchmarkSubject("createMaskWithComponentBitFlip", () => {
+    //     unionMask = this.createMaskWithComponentBitFlip(currentArchetypeMask, componentId);
+    //   })
+    // );
     const unionMask = this.createMaskWithComponentBitFlip(currentArchetypeMask, componentId);
+    // let nextArchetype;
+    // benchReport.push(
+    //   benchmarkSubject("getArchetype", () => {
+    //     nextArchetype = this.getArchetype(unionMask);
+    //   })
+    // );
     let nextArchetype = this.getArchetype(unionMask);
     if (!nextArchetype) {
       nextArchetype = this.createArchetype(
@@ -154,6 +169,20 @@ class Engine {
         componentId
       );
     }
+
+    // benchReport.push(
+    //   benchmarkSubject("changeUpEntityArchetype", () => {
+    //     this.changeUpEntityArchetype(
+    //       currentArchetype,
+    //       nextArchetype,
+    //       entityId,
+    //       componentId,
+    //       // @ts-ignore
+    //       fields,
+    //       values
+    //     );
+    //   })
+    // );
     this.changeUpEntityArchetype(
       currentArchetype,
       nextArchetype,
@@ -163,6 +192,8 @@ class Engine {
       fields,
       values
     );
+
+    // console.log(JSON.stringify(benchReport));
   };
 
   getEntityArchetype = (entityId: EntityId): Archetype => {
@@ -253,8 +284,22 @@ class Engine {
   // };
 
   removeComponent = (componentId: number, entityId: EntityId) => {
+    // let benchReport: any = [];
+
     const currentArchetype = this.getEntityArchetype(entityId);
 
+    // benchReport.push(
+    //   benchmarkSubject("reclaimId", () => {
+    //     // if last component...
+    //     if (currentArchetype.componentIds.length === 1) {
+    //       // TODO: some error case?
+    //       if (currentArchetype.componentIds[0] === componentId) {
+    //         currentArchetype.remove(entityId); // TODO: use more efficient remove that doesnt return values?
+    //         this.entityIdPool.reclaimId(entityId);
+    //       }
+    //     }
+    //   })
+    // );
     // if last component...
     if (currentArchetype.componentIds.length === 1) {
       // TODO: some error case?
@@ -272,7 +317,15 @@ class Engine {
         ...currentArchetype.componentIds.filter(id => id !== componentId)
       );
     }
+    // benchReport.push(
+    //   benchmarkSubject("changeDownEntityArchetype", () => {
+    //     // @ts-ignore
+    //     this.changeDownEntityArchetype(currentArchetype, nextArchetype, entityId);
+    //   })
+    // );
     this.changeDownEntityArchetype(currentArchetype, nextArchetype, entityId);
+
+    // console.log(JSON.stringify(benchReport));
   };
 
   changeDownEntityArchetype = (
@@ -484,12 +537,31 @@ class Engine {
   //   return (<SparseSet<T>>this._componentLists[queryTag]).iterable();
   // };
 
-  query = (...componentIds: number[]): Archetype[] => {
-    const resultArchetypes: Archetype[] = [];
-    const searchMask = this.createMaskFromComponentIds(...componentIds);
+  // query = (...componentIds: number[]): Archetype[] => {
+  //   const resultArchetypes: Archetype[] = [];
+  //   const searchMask = this.createMaskFromComponentIds(...componentIds);
 
-    for (let i = 0, l = this._archetypes.length; i < l; i++) {
-      if (this._archetypes[i].maskContains(searchMask)) resultArchetypes.push(this._archetypes[i]);
+  //   const { _archetypes } = this;
+  //   for (let i = 0, l = _archetypes.length; i < l; i++) {
+  //     if (_archetypes[i].maskContains(searchMask)) resultArchetypes.push(_archetypes[i]);
+  //   }
+
+  //   return resultArchetypes;
+  // };
+
+  registerQuery = (...componentIds: number[]) => {
+    // 
+  }
+
+  query = (searchMask: Mask): Archetype[] => {
+    // TODO: this should return archs from registered query instead of building it each time.
+    // when archs are created, they will push themselves into the matching registered query!
+
+    const resultArchetypes: Archetype[] = [];
+
+    const { _archetypes } = this;
+    for (let i = 0, l = _archetypes.length; i < l; i++) {
+      if (_archetypes[i].maskContains(searchMask)) resultArchetypes.push(_archetypes[i]);
     }
 
     return resultArchetypes;

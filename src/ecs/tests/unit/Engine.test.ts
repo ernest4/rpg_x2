@@ -2,10 +2,31 @@ import { context } from "../../../../tests/jestHelpers";
 import Component from "../../Component";
 import Engine from "../../Engine";
 import System from "../../System";
+import { benchmark, benchmarkSubject } from "../../utils/benchmark";
 import SparseSet from "../../utils/SparseSet";
 import NumberComponent from "../helpers/components/NumberComponent";
 import StrictNumberComponent from "../helpers/components/StrictNumberComponent";
 import StringComponent from "../helpers/components/StringComponent";
+
+const createMaskFromComponentIds = (...componentIds: number[]) => {
+  const newMask = [];
+  for (let i = 0, l = componentIds.length; i < l; i++) {
+    const componentId = componentIds[i];
+    newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
+  }
+  return newMask;
+};
+
+let componentId0 = 0;
+let componentId1 = 1;
+let componentId2 = 2;
+let componentId3 = 3; // NOTE: not in schema by default
+
+let schema = {
+  [componentId0]: ["x", "y"],
+  [componentId1]: ["dx", "dy"],
+  [componentId2]: ["u", "v", "t"],
+};
 
 class TestySystem extends System {
   // TODO: ...
@@ -26,6 +47,32 @@ class TestySystem extends System {
   }
 }
 
+class QuerySystem extends System {
+  constructor(engine: Engine) {
+    super(engine);
+  }
+
+  start(): void {}
+  update(): void {
+    const archetypes = this.query(componentId0, componentId1);
+    for (let j = 0, l = archetypes.length; j < l; j++) {
+      const {
+        components: {
+          [componentId0]: { x, y },
+          [componentId1]: { dx, dy },
+        },
+        elementCount,
+      } = archetypes[j];
+
+      for (let i = 0; i < elementCount; i++) {
+        x[i] += dx[i];
+        y[i] += dy[i];
+      }
+    }
+  }
+  destroy(): void {}
+}
+
 // class TestySystem2 extends System {
 //
 // }
@@ -35,18 +82,19 @@ class TestySystem extends System {
 // }
 
 describe(Engine, () => {
-  let componentId0 = 0;
-  let componentId1 = 1;
-  let componentId2 = 2;
-  let componentId3 = 3; // NOTE: not in schema by default
+  // let componentId0 = 0;
+  // let componentId1 = 1;
+  // let componentId2 = 2;
+  // let componentId3 = 3; // NOTE: not in schema by default
 
-  let schema = {
-    [componentId0]: ["x", "y"],
-    [componentId1]: ["dx", "dy"],
-    [componentId2]: ["u", "v", "t"],
-  };
+  // let schema = {
+  //   [componentId0]: ["x", "y"],
+  //   [componentId1]: ["dx", "dy"],
+  //   [componentId2]: ["u", "v", "t"],
+  // };
 
   let engine: Engine;
+  let querySystem1: System;
   // let testySystem1: System;
   // let testySystem2: System;
   // let testySystem3: System;
@@ -64,6 +112,9 @@ describe(Engine, () => {
 
   beforeEach(() => {
     engine = new Engine(schema);
+
+    querySystem1 = new QuerySystem(engine);
+    engine.addSystem(querySystem1);
 
     // testySystem1 = new TestySystem(engine);
     // testySystem1.start = jest.fn();
@@ -84,10 +135,88 @@ describe(Engine, () => {
   it("placeholder", () => {});
 
   describe("benchmarks", () => {
-    for (let i = 0; i < 4000; i++) {
-      const entityId = engine.newEntityId();
-      engine.addComponent(entityId, componentId0, schema[componentId0], [0, 0]);
-    }
+    // it("benchmarks add/remove", () => {
+    //   for (let i = 0; i < 4000; i++) {
+    //     const entityId = engine.newEntityId();
+    //     engine.addComponent(entityId, componentId0, schema[componentId0], [i, i + 1]);
+    //     engine.addComponent(entityId, componentId1, schema[componentId1], [i + 2, i + 3]);
+    //     engine.removeComponent(componentId0, entityId);
+    //   }
+    // });
+
+    const queryIterations = 10000;
+    it("benchmarks query", () => {
+      console.log(
+        benchmarkSubject("query setup", () => {
+          for (let i = 0; i < 40000; i++) {
+            const entityId = engine.newEntityId();
+            engine.addComponent(entityId, componentId0, schema[componentId0], [i, i + 1]);
+            engine.addComponent(entityId, componentId1, schema[componentId1], [i + 2, i + 3]);
+          }
+        })
+      );
+
+      const searchMask = createMaskFromComponentIds(...[componentId0, componentId1]);
+
+      let totalTimes = 0;
+      for (let i = 0; i < queryIterations; i++) {
+        totalTimes += benchmark(() => {
+          // engine.update(1234);
+          const archetypes = engine.query(searchMask);
+          for (let j = 0, l = archetypes.length; j < l; j++) {
+            const {
+              components: {
+                [componentId0]: { x, y },
+                [componentId1]: { dx, dy },
+              },
+              elementCount,
+            } = archetypes[j];
+
+            // console.log(JSON.stringify([archetypes[j].components, elementCount]));
+
+            for (let i = 0; i < elementCount; i++) {
+              x[i] += dx[i];
+              y[i] += dy[i];
+            }
+          }
+        });
+      }
+
+      const time = totalTimes / queryIterations;
+      console.log(`query: ${time}`);
+    });
+
+    it("baseline", () => {
+      const x = [];
+      const y = [];
+      const dx = [];
+      const dy = [];
+      const elementCount = 40000;
+
+      console.log(
+        benchmarkSubject("baseline query setup", () => {
+          for (let i = 0; i < elementCount; i++) {
+            x.push(i);
+            y.push(i + 1);
+            dx.push(i + 2);
+            dy.push(i + 3);
+          }
+        })
+      );
+
+      let totalTimes = 0;
+      for (let i = 0; i < queryIterations; i++) {
+        totalTimes += benchmark(() => {
+          for (let i = 0; i < elementCount; i++) {
+            x[i] += dx[i];
+            y[i] += dy[i];
+          }
+        });
+      }
+
+      const time = totalTimes / queryIterations;
+      console.log(`baseline query: ${time}`);
+    });
   });
 
   // describe("#addSystem", () => {
