@@ -9,12 +9,9 @@ import Movement from "../systems/Movement";
 import FpsCounter from "../../utils/FpsCounter";
 import { DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import { FieldTypes } from "../../ecs/Component";
-import { Vector3f } from "../../ecs/Engine";
+import { i32, Vector3f } from "../../ecs/Engine";
 // import FpsCounter from "./utils/FpsCounter";
 
-const Vector3 = ["x", "y", "z"] as const;
-export const NullVector3 = [0, 0, 0] as const;
 // TODO: move this to own file?
 export const enum Components {
   Position,
@@ -27,10 +24,10 @@ export const enum Components {
 // TODO: move this to own file?
 export const SCHEMA = {
   [Components.Position]: Vector3f,
-  // [Components.Velocity]: Vector3,
-  // [Components.Speed]: ["speed"],
-  // [Components.Player]: [],
-  // [Components.Sprite]: ["url", "frameWidth"],
+  [Components.Velocity]: Vector3f,
+  [Components.Speed]: [i32("speed")],
+  [Components.Player]: [],
+  [Components.Sprite]: [i32("url"), i32("frameWidth")],
 } as const;
 
 export default class Main extends Phaser.Scene {

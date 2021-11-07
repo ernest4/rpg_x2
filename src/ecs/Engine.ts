@@ -19,23 +19,24 @@ import { benchmarkSubject } from "./utils/benchmark";
 // }
 
 // TODO: more number types?
-export const enum Type {
-  f32,
-  i32,
-}
-// const f32 = 0 as const;
-// const i32 = 1 as const;
-// export const Vector2i = { x: i32, y: i32 };
-// export const Vector2f = { x: f32, y: f32 };
-// export const Vector3i = { z: i32, ...Vector2i };
-// export const Vector3f = { z: f32, ...Vector2f };
-export const Vector2i = { x: Type.i32, y: Type.i32 };
-export const Vector2f = { x: Type.f32, y: Type.f32 };
-export const Vector3i = { z: Type.i32, ...Vector2i };
-export const Vector3f = { z: Type.f32, ...Vector2f };
+// export const enum Type {
+//   f32,
+//   i32,
+// }
+export const i32 = <T extends string>(field: T) => `${field}_i32` as const;
+export const f32 = <T extends string>(field: T) => `${field}_f32` as const;
+
+export const Vector2i = [i32("x"), i32("y")] as const;
+export const Vector2f = [f32("x"), f32("y")] as const;
+export const Vector3i = [...Vector2i, i32("z")] as const;
+export const Vector3f = [...Vector2f, f32("z")] as const;
+// export const Vector3f = <X extends string, Y extends string, Z extends string>(x: X, y: Y, z: Z) =>
+//   [i32(x), i32(y), f32(z)] as const;
+
+export const NullVector3 = [0, 0, 0] as const;
 
 type KeyAndType = string;
-export type ComponentsSchema = { [componentId: number]: KeyAndType[] };
+export type ComponentsSchema = { [componentId: number]: readonly KeyAndType[] };
 
 // TODO: jest tests !!!!
 class Engine {
@@ -52,7 +53,7 @@ class Engine {
   private _stats: Stats;
   // lastComponentSignatureId: number;
   private _archetypes: Archetype[];
-  private _componentsSchema: ComponentsSchema;
+  _componentsSchema: ComponentsSchema;
   // queries: Archetype[][] = [];
   private _queries: { [key: string]: Archetype[] } = {};
   readonly maxEntities: number;
@@ -154,11 +155,11 @@ class Engine {
   //   return component;
   // };
 
-  addComponent = <T extends K, K extends { [key: string]: Type }, N extends number>(
-    schema: K,
-    componentId: N,
+  addComponent = <F extends readonly [] | readonly any[]>(
     entityId: EntityId,
-    values: T
+    componentId: number,
+    fields: F,
+    values: { [key in keyof F]: number }
   ) => {
     // let benchReport: any = [];
     // let currentArchetype;
