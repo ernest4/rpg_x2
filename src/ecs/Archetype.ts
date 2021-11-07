@@ -15,19 +15,29 @@ class Archetype {
   elementCount: number = 0; // No elements initially
   denseEntityIdList: EntityId[] = [];
   private _sparseEntityIdList: number[] = [];
-  components: { [componentId: number]: { [componentField: string]: any[] } };
+  // components: { [componentId: number]: { [componentField: string]: any[] } };
+  components: { [componentId: number]: { [componentField: string]: Float32Array } };
+  maxEntities: number;
 
-  constructor(mask: Mask, componentsSchema: ComponentsSchema, ...componentIds: number[]) {
+  constructor(
+    mask: Mask,
+    componentsSchema: ComponentsSchema,
+    maxEntities: number,
+    ...componentIds: number[]
+  ) {
     this.mask = mask;
     this.componentIds = componentIds;
+    this.maxEntities = maxEntities;
 
     this.components = {};
     for (let i = 0, l = componentIds.length; i < l; i++) {
-      const soa: { [componentField: string]: any[] } = {};
+      // const soa: { [componentField: string]: any[] } = {};
+      const soa: { [componentField: string]: Float32Array } = {};
       const componentId = componentIds[i];
       const componentFields = componentsSchema[componentId];
       for (let j = 0, ll = componentFields.length; j < ll; j++) {
-        soa[componentFields[j]] = []; // denseList per field
+        // soa[componentFields[j]] = []; // denseList per field
+        soa[componentFields[j]] = new Float32Array(maxEntities); // denseList per field
       }
       this.components[componentId] = soa;
     }

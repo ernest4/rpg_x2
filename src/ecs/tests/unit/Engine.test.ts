@@ -156,14 +156,15 @@ describe(Engine, () => {
         })
       );
 
-      const queryId = engine.registerQuery(componentId0, componentId1);
-      const archetypes = engine.queries[queryId];
+      // const queryId = engine.registerQuery(componentId0, componentId1);
+      // const archetypes = engine.queries[queryId];
 
       let totalTimes = 0;
       for (let i = 0; i < queryIterations; i++) {
         totalTimes += benchmark(() => {
           // const archetypes = engine.query(queryId);
           // const archetypes = engine.queries[queryId];
+          const archetypes = engine.query(componentId1, componentId0);
           for (let j = 0, l = archetypes.length; j < l; j++) {
             const {
               components: {

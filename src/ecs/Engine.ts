@@ -38,10 +38,13 @@ class Engine {
   lastComponentSignatureId: number;
   private _archetypes: Archetype[];
   _componentsSchema: ComponentsSchema;
-  queries: Archetype[][] = [];
-  private _queryStringToId: { [key: string]: number } = {};
+  // queries: Archetype[][] = [];
+  private _queries: { [key: string]: Archetype[] } = {};
+  readonly maxEntities: number;
+  // private _queryStringToId: { [key: string]: number } = {};
 
-  constructor(componentsSchema: ComponentsSchema, debug?: boolean) {
+  constructor(componentsSchema: ComponentsSchema, maxEntities = 1e6, debug?: boolean) {
+    this.maxEntities = maxEntities;
     this._debug = debug;
     if (debug) this._stats = new Stats();
     // this._systemUpdateFunctions = [];
@@ -225,7 +228,12 @@ class Engine {
   };
 
   createArchetype = (mask: Mask, ...componentIds: number[]): Archetype => {
-    const newArchetype = new Archetype(mask, this._componentsSchema, ...componentIds);
+    const newArchetype = new Archetype(
+      mask,
+      this._componentsSchema,
+      this.maxEntities,
+      ...componentIds
+    );
     this._archetypes.push(newArchetype);
     return newArchetype;
   };
@@ -551,10 +559,31 @@ class Engine {
   //   return resultArchetypes;
   // };
 
-  registerQuery = (...componentIds: number[]): number => {
-    const { _archetypes, _queryStringToId } = this;
+  // registerQuery = (...componentIds: number[]): number => {
+  //   const { _archetypes, _queryStringToId } = this;
+  //   const queryString = componentIds.sort().toString();
+  //   if (0 <= _queryStringToId[queryString]) return _queryStringToId[queryString];
+
+  //   const resultArchetypes: Archetype[] = [];
+  //   const searchMask = this.createMaskFromComponentIds(...componentIds);
+
+  //   for (let i = 0, l = _archetypes.length; i < l; i++) {
+  //     if (_archetypes[i].maskContains(searchMask)) resultArchetypes.push(_archetypes[i]);
+  //   }
+
+  //   const queryId = this.queries.push(resultArchetypes) - 1;
+  //   _queryStringToId[queryString] = queryId;
+  //   return queryId;
+  // };
+
+  // query = (queryId: number): Archetype[] => {
+  //   return this.queries[queryId];
+  // };
+
+  query = (...componentIds: number[]): Archetype[] => {
+    const { _archetypes, _queries } = this;
     const queryString = componentIds.sort().toString();
-    if (0 <= _queryStringToId[queryString]) return _queryStringToId[queryString];
+    if (_queries[queryString]) return _queries[queryString];
 
     const resultArchetypes: Archetype[] = [];
     const searchMask = this.createMaskFromComponentIds(...componentIds);
@@ -563,13 +592,11 @@ class Engine {
       if (_archetypes[i].maskContains(searchMask)) resultArchetypes.push(_archetypes[i]);
     }
 
-    const queryId = this.queries.push(resultArchetypes) - 1;
-    _queryStringToId[queryString] = queryId;
-    return queryId;
-  };
-
-  query = (queryId: number): Archetype[] => {
-    return this.queries[queryId];
+    // const queryId = this.queries.push(resultArchetypes) - 1;
+    // _queryStringToId[queryString] = queryId;
+    // return queryId;
+    _queries[queryString] = resultArchetypes;
+    return resultArchetypes;
   };
 
   createMaskFromComponentIds = (...componentIds: number[]) => {
