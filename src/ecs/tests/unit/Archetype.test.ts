@@ -17,6 +17,8 @@ const createMaskForComponent = (mask: number[], componentId) => {
 };
 
 describe(Archetype, () => {
+  let maxEntities = 1e6;
+
   let componentId0 = 0;
   let componentId1 = 1;
   let componentId2 = 2;
@@ -35,7 +37,7 @@ describe(Archetype, () => {
   let subject: Archetype;
 
   beforeEach(() => {
-    subject = new Archetype(generatedMask, schema, 1e6, ...componentIds);
+    subject = new Archetype(generatedMask, schema, maxEntities, ...componentIds);
   });
 
   describe("constructor", () => {
@@ -50,6 +52,7 @@ describe(Archetype, () => {
         [componentId0, componentId1, componentId2].map(i => i.toString())
       );
       expect(subject.components[componentId0].x).toBeInstanceOf(Float32Array);
+      expect(subject.components[componentId0].x.length).toEqual(maxEntities);
       expect(subject.components[componentId0].y).toBeInstanceOf(Float32Array);
       expect(subject.components[componentId2].u).toBeInstanceOf(Float32Array);
       expect(subject.components[componentId2].v).toBeInstanceOf(Int32Array);

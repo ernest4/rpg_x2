@@ -12,6 +12,8 @@ const TYPE_TO_ARRAY = {
   [Type.i32]: Int32Array,
 };
 
+type TypedArray = Float32Array | Int32Array;
+
 // this is optimized version of sparseSet...
 class Archetype {
   mask: Mask;
@@ -20,7 +22,7 @@ class Archetype {
   elementCount: number = 0; // No elements initially
   denseEntityIdList: EntityId[] = [];
   private _sparseEntityIdList: number[] = [];
-  components: { [componentId: number]: { [componentField: string]: ArrayBufferLike } };
+  components: { [componentId: number]: { [componentField: string]: TypedArray } };
   maxEntities: number;
 
   constructor(
@@ -35,7 +37,7 @@ class Archetype {
 
     this.components = {};
     for (let i = 0, l = componentIds.length; i < l; i++) {
-      const soa: { [componentField: string]: ArrayBufferLike } = {};
+      const soa: { [componentField: string]: TypedArray } = {};
       const componentId = componentIds[i];
       // const componentFields = componentsSchema[componentId];
       // for (let j = 0, ll = componentFields.length; j < ll; j++) {
