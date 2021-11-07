@@ -33,9 +33,10 @@ class Archetype {
     }
   }
 
-  maskMatches = (mask: Mask): boolean => {
-    for (let i = 0, l = this.mask.length; i < l; i++) {
-      if (this.mask[i] !== mask[i]) return false;
+  maskMatches = (queryMask: Mask): boolean => {
+    const { mask } = this;
+    for (let i = 0, l = mask.length; i < l; i++) {
+      if (mask[i] !== queryMask[i]) return false;
     }
     return true;
   };
@@ -43,8 +44,9 @@ class Archetype {
   // TODO: handle edge case when subMask is [] which returns true?
   // or is that fine?
   maskContains = (subMask: Mask) => {
+    const { mask } = this;
     for (let i = 0, l = subMask.length; i < l; i++) {
-      if ((this.mask[i] & subMask[i]) !== subMask[i]) return false;
+      if ((mask[i] & subMask[i]) !== subMask[i]) return false;
     }
     return true;
   };
