@@ -22,13 +22,14 @@ class Archetype {
     this.componentIds = componentIds;
 
     this.components = {};
-    let soa: { [componentField: string]: any[] } = {};
     for (let i = 0, l = componentIds.length; i < l; i++) {
-      const componentFields = componentsSchema[i];
+      const soa: { [componentField: string]: any[] } = {};
+      const componentId = componentIds[i];
+      const componentFields = componentsSchema[componentId];
       for (let j = 0, ll = componentFields.length; j < ll; j++) {
         soa[componentFields[j]] = []; // denseList per field
       }
-      this.components[i] = soa;
+      this.components[componentId] = soa;
     }
   }
 
@@ -39,9 +40,20 @@ class Archetype {
     return true;
   };
 
+  // TODO: handle edge case when subMask is [] which returns true?
+  // or is that fine?
   maskContains = (subMask: Mask) => {
     for (let i = 0, l = subMask.length; i < l; i++) {
-      if (this.mask[i] !== subMask[i]) return false;
+      if ((this.mask[i] & subMask[i]) !== subMask[i]) return false;
+    }
+    return true;
+  };
+
+  hasComponents = (...componentIds: number[]): boolean => {
+    const { mask } = this;
+    for (let i = 0, l = componentIds.length; i < l; i++) {
+      const componentId = componentIds[i];
+      if (!(mask[~~(componentId / 32)] & (1 << componentId % 32))) return false;
     }
     return true;
   };
