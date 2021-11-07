@@ -147,7 +147,7 @@ describe(Engine, () => {
     const queryIterations = 10000;
     it("benchmarks query", () => {
       console.log(
-        benchmarkSubject("query setup", () => {
+        benchmarkSubject("setup", () => {
           for (let i = 0; i < 40000; i++) {
             const entityId = engine.newEntityId();
             engine.addComponent(entityId, componentId0, schema[componentId0], [i, i + 1]);
@@ -156,13 +156,14 @@ describe(Engine, () => {
         })
       );
 
-      const searchMask = createMaskFromComponentIds(...[componentId0, componentId1]);
+      const queryId = engine.registerQuery(componentId0, componentId1);
+      const archetypes = engine.queries[queryId];
 
       let totalTimes = 0;
       for (let i = 0; i < queryIterations; i++) {
         totalTimes += benchmark(() => {
-          // engine.update(1234);
-          const archetypes = engine.query(searchMask);
+          // const archetypes = engine.query(queryId);
+          // const archetypes = engine.queries[queryId];
           for (let j = 0, l = archetypes.length; j < l; j++) {
             const {
               components: {
@@ -194,7 +195,7 @@ describe(Engine, () => {
       const elementCount = 40000;
 
       console.log(
-        benchmarkSubject("baseline query setup", () => {
+        benchmarkSubject("baseline setup", () => {
           for (let i = 0; i < elementCount; i++) {
             x.push(i);
             y.push(i + 1);

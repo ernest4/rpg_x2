@@ -38,6 +38,8 @@ class Engine {
   lastComponentSignatureId: number;
   private _archetypes: Archetype[];
   _componentsSchema: ComponentsSchema;
+  queries: Archetype[][] = [];
+  private _queryStringToId: { [key: string]: number } = {};
 
   constructor(componentsSchema: ComponentsSchema, debug?: boolean) {
     this._debug = debug;
@@ -549,22 +551,25 @@ class Engine {
   //   return resultArchetypes;
   // };
 
-  registerQuery = (...componentIds: number[]) => {
-    // 
-  }
-
-  query = (searchMask: Mask): Archetype[] => {
-    // TODO: this should return archs from registered query instead of building it each time.
-    // when archs are created, they will push themselves into the matching registered query!
+  registerQuery = (...componentIds: number[]): number => {
+    const { _archetypes, _queryStringToId } = this;
+    const queryString = componentIds.sort().toString();
+    if (0 <= _queryStringToId[queryString]) return _queryStringToId[queryString];
 
     const resultArchetypes: Archetype[] = [];
+    const searchMask = this.createMaskFromComponentIds(...componentIds);
 
-    const { _archetypes } = this;
     for (let i = 0, l = _archetypes.length; i < l; i++) {
       if (_archetypes[i].maskContains(searchMask)) resultArchetypes.push(_archetypes[i]);
     }
 
-    return resultArchetypes;
+    const queryId = this.queries.push(resultArchetypes) - 1;
+    _queryStringToId[queryString] = queryId;
+    return queryId;
+  };
+
+  query = (queryId: number): Archetype[] => {
+    return this.queries[queryId];
   };
 
   createMaskFromComponentIds = (...componentIds: number[]) => {
