@@ -111,6 +111,7 @@ class Manager extends System {
       const entityId = this.newEntityId();
 
       // this.removeComponent(Components.Player, entityId);
+      // this.addComponent(entityId, Velocity.new({x, y, z}))
 
       if (i === 1) this.addComponent(entityId, Components.Player, SCHEMA[Components.Player], []);
       this.addComponent(entityId, Components.Speed, SCHEMA[Components.Speed], [100 + i]);
