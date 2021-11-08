@@ -155,11 +155,15 @@ class Engine {
   //   return component;
   // };
 
-  addComponent = <F extends readonly [] | readonly any[]>(
+  // addComponent = <F extends readonly [] | readonly any[]>(
+  //   entityId: EntityId,
+  //   componentId: number,
+  //   fields: F,
+  //   values: { [key in keyof F]: number }
+  // ) => {
+  addComponent = (
     entityId: EntityId,
-    componentId: number,
-    fields: F,
-    values: { [key in keyof F]: number }
+    { _componentId: componentId, ...fields }: { _componentId: number; [field: string]: number }
   ) => {
     // let benchReport: any = [];
     // let currentArchetype;

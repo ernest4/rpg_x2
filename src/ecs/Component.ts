@@ -4,183 +4,108 @@ import SparseSet from "./utils/SparseSet";
 import SignatureIdGenerator from "./component/SignatureIdGenerator";
 import QueryGroup from "./component/QueryGroup";
 
-export const FieldTypes = { Number: 0, String: "s", Object: new Object() };
-export type FieldType = typeof FieldTypes[keyof typeof FieldTypes];
-export type ComponentSchema = { [key: string]: FieldType };
+// export const FieldTypes = { Number: 0, String: "s", Object: new Object() };
+// export type FieldType = typeof FieldTypes[keyof typeof FieldTypes];
+// export type ComponentSchema = { [key: string]: FieldType };
+export type ComponentSchema = { [key: string]: i32 | f32 };
 
 // TODO: implement this POC!
-enum i32 {}
+export enum i32 {}
+export enum f32 {}
 export const _i32 = () => <i32>(<any>"i32");
+export const _f32 = () => <f32>(<any>"f32");
 export const Vector2 = { x: _i32(), y: _i32() };
 
 type args = typeof Vector2;
 const v: args = { x: 3, y: 9 };
 
-export const Vector3 = { z: FieldTypes.Number, ...Vector2 };
-export const NullVector2 = { x: 0, y: 0 };
-export const NullVector3 = { z: 0, ...NullVector2 };
+// export const Vector3 = { z: FieldTypes.Number, ...Vector2 };
+// export const NullVector2 = { x: 0, y: 0 };
+// export const NullVector3 = { z: 0, ...NullVector2 };
 
-export type ComponentsSchema = { [key: string]: ComponentSchema };
+// export type ComponentsSchema = { [key: string]: ComponentSchema };
 
 // TODO: jests
 class Component<T extends ComponentSchema> {
-  signatureId: number;
-  private _soa: { [key: string | number]: SparseSet<FieldType> };
-  private _valueSparseSets: SparseSet<FieldType>[];
+  id: number;
+  private _soa: { [key: string | number]: SparseSet<number> };
+  private _valueSparseSets: SparseSet<number>[];
   private _referenceSparseSet: SparseSet<any>;
   private _denseLists: any;
-  private _addCallback: (entityId: EntityId, params: T) => void;
-  private _removeCallback: (entityId: EntityId) => void;
-  private _queryGroup: QueryGroup<any, any>;
 
   constructor(schema: T) {
-    this.signatureId = SignatureIdGenerator.newSignatureId();
+    this.id = SignatureIdGenerator.newSignatureId();
 
-    this._soa = {}; // private
+    // this._soa = {}; // private
 
-    const entries = Object.entries(schema);
-    let field;
-    let type;
-    for (let i = 0; i < entries.length; i++) {
-      [field, type] = entries[i];
-      this._soa[field] = new SparseSet();
-    }
+    // const entries = Object.entries(schema);
+    // let field;
+    // let type;
+    // for (let i = 0; i < entries.length; i++) {
+    //   [field, type] = entries[i];
+    //   this._soa[field] = new SparseSet();
+    // }
 
-    // caching...
-    this._valueSparseSets = Object.values(this._soa);
-    this._referenceSparseSet = Object.values(this._soa)[0];
+    // // caching...
+    // this._valueSparseSets = Object.values(this._soa);
+    // this._referenceSparseSet = Object.values(this._soa)[0];
   }
 
+  new = (params: T): T & { _componentId: number } => {
+    // @ts-ignore
+    params._componentId = this.id;
+    // @ts-ignore
+    return params;
+  };
+
+  _newSoa = () => {
+    //
+  };
+
   // // TODO: jests
-  // registerEventListener = (functionName: "add" | "remove", callback: (...any) => void) => {
-  //   this[`_${functionName}Callback`] = callback;
-  // };
-
-  // TODO: jests
-  registerAddEventListener = (callback: typeof this._addCallback) => {
-    this._addCallback = callback;
-  };
-
-  // TODO: jests
-  registerRemoveEventListener = (callback: typeof this._removeCallback) => {
-    this._removeCallback = callback;
-  };
-
-  // TODO: jests
-  hasId = (entityId: EntityId) => this._referenceSparseSet.hasId(entityId);
-
-  // TODO: jests
-  add = (entityId: EntityId, params: T) => {
-    let added;
-    const entries = Object.entries(params);
-    let field;
-    let value;
-    for (let i = 0; i < entries.length; i++) {
-      [field, value] = entries[i];
-      added = this._soa[field].add(entityId, value);
-    }
-    if (added !== null && this._addCallback) this._addCallback(entityId, params);
-  };
-
-  // TODO: jests
-  remove = (entityId: EntityId) => {
-    let removed;
-    const sparseSets = this._valueSparseSets;
-    for (let i = 0; i < sparseSets.length; i++) {
-      removed = sparseSets[i].remove(entityId);
-    }
-    if (removed !== null && this._removeCallback) this._removeCallback(entityId);
-  };
-
-  // TODO: jests
-  get = (entityId: EntityId): ComponentSchema => {
-    const result = {}; // TODO: cachet this object on instance?
-    const entries = Object.entries(this._soa); // TODO: cache THIS after constructions of class ???
-    let field;
-    let sparseSet;
-    for (let i = 0; i < entries.length; i++) {
-      [field, sparseSet] = entries[i];
-      result[field] = sparseSet.getItem(entityId);
-    }
-    return result;
-  };
-
-  // TODO: jests
-  getField = (entityId: EntityId, field: string) => {
-    this._soa[field].getItem(entityId);
-  };
-
-  // TODO: jests
-  set = (entityId: EntityId, params: { [key in keyof T]: any }) => {
-    const entries = Object.entries(params);
-    let field;
-    let value;
-    for (let i = 0; i < entries.length; i++) {
-      [field, value] = entries[i];
-      this._soa[field].set(entityId, value);
-    }
-  };
-
-  // select = () => {
-  //   //
-  // };
-
-  // filters ?
-  // where = () => {
-  //   //
-  // };
-
-  all = (): [{ [key in keyof T]: any[] }, number] => {
-    if (this._denseLists) return [this._denseLists, this._referenceSparseSet._elementCount];
-
-    // TODO: cache value count on instance.
-    const valueCount = this._referenceSparseSet._elementCount;
-    const result = {}; // TODO: cachet this object on instance?
-    const entries = Object.entries(this._soa); // TODO: cache THIS after constructions of class ???
-    let field: string;
-    let sparseSet: SparseSet<FieldType>;
-    for (let i = 0; i < entries.length; i++) {
-      [field, sparseSet] = entries[i];
-      result[field] = sparseSet.denseItemList;
-    }
-    this._denseLists = result; // TODO: cleaner way to cache?
-    return [result, valueCount] as [{ [key in keyof T]: any[] }, number];
-  };
-
-  // query builder?
-  // joins = (...components: Component<any>[]) => {
-  //   // ...
-  // };
-  // joins = <K extends ComponentSchema>(component: Component<K>) => {
-  //   let matchCount = 0;
-  //   const valueCount = this._referenceSparseSet._elementCount;
-  //   const entityIds = this._referenceSparseSet.denseIdList;
-
-  //   for (let i = 0; i < valueCount; i++) {
-  //     if (component.hasId(entityIds[i])) matchCount++;
+  // add = (entityId: EntityId, params: T) => {
+  //   let added;
+  //   const entries = Object.entries(params);
+  //   let field;
+  //   let value;
+  //   for (let i = 0; i < entries.length; i++) {
+  //     [field, value] = entries[i];
+  //     added = this._soa[field].add(entityId, value);
   //   }
-
-  //   return [this.all(), matchCount] as const;
-  // };
-
-  // group builder? (this would be cached)
-  // runtime errors should pop up if groups are trying to share same components
-  // group = (...components: Component<any>[]) => {
-  //   // ...
+  //   if (added !== null && this._addCallback) this._addCallback(entityId, params);
   // };
 
   // TODO: jests
-  group = <K extends ComponentSchema>(component: Component<K>) => {
-    // TODO: error/warn about trying to set other query groups (sharing components)?
-    if (this._queryGroup) return this._queryGroup;
-
-    return new QueryGroup(this, component);
+  _add = (params: T) => {
+    // let added;
+    // const entries = Object.entries(params);
+    // let field;
+    // let value;
+    // for (let i = 0; i < entries.length; i++) {
+    //   [field, value] = entries[i];
+    //   added = this._soa[field].add(entityId, value);
+    // }
+    // if (added !== null && this._addCallback) this._addCallback(entityId, params);
   };
 
-  setQueryGroup = <T extends ComponentSchema, K extends ComponentSchema>(
-    queryGroup: QueryGroup<T, K>
-  ) => {
-    this._queryGroup = queryGroup;
+  // // TODO: jests
+  // remove = (entityId: EntityId) => {
+  //   // let removed;
+  //   // const sparseSets = this._valueSparseSets;
+  //   // for (let i = 0; i < sparseSets.length; i++) {
+  //   //   removed = sparseSets[i].remove(entityId);
+  //   // }
+  //   // if (removed !== null && this._removeCallback) this._removeCallback(entityId);
+  // };
+
+  // TODO: jests
+  _remove = (denseListIndex: number) => {
+    // let removed;
+    // const sparseSets = this._valueSparseSets;
+    // for (let i = 0; i < sparseSets.length; i++) {
+    //   removed = sparseSets[i].remove(entityId);
+    // }
+    // if (removed !== null && this._removeCallback) this._removeCallback(entityId);
   };
 
   // // NOTE: bit dangerous as it bypasses the original constructor with constraints.

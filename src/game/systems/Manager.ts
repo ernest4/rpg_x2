@@ -6,6 +6,7 @@ import Transform from "../components/Transform";
 import { assetsPath } from "../../utils/environment";
 import { Engine } from "../../ecs";
 import { Components, SCHEMA, NullVector3 } from "../scenes/Main";
+import Velocity from "../components/Velocity";
 
 // TODO: jests
 
@@ -77,7 +78,6 @@ const enum C {
 // // func(SCH, C.Pos, ["x", "y", "z"], [0, 0, 0]);
 // func(C.Pos, SCH[C.Pos], [0, 0, 0]);
 
-
 // helper functions
 const i32 = <T extends string>(field: T) => `${field}_i32` as const;
 
@@ -111,7 +111,8 @@ class Manager extends System {
       const entityId = this.newEntityId();
 
       // this.removeComponent(Components.Player, entityId);
-      // this.addComponent(entityId, Velocity.new({x, y, z}))
+      // Velocity.new({ x: 0, y: 89 });
+      this.addComponent(entityId, Velocity.new({ x: 0, y: 67 }));
 
       if (i === 1) this.addComponent(entityId, Components.Player, SCHEMA[Components.Player], []);
       this.addComponent(entityId, Components.Speed, SCHEMA[Components.Speed], [100 + i]);

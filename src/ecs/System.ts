@@ -7,11 +7,9 @@ import { benchmarkSubject } from "./utils/benchmark";
 abstract class System {
   private readonly _engine: Engine;
   query: (...componentIds: number[]) => Archetype[];
-  addComponent: <F extends readonly [] | readonly any[]>(
+  addComponent: (
     entityId: EntityId,
-    componentId: number,
-    fields: F,
-    values: { [key in keyof F]: number }
+    { _componentId: componentId, ...fields }: { _componentId: number; [key: string]: number }
   ) => void;
   removeComponent: (componentId: number, entityId: EntityId) => void;
 

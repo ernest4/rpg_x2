@@ -1,6 +1,6 @@
-import Component, { ComponentSchema, FieldTypes, i32, Vector3 } from "../../ecs/Component";
+import Component, { ComponentSchema, _i32 } from "../../ecs/Component";
 
 class Velocity<T extends ComponentSchema> extends Component<T> {}
 
 // export default new Velocity(Vector3);
-export default new Velocity({ x: i32, y: i32 });
+export default new Velocity({ x: _i32(), y: _i32() });
