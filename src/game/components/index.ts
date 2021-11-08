@@ -1,5 +1,5 @@
 // import DragEvent from "./DragEvent";
-import Component, { Vector2f } from "../../ecs/Component";
+import Component, { Vector2f, Vector3f } from "../../ecs/Component";
 // import InputEvent from "./InputEvent";
 // // import Interactive from "./Interactive";
 // import InteractiveEvent from "./InteractiveEvent_legacy";
@@ -9,8 +9,8 @@ import Component, { Vector2f } from "../../ecs/Component";
 
 // import Transform from "./Transform";
 
-export const Velocity = new Component(Vector2f);
-export const Position = new Component(Vector2f);
+export const Velocity = new Component(Vector3f);
+export const Position = new Component(Vector3f);
 
 export default {
   [Velocity.id]: Velocity,

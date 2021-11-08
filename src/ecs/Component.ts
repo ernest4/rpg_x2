@@ -13,6 +13,8 @@ export const _i32 = () => <i32>(<any>"i32");
 export const _f32 = () => <f32>(<any>"f32");
 export const Vector2i = { x: _i32(), y: _i32() };
 export const Vector2f = { x: _f32(), y: _f32() };
+export const Vector3i = { z: _f32(), ...Vector2i };
+export const Vector3f = { z: _f32(), ...Vector2f };
 
 type args = typeof Vector2i;
 const v: args = { x: 3, y: 9 };
