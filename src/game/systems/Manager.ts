@@ -1,12 +1,13 @@
 import System from "../../ecs/System";
-import { Player, Sprite } from "../components";
+// import { Player, Sprite } from "../components";
+import Schema, { Velocity, Position } from "../components";
 import PhysicsBody from "../components/PhysicsBody";
 import Speed from "../components/Speed";
 import Transform from "../components/Transform";
 import { assetsPath } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import { Components, SCHEMA, NullVector3 } from "../scenes/Main";
-import Velocity from "../components/Velocity";
+import { SCHEMA } from "../scenes/Main";
+// import Velocity from "../components/Velocity";
 
 // TODO: jests
 
@@ -111,17 +112,12 @@ class Manager extends System {
       const entityId = this.newEntityId();
 
       // this.removeComponent(Components.Player, entityId);
-      // Velocity.new({ x: 0, y: 89 });
-      this.addComponent(entityId, Velocity.new({ x: 0, y: 67 }));
+      this.addComponent(entityId, Velocity.new({ x: 5, y: 45 }));
 
-      if (i === 1) this.addComponent(entityId, Components.Player, SCHEMA[Components.Player], []);
-      this.addComponent(entityId, Components.Speed, SCHEMA[Components.Speed], [100 + i]);
-      this.addComponent(entityId, Components.Position, SCHEMA[Components.Position], [
-        200 + i,
-        200 + i,
-        0,
-      ]);
-      this.addComponent(entityId, Components.Velocity, SCHEMA[Components.Velocity], NullVector3);
+      if (i === 1) this.addComponent(entityId, CID.Player, SCHEMA[CID.Player], []);
+      this.addComponent(entityId, CID.Speed, SCHEMA[CID.Speed], [100 + i]);
+      this.addComponent(entityId, CID.Position, SCHEMA[CID.Position], [200 + i, 200 + i, 0]);
+      this.addComponent(entityId, CID.Velocity, SCHEMA[CID.Velocity], NullVector3);
       // this.addComponent(entityId, Components.Sprite, SCHEMA[Components.Sprite], [
       //   assetsPath("images/unit_T.png"),
       //   32,

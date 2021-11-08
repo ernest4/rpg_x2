@@ -1,22 +1,20 @@
 import { ComponentClass, EntityId } from "./types";
 import Serializable from "./component/interfaces/Serializable";
-import SparseSet from "./utils/SparseSet";
 import SignatureIdGenerator from "./component/SignatureIdGenerator";
-import QueryGroup from "./component/QueryGroup";
 
 // export const FieldTypes = { Number: 0, String: "s", Object: new Object() };
 // export type FieldType = typeof FieldTypes[keyof typeof FieldTypes];
 // export type ComponentSchema = { [key: string]: FieldType };
 export type ComponentSchema = { [key: string]: i32 | f32 };
 
-// TODO: implement this POC!
 export enum i32 {}
 export enum f32 {}
 export const _i32 = () => <i32>(<any>"i32");
 export const _f32 = () => <f32>(<any>"f32");
-export const Vector2 = { x: _i32(), y: _i32() };
+export const Vector2i = { x: _i32(), y: _i32() };
+export const Vector2f = { x: _f32(), y: _f32() };
 
-type args = typeof Vector2;
+type args = typeof Vector2i;
 const v: args = { x: 3, y: 9 };
 
 // export const Vector3 = { z: FieldTypes.Number, ...Vector2 };
@@ -25,41 +23,42 @@ const v: args = { x: 3, y: 9 };
 
 // export type ComponentsSchema = { [key: string]: ComponentSchema };
 
+export type TypedArray = Float32Array | Int32Array;
+export type SOA = { [componentField: string]: TypedArray };
+
+const TYPE_TO_ARRAY = {
+  f32: Float32Array,
+  i32: Int32Array,
+};
+
 // TODO: jests
 class Component<T extends ComponentSchema> {
   id: number;
-  private _soa: { [key: string | number]: SparseSet<number> };
-  private _valueSparseSets: SparseSet<number>[];
-  private _referenceSparseSet: SparseSet<any>;
-  private _denseLists: any;
+  private _schema: T;
 
   constructor(schema: T) {
     this.id = SignatureIdGenerator.newSignatureId();
-
-    // this._soa = {}; // private
-
-    // const entries = Object.entries(schema);
-    // let field;
-    // let type;
-    // for (let i = 0; i < entries.length; i++) {
-    //   [field, type] = entries[i];
-    //   this._soa[field] = new SparseSet();
-    // }
-
-    // // caching...
-    // this._valueSparseSets = Object.values(this._soa);
-    // this._referenceSparseSet = Object.values(this._soa)[0];
+    this._schema = schema;
   }
 
-  new = (params: T): T & { _componentId: number } => {
+  new = (params: { [key in keyof T]: T[key] }): { [key in keyof T]: T[key] } & {
+    _componentInstance: Component<T>;
+  } => {
+    // modifying over making new object to avoid allocations...
     // @ts-ignore
-    params._componentId = this.id;
+    params._componentInstance = this;
     // @ts-ignore
     return params;
   };
 
-  _newSoa = () => {
-    //
+  _newSoa = (maxEntities: number): SOA => {
+    const soa: SOA = {};
+    const componentSchemaEntries = Object.entries(this._schema);
+    for (let j = 0, ll = componentSchemaEntries.length; j < ll; j++) {
+      const [field, type] = componentSchemaEntries[j];
+      soa[field] = new TYPE_TO_ARRAY[type](maxEntities); // denseList per field
+    }
+    return soa;
   };
 
   // // TODO: jests

@@ -1,4 +1,5 @@
-import { ComponentsSchema, Type } from "./Engine";
+import Component, { ComponentSchema } from "./Component";
+import { ComponentsSchema, TypedArray } from "./Engine";
 import { EntityId } from "./types";
 
 export type Mask = number[];
@@ -7,12 +8,12 @@ export type Fields = string[];
 export type Values = any[];
 // export type ComponentsSchema = { [key: number]: readonly string[] };
 
-const TYPE_TO_ARRAY = {
-  [Type.f32]: Float32Array,
-  [Type.i32]: Int32Array,
-};
+// const TYPE_TO_ARRAY = {
+//   [Type.f32]: Float32Array,
+//   [Type.i32]: Int32Array,
+// };
 
-type TypedArray = Float32Array | Int32Array;
+// type TypedArray = Float32Array | Int32Array;
 
 // this is optimized version of sparseSet...
 class Archetype {
@@ -21,7 +22,7 @@ class Archetype {
 
   elementCount: number = 0; // No elements initially
   denseEntityIdList: EntityId[] = [];
-  private _sparseEntityIdList: number[] = [];
+  private _sparseEntityIdList: Uint32Array = new Uint32Array(1e6); // TODO: 1e6 enough??
   components: { [componentId: number]: { [componentField: string]: TypedArray } };
   maxEntities: number;
 
@@ -37,19 +38,9 @@ class Archetype {
 
     this.components = {};
     for (let i = 0, l = componentIds.length; i < l; i++) {
-      const soa: { [componentField: string]: TypedArray } = {};
       const componentId = componentIds[i];
-      // const componentFields = componentsSchema[componentId];
-      // for (let j = 0, ll = componentFields.length; j < ll; j++) {
-      //   soa[componentFields[j]] = new Float32Array(maxEntities); // denseList per field
-      // }
-      const componentSchema = componentsSchema[componentId];
-      const componentSchemaEntries = Object.entries(componentSchema);
-      for (let j = 0, ll = componentSchemaEntries.length; j < ll; j++) {
-        const [field, type] = componentSchemaEntries[j];
-        soa[field] = new TYPE_TO_ARRAY[type](maxEntities); // denseList per field
-      }
-      this.components[componentId] = soa;
+      const componentInstance = componentsSchema[componentId];
+      this.components[componentId] = componentInstance._newSoa(maxEntities);
     }
   }
 
@@ -152,6 +143,21 @@ class Archetype {
   // TODO: jests !!!
   get = () => {
     //
+  };
+
+  // TODO: jests !!!
+  getEntityIndexUnchecked = (entityId: EntityId) => {
+    return this.denseEntityIdList[this._sparseEntityIdList[entityId]];
+  };
+
+  // TODO: jests !!!
+  getEntity = (
+    entityId: EntityId
+  ): [{ [componentId: number]: { [componentField: string]: TypedArray } }, number] | null => {
+    if (!this.hasEntity(entityId)) return null;
+
+    const entityIndex = this.denseEntityIdList[this._sparseEntityIdList[entityId]];
+    return [this.components, entityIndex];
   };
 }
 

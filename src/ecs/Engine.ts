@@ -7,6 +7,7 @@ import Entity from "./Entity";
 import Stats from "./utils/Stats";
 import Archetype, { Fields, Mask, Values } from "./Archetype";
 import { benchmarkSubject } from "./utils/benchmark";
+import Component, { ComponentSchema } from "./Component";
 
 // TODO: move out to own class?
 // class EntityIdAlias extends SparseSetItem {
@@ -35,8 +36,9 @@ export const Vector3f = [...Vector2f, f32("z")] as const;
 
 export const NullVector3 = [0, 0, 0] as const;
 
-type KeyAndType = string;
-export type ComponentsSchema = { [componentId: number]: readonly KeyAndType[] };
+// type KeyAndType = string;
+// export type ComponentsSchema = { [componentId: number]: readonly KeyAndType[] };
+export type ComponentsSchema = { [componentId: number]: Component<any> };
 
 // TODO: jest tests !!!!
 class Engine {
@@ -161,9 +163,13 @@ class Engine {
   //   fields: F,
   //   values: { [key in keyof F]: number }
   // ) => {
-  addComponent = (
+  addComponent = <T extends ComponentSchema>(
     entityId: EntityId,
-    { _componentId: componentId, ...fields }: { _componentId: number; [field: string]: number }
+    {
+      _componentInstance,
+      _componentInstance: { id: componentId },
+      ...fields
+    }: { [key in keyof T]: T[key] } & { _componentInstance: Component<T> }
   ) => {
     // let benchReport: any = [];
     // let currentArchetype;
@@ -213,10 +219,9 @@ class Engine {
       currentArchetype,
       nextArchetype,
       entityId,
-      componentId,
+      _componentInstance,
       // @ts-ignore
-      fields,
-      values
+      fields
     );
 
     // console.log(JSON.stringify(benchReport));
@@ -259,22 +264,30 @@ class Engine {
     return newArchetype;
   };
 
-  changeUpEntityArchetype = (
+  changeUpEntityArchetype = <T extends ComponentSchema>(
     currentArchetype: Archetype,
     newArchetype: Archetype,
     entityId: EntityId,
-    componentId: number,
-    newComponentFields: Fields,
-    newComponentValues: Values
+    componentInstance: Component<T>,
+    newComponentObject: { [key in keyof T]: T[key] }
+    // newComponentFields: Fields,
+    // newComponentValues: Values
   ) => {
     const [componentIds, fields, values] = currentArchetype?.remove(entityId) || [[], [], []]; // first component wont have any archetypes
 
     // combine new and old components in single data stream
-    for (let i = 0, l = newComponentFields.length; i < l; i++) {
-      componentIds.push(componentId);
-      fields.push(newComponentFields[i]);
-      values.push(newComponentValues[i]);
+    const newComponentEntries = Object.entries(newComponentObject);
+    for (let i = 0, l = newComponentEntries.length; i < l; i++) {
+      const [field, value] = newComponentEntries[i];
+      componentIds.push(componentInstance.id);
+      fields.push(field);
+      values.push(value);
     }
+    // for (let i = 0, l = newComponentFields.length; i < l; i++) {
+    //   componentIds.push(componentId);
+    //   fields.push(newComponentFields[i]);
+    //   values.push(newComponentValues[i]);
+    // }
 
     newArchetype.add(entityId, componentIds, fields, values);
   };
@@ -497,12 +510,6 @@ class Engine {
   //   return this.addComponent(tag, this.getOrCreateNullComponentById(entityId, componentClass, tag));
   // };
 
-  // removeEntity = (entityId: EntityId) => {
-  //   // NOTE: In EnTT this happens by iterating every single sparse set in the registry, checking if it contains the entity, and deleting it if it does.
-  //   Object.values(this._componentLists).forEach(componentList => componentList.remove(entityId));
-  //   this.entityIdPool.reclaimId(entityId);
-  // };
-
   removeEntity = (entityId: EntityId) => {
     const currentArchetype = this.getEntityArchetype(entityId);
     currentArchetype.remove(entityId); // TODO: use more efficient remove that doesnt return values?
@@ -525,42 +532,6 @@ class Engine {
     this._updating = false;
     // this.updateComplete.dispatch(); // TODO: signals??
   };
-
-  // TODO: jests
-  // NOTE: most general, slowest query
-  // queryN = (callback: QueryCallback, ...queryTags: number[]) => {
-  //   const componentsLists = this._componentLists;
-  //   let shortestComponentListIndex = 0;
-  //   let shortestComponentList = componentsLists[queryTags[shortestComponentListIndex]];
-  //   if (!shortestComponentList) return;
-
-  //   let nextShortestComponentList: SparseSet<Component>;
-  //   const componentClassesLength = queryTags.length;
-  //   for (let i = 0; i < componentClassesLength; i++) {
-  //     nextShortestComponentList = componentsLists[queryTags[i]];
-
-  //     if (nextShortestComponentList && shortestComponentList) {
-  //       if (nextShortestComponentList.size < shortestComponentList.size) {
-  //         shortestComponentList = nextShortestComponentList;
-  //         shortestComponentListIndex = i;
-  //       }
-  //     }
-  //   }
-
-  //   let querySet: QuerySet = [];
-  //   let anotherComponent: Component;
-  //   const processComponent = component => {
-  //     for (let i = 0; i < componentClassesLength; i++) {
-  //       anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
-
-  //       if (!anotherComponent) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-  //       querySet[i] = anotherComponent;
-  //     }
-  //     callback(querySet);
-  //   };
-
-  //   shortestComponentList.stream(processComponent);
-  // };
 
   // TODO: jests
   // For systems that query 1 component, can't be faster than this!

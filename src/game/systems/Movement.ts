@@ -1,10 +1,11 @@
 import { Engine } from "../../ecs";
-import { Vector3 } from "../../ecs/Component";
+// import { Vector3 } from "../../ecs/Component";
 import System from "../../ecs/System";
-import PhysicsBody from "../components/PhysicsBody";
-import Position from "../components/Position";
-import Velocity from "../components/Velocity";
-import { Components, SCHEMA } from "../scenes/Main";
+import { Velocity, Position } from "../components";
+// import PhysicsBody from "../components/PhysicsBody";
+// import Position from "../components/Position";
+// import Velocity from "../components/Velocity";
+// import { Components } from "../scenes/Main";
 
 class Movement extends System {
   constructor(engine: Engine) {
@@ -18,12 +19,12 @@ class Movement extends System {
     // });
     const seconds = this.deltaTime / 1000;
 
-    const archetypes = this.query(Components.Velocity, Components.Position);
+    const archetypes = this.query(Velocity.id, Position.id);
     for (let j = 0, l = archetypes.length; j < l; j++) {
       const {
         components: {
-          [Components.Velocity]: { x: dx, y: dy, z: dz },
-          [Components.Position]: { x, y, z },
+          [Velocity.id]: { x: dx, y: dy, z: dz },
+          [Position.id]: { x, y, z },
         },
         elementCount,
       } = archetypes[j];
