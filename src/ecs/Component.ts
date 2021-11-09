@@ -15,6 +15,15 @@ export const Vector2i = { x: _i32(), y: _i32() };
 export const Vector2f = { x: _f32(), y: _f32() };
 export const Vector3i = { z: _f32(), ...Vector2i };
 export const Vector3f = { z: _f32(), ...Vector2f };
+export const Floats32 = <T extends string>(...fields: T[]): { [key in T]: i32 } => {
+  const object = {};
+  fields.forEach(field => {
+    // @ts-ignore
+    object[field] = _f32();
+  });
+  // @ts-ignore
+  return object;
+};
 
 type args = typeof Vector2i;
 const v: args = { x: 3, y: 9 };

@@ -1,5 +1,5 @@
 import { context } from "../../../../tests/jestHelpers";
-import Component, { Vector2f, _f32, _i32 } from "../../Component";
+import Component, { Floats32, Vector2f, _f32, _i32 } from "../../Component";
 // import Component from "../../Component";
 import Engine from "../../Engine";
 import System from "../../System";
@@ -27,7 +27,8 @@ const enum Components {
 
 let schema = {
   [Components.component0]: new Component(Components.component0, Vector2f),
-  [Components.component1]: new Component(Components.component1, { dx: _f32(), dy: _f32() }),
+  // [Components.component1]: new Component(Components.component1, { dx: _f32(), dy: _f32() }),
+  [Components.component1]: new Component(Components.component1, Floats32("dx", "dy")),
   // [component2.id]: new Component({ u: _f32(), v: _i32(), t: _i32() }),
   // [component3.id]: new Component({ t: _i32() }),
 };

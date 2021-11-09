@@ -1,5 +1,5 @@
-import Component, { ComponentSchema } from "./Component";
-import { ComponentsSchema, TypedArray } from "./Engine";
+import Component, { ComponentSchema, TypedArray } from "./Component";
+import { ComponentsSchema } from "./Engine";
 import { EntityId } from "./types";
 
 export type Mask = number[];

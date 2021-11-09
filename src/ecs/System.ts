@@ -20,7 +20,7 @@ abstract class System {
 
   constructor(engine: Engine) {
     this._engine = engine;
-    this.query = this.engine.query;
+    // this.view = this.engine.view;
     this.addComponent = this.engine.addComponent;
     this.removeComponent = this.engine.removeComponent;
   }
