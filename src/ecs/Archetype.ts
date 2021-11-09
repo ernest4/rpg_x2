@@ -15,6 +15,8 @@ export type Values = any[];
 
 // type TypedArray = Float32Array | Int32Array;
 
+const MAX_SPARSE_ENTITIES = 1e6;
+const TOMBSTONE_ENTITY = 1e6 - 1;
 // this is optimized version of sparseSet...
 class Archetype {
   mask: Mask;
@@ -22,7 +24,9 @@ class Archetype {
 
   elementCount: number = 0; // No elements initially
   denseEntityIdList: EntityId[] = [];
-  private _sparseEntityIdList: Uint32Array = new Uint32Array(1e6); // TODO: 1e6 enough??
+  private _sparseEntityIdList: Uint32Array = new Uint32Array(MAX_SPARSE_ENTITIES).fill(
+    TOMBSTONE_ENTITY
+  ); // TODO: 1e6 enough??
   components: { [componentId: number]: { [componentField: string]: TypedArray } };
   maxEntities: number;
 
@@ -75,10 +79,8 @@ class Archetype {
   // TODO: optimize with tombstone lookup https://skypjack.github.io/2020-08-02-ecs-baf-part-9/
   hasEntity = (entityId: EntityId) => {
     const { _sparseEntityIdList } = this;
-    return (
-      _sparseEntityIdList[entityId] < this.elementCount &&
-      this.denseEntityIdList[_sparseEntityIdList[entityId]] === entityId
-    );
+    const entityIdIndex = _sparseEntityIdList[entityId];
+    return entityIdIndex < this.elementCount && entityIdIndex !== TOMBSTONE_ENTITY;
   };
 
   // TODO: jests !!!
@@ -134,7 +136,8 @@ class Archetype {
     // swap ids of last entity with deleted entity to overwrite
     const lastEntityId = denseEntityIdList[elementCount - 1];
     denseEntityIdList[denseListIndex] = lastEntityId;
-    _sparseEntityIdList[lastEntityId] = denseListIndex;
+    // _sparseEntityIdList[lastEntityId] = denseListIndex;
+    _sparseEntityIdList[lastEntityId] = TOMBSTONE_ENTITY;
 
     this.elementCount--;
     return [componentIds, fields, values];
