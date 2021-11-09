@@ -114,6 +114,26 @@ describe(Archetype, () => {
     });
   });
 
+  describe("#hasEntity", () => {
+    let entityId = 123;
+
+    beforeEach(() => {
+      subject.add(entityId, [], [], []);
+    });
+
+    context("when archetype has given entityId", () => {
+      it("returns true", () => {
+        expect(subject.hasEntity(entityId)).toBeTrue();
+      });
+    });
+
+    context("when archetype does not have given entityId", () => {
+      it("returns false", () => {
+        expect(subject.hasEntity(entityId + 1)).toBeFalse();
+      });
+    });
+  });
+
   // describe("#add", () => {
   //   let previousSizeBeforeAdd: number;
   //   let previousSizeAfterAdd: number;

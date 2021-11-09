@@ -525,7 +525,13 @@ class Engine {
 
   removeEntity = (entityId: EntityId) => {
     const currentArchetype = this.getEntityArchetype(entityId);
-    currentArchetype.remove(entityId); // TODO: use more efficient remove that doesnt return values?
+    currentArchetype.remove(entityId);
+    this.entityIdPool.reclaimId(entityId);
+  };
+
+  destroyEntity = (entityId: EntityId) => {
+    const currentArchetype = this.getEntityArchetype(entityId);
+    currentArchetype.destroy(entityId);
     this.entityIdPool.reclaimId(entityId);
   };
 

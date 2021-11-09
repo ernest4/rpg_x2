@@ -104,7 +104,7 @@ class Archetype {
   remove = (entityId: EntityId): [ComponentIds, Fields, Values] => {
     // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
-    const { _sparseEntityIdList, elementCount, denseEntityIdList } = this;
+    const { _sparseEntityIdList, elementCount, denseEntityIdList, components } = this;
     // [1, 1, 2,...]
     // [x, y, name,...]
     // [123, 456, 'abc',...]
@@ -119,7 +119,7 @@ class Archetype {
     // TODO: once above cached, i think this can become single for loop
     for (let i = 0, l = this.componentIds.length; i < l; i++) {
       const componentId = this.componentIds[i];
-      const componentEntries = Object.entries(this.components[componentId]);
+      const componentEntries = Object.entries(components[componentId]);
       for (let j = 0, ll = componentEntries.length; i < ll; i++) {
         // capture data
         componentIds.push(componentId);
@@ -138,6 +138,33 @@ class Archetype {
 
     this.elementCount--;
     return [componentIds, fields, values];
+  };
+
+  // TODO: jests !!!
+  destroy = (entityId: EntityId): void => {
+    // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
+
+    const { _sparseEntityIdList, elementCount, denseEntityIdList, componentIds, components } = this;
+
+    const denseListIndex = _sparseEntityIdList[entityId];
+
+    // TODO: once above cached, i think this can become single for loop
+    for (let i = 0, l = componentIds.length; i < l; i++) {
+      const componentId = componentIds[i];
+      const componentEntries = Object.entries(components[componentId]);
+      for (let j = 0, ll = componentEntries.length; i < ll; i++) {
+        const [field, valuesDenseList] = componentEntries[j];
+        // replace with last item to 'delete' but keep list packed
+        valuesDenseList[denseListIndex] = valuesDenseList[elementCount - 1];
+      }
+    }
+
+    // swap ids of last entity with deleted entity to overwrite
+    const lastEntityId = denseEntityIdList[elementCount - 1];
+    denseEntityIdList[denseListIndex] = lastEntityId;
+    _sparseEntityIdList[lastEntityId] = denseListIndex;
+
+    this.elementCount--;
   };
 
   // TODO: jests !!!
