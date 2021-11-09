@@ -172,28 +172,9 @@ class Engine {
       ...fields
     }: { [key in keyof T]: T[key] } & { _componentInstance: Component<T> }
   ) => {
-    // let benchReport: any = [];
-    // let currentArchetype;
-    // benchReport.push(
-    //   benchmarkSubject("getEntityArchetype", () => {
-    //     currentArchetype = this.getEntityArchetype(entityId);
-    //   })
-    // );
     const currentArchetype = this.getEntityArchetype(entityId);
     const currentArchetypeMask = currentArchetype?.mask || []; // first component wont have any archetypes
-    // let unionMask;
-    // benchReport.push(
-    //   benchmarkSubject("createMaskWithComponentBitFlip", () => {
-    //     unionMask = this.createMaskWithComponentBitFlip(currentArchetypeMask, componentId);
-    //   })
-    // );
     const unionMask = this.createMaskWithComponentBitFlip(currentArchetypeMask, componentId);
-    // let nextArchetype;
-    // benchReport.push(
-    //   benchmarkSubject("getArchetype", () => {
-    //     nextArchetype = this.getArchetype(unionMask);
-    //   })
-    // );
     let nextArchetype = this.getArchetype(unionMask);
     if (!nextArchetype) {
       nextArchetype = this.createArchetype(
@@ -203,19 +184,6 @@ class Engine {
       );
     }
 
-    // benchReport.push(
-    //   benchmarkSubject("changeUpEntityArchetype", () => {
-    //     this.changeUpEntityArchetype(
-    //       currentArchetype,
-    //       nextArchetype,
-    //       entityId,
-    //       componentId,
-    //       // @ts-ignore
-    //       fields,
-    //       values
-    //     );
-    //   })
-    // );
     this.changeUpEntityArchetype(
       currentArchetype,
       nextArchetype,
@@ -224,18 +192,37 @@ class Engine {
       // @ts-ignore
       fields
     );
-
-    // console.log(JSON.stringify(benchReport));
   };
 
-  getEntityArchetype = (entityId: EntityId): Archetype => {
+  // getCurrentAndNextEntityArchetype = (
+  //   entityId: EntityId,
+  //   nextArchetypeMask: Mask
+  // ): [Archetype | null, Archetype] => {
+  //   let currentArchetype: Archetype | null;
+  //   let nextArchetype: Archetype;
+
+  //   const { _archetypes } = this;
+  //   for (let i = 0, l = _archetypes.length; i < l; i++) {
+  //     const archetype = _archetypes[i];
+  //     if (!nextArchetype && archetype.maskMatches(nextArchetypeMask)) {
+  //       if (currentArchetype) return [currentArchetype, archetype];
+
+  //       nextArchetype = archetype;
+  //     }
+  //     if (!currentArchetype && archetype.hasEntity(entityId)) {
+  //       if (nextArchetype) return [archetype, nextArchetype];
+
+  //       currentArchetype = archetype;
+  //     }
+  //   }
+  // };
+
+  getEntityArchetype = (entityId: EntityId): Archetype | null => {
     const { _archetypes } = this;
-    // TODO: this loop could both find the current AND the next archetype in one go!
     for (let i = 0, l = _archetypes.length; i < l; i++) {
-      if (_archetypes[i].hasEntity(entityId)) {
-        return _archetypes[i];
-      }
+      if (_archetypes[i].hasEntity(entityId)) return _archetypes[i];
     }
+    return null;
   };
 
   createMaskWithComponentBitFlip = (mask: Mask, componentId: number): Mask => {
@@ -247,11 +234,12 @@ class Engine {
     return newMask;
   };
 
-  getArchetype = (mask: Mask): Archetype | void => {
+  getArchetype = (mask: Mask): Archetype | null => {
     const { _archetypes } = this;
     for (let i = 0, l = _archetypes.length; i < l; i++) {
       if (_archetypes[i].maskMatches(mask)) return _archetypes[i];
     }
+    return null;
   };
 
   createArchetype = (mask: Mask, ...componentIds: number[]): Archetype => {
@@ -286,8 +274,26 @@ class Engine {
     // newComponentFields: Fields,
     // newComponentValues: Values
   ) => {
+    // let benchReport: any = [];
+
+    // benchReport.push(
+    //   benchmarkSubject("currentArchetype.remove", () => {
+    //     currentArchetype?.remove(entityId) || [[], [], []]; // first component wont have any archetypes
+    //   })
+    // );
     const [componentIds, fields, values] = currentArchetype?.remove(entityId) || [[], [], []]; // first component wont have any archetypes
 
+    // benchReport.push(
+    //   benchmarkSubject("newComponentObject", () => {
+    //     const newComponentEntries = Object.entries(newComponentObject);
+    //     for (let i = 0, l = newComponentEntries.length; i < l; i++) {
+    //       const [field, value] = newComponentEntries[i];
+    //       componentIds.push(componentInstance.id);
+    //       fields.push(field);
+    //       values.push(value);
+    //     }
+    //   })
+    // );
     // combine new and old components in single data stream
     const newComponentEntries = Object.entries(newComponentObject);
     for (let i = 0, l = newComponentEntries.length; i < l; i++) {
@@ -302,7 +308,15 @@ class Engine {
     //   values.push(newComponentValues[i]);
     // }
 
+    // benchReport.push(
+    //   benchmarkSubject("newArchetype.add", () => {
+    //     newArchetype.add(entityId, componentIds, fields, values);
+    //   })
+    // );
+
     newArchetype.add(entityId, componentIds, fields, values);
+
+    // console.log(JSON.stringify(benchReport));
   };
 
   // addComponents = (...components: Component[]) => components.forEach(this.addComponent);
@@ -341,28 +355,18 @@ class Engine {
   // };
 
   removeComponent = (componentId: number, entityId: EntityId) => {
-    // let benchReport: any = [];
-
     const currentArchetype = this.getEntityArchetype(entityId);
 
-    // benchReport.push(
-    //   benchmarkSubject("reclaimId", () => {
-    //     // if last component...
-    //     if (currentArchetype.componentIds.length === 1) {
-    //       // TODO: some error case?
-    //       if (currentArchetype.componentIds[0] === componentId) {
-    //         currentArchetype.remove(entityId); // TODO: use more efficient remove that doesnt return values?
-    //         this.entityIdPool.reclaimId(entityId);
-    //       }
-    //     }
-    //   })
-    // );
     // if last component...
     if (currentArchetype.componentIds.length === 1) {
-      // TODO: some error case?
+      // On last component
       if (currentArchetype.componentIds[0] === componentId) {
-        currentArchetype.remove(entityId); // TODO: use more efficient remove that doesnt return values?
+        // currentArchetype.remove(entityId);
+        currentArchetype.destroy(entityId);
         this.entityIdPool.reclaimId(entityId);
+        return;
+      } else {
+        // TODO: some error case? is this possible?
       }
     }
 
@@ -374,15 +378,8 @@ class Engine {
         ...currentArchetype.componentIds.filter(id => id !== componentId)
       );
     }
-    // benchReport.push(
-    //   benchmarkSubject("changeDownEntityArchetype", () => {
-    //     // @ts-ignore
-    //     this.changeDownEntityArchetype(currentArchetype, nextArchetype, entityId);
-    //   })
-    // );
-    this.changeDownEntityArchetype(currentArchetype, nextArchetype, entityId);
 
-    // console.log(JSON.stringify(benchReport));
+    this.changeDownEntityArchetype(currentArchetype, nextArchetype, entityId);
   };
 
   changeDownEntityArchetype = (

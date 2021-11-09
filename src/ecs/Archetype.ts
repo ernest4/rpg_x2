@@ -23,7 +23,7 @@ class Archetype {
   componentIds: ComponentIds;
 
   elementCount: number = 0; // No elements initially
-  denseEntityIdList: EntityId[] = [];
+  entityIdDenseList: EntityId[] = [];
   private _sparseEntityIdList: Uint32Array = new Uint32Array(MAX_SPARSE_ENTITIES).fill(
     TOMBSTONE_ENTITY
   ); // TODO: 1e6 enough??
@@ -86,9 +86,9 @@ class Archetype {
   // TODO: jests !!!
   add = (entityId: EntityId, componentIds: ComponentIds, fields: Fields, values: Values): void => {
     // if (this.hasEntity(entityId)) return; // TODO: is this needed?
-    const { elementCount, denseEntityIdList, _sparseEntityIdList, components } = this;
+    const { elementCount, entityIdDenseList, _sparseEntityIdList, components } = this;
 
-    denseEntityIdList[elementCount] = entityId;
+    entityIdDenseList[elementCount] = entityId;
 
     // TODO: can optimize this further by reducing indirection?
     // pass in another array that specifies how many iterations per componentId?
@@ -106,7 +106,7 @@ class Archetype {
   remove = (entityId: EntityId): [ComponentIds, Fields, Values] => {
     // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
-    const { _sparseEntityIdList, elementCount, denseEntityIdList, components } = this;
+    const { _sparseEntityIdList, elementCount, entityIdDenseList, components } = this;
     // [1, 1, 2,...]
     // [x, y, name,...]
     // [123, 456, 'abc',...]
@@ -122,7 +122,7 @@ class Archetype {
     for (let i = 0, l = this.componentIds.length; i < l; i++) {
       const componentId = this.componentIds[i];
       const componentEntries = Object.entries(components[componentId]);
-      for (let j = 0, ll = componentEntries.length; i < ll; i++) {
+      for (let j = 0, ll = componentEntries.length; j < ll; j++) {
         // capture data
         componentIds.push(componentId);
         const [field, valuesDenseList] = componentEntries[j];
@@ -134,8 +134,8 @@ class Archetype {
     }
 
     // swap ids of last entity with deleted entity to overwrite
-    const lastEntityId = denseEntityIdList[elementCount - 1];
-    denseEntityIdList[denseListIndex] = lastEntityId;
+    const lastEntityId = entityIdDenseList[elementCount - 1];
+    entityIdDenseList[denseListIndex] = lastEntityId;
     // _sparseEntityIdList[lastEntityId] = denseListIndex;
     _sparseEntityIdList[lastEntityId] = TOMBSTONE_ENTITY;
 
@@ -145,27 +145,28 @@ class Archetype {
 
   // TODO: jests !!!
   destroy = (entityId: EntityId): void => {
-    // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
+    if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
-    const { _sparseEntityIdList, elementCount, denseEntityIdList, componentIds, components } = this;
+    const { _sparseEntityIdList, elementCount, entityIdDenseList, componentIds, components } = this;
 
     const denseListIndex = _sparseEntityIdList[entityId];
 
     // TODO: once above cached, i think this can become single for loop
     for (let i = 0, l = componentIds.length; i < l; i++) {
       const componentId = componentIds[i];
-      const componentEntries = Object.entries(components[componentId]);
-      for (let j = 0, ll = componentEntries.length; i < ll; i++) {
-        const [field, valuesDenseList] = componentEntries[j];
+      const valuesDenseLists = Object.values(components[componentId]);
+      for (let j = 0, ll = valuesDenseLists.length; j < ll; j++) {
+        const valuesDenseList = valuesDenseLists[j];
         // replace with last item to 'delete' but keep list packed
         valuesDenseList[denseListIndex] = valuesDenseList[elementCount - 1];
       }
     }
 
     // swap ids of last entity with deleted entity to overwrite
-    const lastEntityId = denseEntityIdList[elementCount - 1];
-    denseEntityIdList[denseListIndex] = lastEntityId;
-    _sparseEntityIdList[lastEntityId] = denseListIndex;
+    const lastEntityId = entityIdDenseList[elementCount - 1];
+    entityIdDenseList[denseListIndex] = lastEntityId;
+    // _sparseEntityIdList[lastEntityId] = denseListIndex;
+    _sparseEntityIdList[lastEntityId] = TOMBSTONE_ENTITY;
 
     this.elementCount--;
   };
@@ -177,7 +178,7 @@ class Archetype {
 
   // TODO: jests !!!
   getEntityIndexUnchecked = (entityId: EntityId) => {
-    return this.denseEntityIdList[this._sparseEntityIdList[entityId]];
+    return this.entityIdDenseList[this._sparseEntityIdList[entityId]];
   };
 
   // TODO: jests !!!
@@ -186,7 +187,7 @@ class Archetype {
   ): [{ [componentId: number]: { [componentField: string]: TypedArray } }, number] | null => {
     if (!this.hasEntity(entityId)) return null;
 
-    const entityIndex = this.denseEntityIdList[this._sparseEntityIdList[entityId]];
+    const entityIndex = this.entityIdDenseList[this._sparseEntityIdList[entityId]];
     return [this.components, entityIndex];
   };
 }
