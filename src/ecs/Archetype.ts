@@ -75,9 +75,7 @@ class Archetype {
     return true;
   };
 
-  // TODO: jests !!!
-  // TODO: optimize with tombstone lookup https://skypjack.github.io/2020-08-02-ecs-baf-part-9/
-  hasEntity = (entityId: EntityId) => {
+  hasEntity = (entityId: EntityId): boolean => {
     const { _sparseEntityIdList } = this;
     const entityIdIndex = _sparseEntityIdList[entityId];
     return entityIdIndex < this.elementCount && entityIdIndex !== TOMBSTONE_ENTITY;
@@ -85,9 +83,9 @@ class Archetype {
 
   // TODO: jests !!!
   add = (entityId: EntityId, componentIds: ComponentIds, fields: Fields, values: Values): void => {
-    // if (this.hasEntity(entityId)) return; // TODO: is this needed?
-    const { elementCount, entityIdDenseList, _sparseEntityIdList, components } = this;
+    if (this.hasEntity(entityId)) return; // TODO: is this needed?
 
+    const { elementCount, entityIdDenseList, _sparseEntityIdList, components } = this;
     entityIdDenseList[elementCount] = entityId;
 
     // TODO: can optimize this further by reducing indirection?
@@ -104,19 +102,18 @@ class Archetype {
 
   // TODO: jests !!!
   remove = (entityId: EntityId): [ComponentIds, Fields, Values] => {
-    // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
+    if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
     const { _sparseEntityIdList, elementCount, entityIdDenseList, components } = this;
-    // [1, 1, 2,...]
-    // [x, y, name,...]
-    // [123, 456, 'abc',...]
+    const denseListIndex = _sparseEntityIdList[entityId];
 
     // TODO: caching!!
     const componentIds: ComponentIds = []; // TODO: cache on class no initialization
     const fields: Fields = []; // TODO: cache on class no initialization
     const values: Values = [];
-
-    const denseListIndex = _sparseEntityIdList[entityId];
+    // [1, 1, 2,...]
+    // [x, y, name,...]
+    // [123, 456, 'abc',...]
 
     // TODO: once above cached, i think this can become single for loop
     for (let i = 0, l = this.componentIds.length; i < l; i++) {
@@ -136,8 +133,7 @@ class Archetype {
     // swap ids of last entity with deleted entity to overwrite
     const lastEntityId = entityIdDenseList[elementCount - 1];
     entityIdDenseList[denseListIndex] = lastEntityId;
-    // _sparseEntityIdList[lastEntityId] = denseListIndex;
-    _sparseEntityIdList[lastEntityId] = TOMBSTONE_ENTITY;
+    _sparseEntityIdList[lastEntityId] = denseListIndex;
 
     this.elementCount--;
     return [componentIds, fields, values];
@@ -148,13 +144,11 @@ class Archetype {
     if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
     const { _sparseEntityIdList, elementCount, entityIdDenseList, componentIds, components } = this;
-
     const denseListIndex = _sparseEntityIdList[entityId];
 
     // TODO: once above cached, i think this can become single for loop
     for (let i = 0, l = componentIds.length; i < l; i++) {
-      const componentId = componentIds[i];
-      const valuesDenseLists = Object.values(components[componentId]);
+      const valuesDenseLists = Object.values(components[componentIds[i]]);
       for (let j = 0, ll = valuesDenseLists.length; j < ll; j++) {
         const valuesDenseList = valuesDenseLists[j];
         // replace with last item to 'delete' but keep list packed
@@ -165,8 +159,7 @@ class Archetype {
     // swap ids of last entity with deleted entity to overwrite
     const lastEntityId = entityIdDenseList[elementCount - 1];
     entityIdDenseList[denseListIndex] = lastEntityId;
-    // _sparseEntityIdList[lastEntityId] = denseListIndex;
-    _sparseEntityIdList[lastEntityId] = TOMBSTONE_ENTITY;
+    _sparseEntityIdList[lastEntityId] = denseListIndex;
 
     this.elementCount--;
   };

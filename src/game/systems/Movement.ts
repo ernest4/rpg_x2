@@ -1,7 +1,7 @@
 import { Engine } from "../../ecs";
 // import { Vector3 } from "../../ecs/Component";
 import System from "../../ecs/System";
-import { Velocity, Position } from "../components";
+import { Velocity, Position, Components } from "../components";
 // import PhysicsBody from "../components/PhysicsBody";
 // import Position from "../components/Position";
 // import Velocity from "../components/Velocity";
@@ -19,15 +19,22 @@ class Movement extends System {
     // });
     const seconds = this.deltaTime / 1000;
 
-    const archetypes = this.query(Velocity.id, Position.id);
+    const archetypes = this.query(Components.Velocity, Components.Position);
     for (let j = 0, l = archetypes.length; j < l; j++) {
       const {
         components: {
-          [Velocity.id]: { x: dx, y: dy, z: dz },
-          [Position.id]: { x, y, z },
+          [Components.Velocity]: { x: dx, y: dy, z: dz },
+          [Components.Position]: { x, y, z },
         },
         elementCount,
       } = archetypes[j];
+      // const {
+      //   components: {
+      //     [Components.Velocity]: [dx, dy, dz],
+      //     [Components.Position]: [x, y, z],
+      //   },
+      //   elementCount,
+      // } = archetypes[j];
 
       for (let i = 0; i < elementCount; i++) {
         x[i] += dx[i] * seconds;

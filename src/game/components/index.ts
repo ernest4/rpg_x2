@@ -9,12 +9,16 @@ import Component, { Vector2f, Vector3f } from "../../ecs/Component";
 
 // import Transform from "./Transform";
 
-export const Velocity = new Component(Vector3f);
-export const Position = new Component(Vector3f);
+export const enum Components {
+  Velocity,
+  Position,
+  // component2,
+  // component3,
+}
 
 export default {
-  [Velocity.id]: Velocity,
-  [Position.id]: Position,
+  [Components.Velocity]: new Component(Components.Velocity, Vector3f),
+  [Components.Position]: new Component(Components.Position, Vector3f),
 };
 
 // export const schema = {

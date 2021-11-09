@@ -375,7 +375,7 @@ class Engine {
     if (!nextArchetype) {
       nextArchetype = this.createArchetype(
         differenceMask,
-        ...currentArchetype.componentIds.filter(id => id !== componentId)
+        ...currentArchetype.componentIds.filter(id => id !== componentId) // TODO: cache func for efficiency?
       );
     }
 
