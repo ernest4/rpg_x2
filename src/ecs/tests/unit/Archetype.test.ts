@@ -1,6 +1,6 @@
 import { context } from "../../../../tests/jestHelpers";
 import Archetype from "../../Archetype";
-import { Type, Vector2f } from "../../Engine";
+import Component, { Vector2f, Vector3f, _f32, _i32 } from "../../Component";
 
 const createMaskForComponents = (mask: number[], ...componentIds: number[]) => {
   componentIds.forEach(id => (mask = createMaskForComponent(mask, id)));
@@ -19,19 +19,20 @@ const createMaskForComponent = (mask: number[], componentId) => {
 describe(Archetype, () => {
   let maxEntities = 1e6;
 
-  let componentId0 = 0;
-  let componentId1 = 1;
-  let componentId2 = 2;
-  let componentId3 = 3; // NOTE: not in schema by default
+  let component0 = new Component(Vector2f);
+  let component1 = new Component({ dx: _f32(), dy: _f32() });
+  let component2 = new Component({ u: _f32(), v: _i32(), t: _i32() });
+  let component3 = new Component({ t: _i32() });
 
   let schema = {
-    [componentId0]: Vector2f,
-    [componentId1]: { dx: Type.f32, dy: Type.f32 },
-    [componentId2]: { u: Type.f32, v: Type.i32, t: Type.i32 },
+    [component0.id]: component0,
+    [component1.id]: component1,
+    [component2.id]: component2,
+    [component3.id]: component3,
   };
 
   let mask = [];
-  let componentIds = [componentId0, componentId1, componentId2];
+  let componentIds = [component0.id, component1.id, component2.id];
   let generatedMask = createMaskForComponents(mask, ...componentIds);
 
   let subject: Archetype;
@@ -42,21 +43,15 @@ describe(Archetype, () => {
 
   describe("constructor", () => {
     it("creates components object", () => {
-      // expect(subject.components).toEqual({
-      //   [componentId0]: { x: [], y: [] },
-      //   [componentId1]: { dx: [], dy: [] },
-      //   [componentId2]: { u: [], v: [], t: [] },
-      // });
-
       expect(Object.keys(subject.components)).toEqual(
-        [componentId0, componentId1, componentId2].map(i => i.toString())
+        [component0.id, component1.id, component2.id].map(i => i.toString())
       );
-      expect(subject.components[componentId0].x).toBeInstanceOf(Float32Array);
-      expect(subject.components[componentId0].x.length).toEqual(maxEntities);
-      expect(subject.components[componentId0].y).toBeInstanceOf(Float32Array);
-      expect(subject.components[componentId2].u).toBeInstanceOf(Float32Array);
-      expect(subject.components[componentId2].v).toBeInstanceOf(Int32Array);
-      expect(subject.components[componentId2].t).toBeInstanceOf(Int32Array);
+      expect(subject.components[component0.id].x).toBeInstanceOf(Float32Array);
+      expect(subject.components[component0.id].x.length).toEqual(maxEntities);
+      expect(subject.components[component0.id].y).toBeInstanceOf(Float32Array);
+      expect(subject.components[component2.id].u).toBeInstanceOf(Float32Array);
+      expect(subject.components[component2.id].v).toBeInstanceOf(Int32Array);
+      expect(subject.components[component2.id].t).toBeInstanceOf(Int32Array);
     });
 
     it("stores componentIds", () => {
@@ -86,14 +81,14 @@ describe(Archetype, () => {
     context("when archetype's mask contains given subMask", () => {
       it("returns true", () => {
         expect(
-          subject.maskContains(createMaskForComponents([], componentId1, componentId2))
+          subject.maskContains(createMaskForComponents([], component1.id, component2.id))
         ).toBeTrue();
       });
     });
 
     context("when archetype's mask does not contain given subMask", () => {
       it("returns false", () => {
-        expect(subject.maskContains(createMaskForComponents([], componentId3))).toBeFalse();
+        expect(subject.maskContains(createMaskForComponents([], component3.id))).toBeFalse();
       });
     });
   });
@@ -101,13 +96,13 @@ describe(Archetype, () => {
   describe("#hasComponents", () => {
     context("when archetype's mask contains given component", () => {
       it("returns true", () => {
-        expect(subject.hasComponents(componentId1, componentId2)).toBeTrue();
+        expect(subject.hasComponents(component1.id, component2.id)).toBeTrue();
       });
     });
 
     context("when archetype's mask does not contain given components", () => {
       it("returns false", () => {
-        expect(subject.hasComponents(componentId3)).toBeFalse();
+        expect(subject.hasComponents(component3.id)).toBeFalse();
       });
     });
   });

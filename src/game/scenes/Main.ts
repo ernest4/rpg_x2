@@ -9,26 +9,27 @@ import Movement from "../systems/Movement";
 import FpsCounter from "../../utils/FpsCounter";
 import { DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import { i32, Vector3f } from "../../ecs/Engine";
+// import { i32, Vector3f } from "../../ecs/Engine";
+import Components from "../components";
 // import FpsCounter from "./utils/FpsCounter";
 
 // TODO: move this to own file?
-export const enum Components {
-  Position,
-  Velocity,
-  Speed,
-  Player,
-  Sprite,
-}
+// export const enum Components {
+//   Position,
+//   Velocity,
+//   Speed,
+//   Player,
+//   Sprite,
+// }
 
-// TODO: move this to own file?
-export const SCHEMA = {
-  [Components.Position]: Vector3f,
-  [Components.Velocity]: Vector3f,
-  [Components.Speed]: [i32("speed")],
-  [Components.Player]: [],
-  [Components.Sprite]: [i32("url"), i32("frameWidth")],
-} as const;
+// // TODO: move this to own file?
+// export const SCHEMA = {
+//   [Components.Position]: Vector3f,
+//   [Components.Velocity]: Vector3f,
+//   [Components.Speed]: [i32("speed")],
+//   [Components.Player]: [],
+//   [Components.Sprite]: [i32("url"), i32("frameWidth")],
+// } as const;
 
 export default class Main extends Phaser.Scene {
   // dudeQuads!: any[];
@@ -56,7 +57,7 @@ export default class Main extends Phaser.Scene {
   }
 
   private initECS = () => {
-    this._engine = new Engine(SCHEMA, DEVELOPMENT);
+    this._engine = new Engine(Components, DEVELOPMENT);
     // TODO: test all systems.
     this._engine.addSystems(
       new Manager(this._engine),

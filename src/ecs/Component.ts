@@ -38,8 +38,8 @@ class Component<T extends ComponentSchema> {
   id: number;
   private _schema: T;
 
-  constructor(schema: T) {
-    this.id = SignatureIdGenerator.newSignatureId();
+  constructor(id: number, schema: T) {
+    this.id = id;
     this._schema = schema;
   }
 
