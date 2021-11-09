@@ -16,13 +16,20 @@ const createMaskForComponent = (mask: number[], componentId) => {
   return newMask;
 };
 
+const enum Components {
+  component0,
+  component1,
+  component2,
+  component3,
+}
+
 describe(Archetype, () => {
   let maxEntities = 1e6;
 
-  let component0 = new Component(Vector2f);
-  let component1 = new Component({ dx: _f32(), dy: _f32() });
-  let component2 = new Component({ u: _f32(), v: _i32(), t: _i32() });
-  let component3 = new Component({ t: _i32() });
+  let component0 = new Component(Components.component0, Vector2f);
+  let component1 = new Component(Components.component1, { dx: _f32(), dy: _f32() });
+  let component2 = new Component(Components.component2, { u: _f32(), v: _i32(), t: _i32() });
+  let component3 = new Component(Components.component3, { t: _i32() });
 
   let schema = {
     [component0.id]: component0,
