@@ -1,12 +1,11 @@
 import System from "../../ecs/System";
 // import { Player, Sprite } from "../components";
-import Schema, { Velocity, Position } from "../components";
+import SCHEMA, { Components } from "../components";
 import PhysicsBody from "../components/PhysicsBody";
 import Speed from "../components/Speed";
 import Transform from "../components/Transform";
 import { assetsPath } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import { SCHEMA } from "../scenes/Main";
 // import Velocity from "../components/Velocity";
 
 // TODO: jests
@@ -112,7 +111,8 @@ class Manager extends System {
       const entityId = this.newEntityId();
 
       // this.removeComponent(Components.Player, entityId);
-      this.addComponent(entityId, Velocity.new({ x: 5, y: 45, z: 0 }));
+      // this.addComponent(entityId, Velocity.new({ x: 5, y: 45, z: 0 }));
+      this.addComponent(entityId, SCHEMA[Components.Velocity].new({ x: 0, y: 0, z: 0 }));
 
       if (i === 1) this.addComponent(entityId, CID.Player, SCHEMA[CID.Player], []);
       this.addComponent(entityId, CID.Speed, SCHEMA[CID.Speed], [100 + i]);

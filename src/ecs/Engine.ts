@@ -522,14 +522,18 @@ class Engine {
 
   removeEntity = (entityId: EntityId) => {
     const currentArchetype = this.getEntityArchetype(entityId);
-    currentArchetype.remove(entityId);
-    this.entityIdPool.reclaimId(entityId);
+    if (currentArchetype) {
+      currentArchetype.remove(entityId);
+      this.entityIdPool.reclaimId(entityId);
+    }
   };
 
   destroyEntity = (entityId: EntityId) => {
     const currentArchetype = this.getEntityArchetype(entityId);
-    currentArchetype.destroy(entityId);
-    this.entityIdPool.reclaimId(entityId);
+    if (currentArchetype) {
+      currentArchetype.destroy(entityId);
+      this.entityIdPool.reclaimId(entityId);
+    }
   };
 
   // // NOTE: fast O(1) bulk operations

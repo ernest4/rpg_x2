@@ -62,17 +62,20 @@ class Component<T extends ComponentSchema> {
     return params;
   };
 
-  _newSoa = (maxEntities: number): [SOA, TypedArray[]] => {
+  _newSoa = (maxEntities: number): [SOA, string[], TypedArray[]] => {
     const soa: SOA = {};
+    const fields: string[] = [];
     const denseLists: TypedArray[] = [];
     const componentSchemaEntries = Object.entries(this._schema);
     for (let j = 0, ll = componentSchemaEntries.length; j < ll; j++) {
       const [field, type] = componentSchemaEntries[j];
       const denseList = new TYPE_TO_ARRAY[type](maxEntities); // denseList per field
       soa[field] = denseList;
+      fields.push(field);
+      
       denseLists.push(denseList);
     }
-    return [soa, denseLists];
+    return [soa, fields, denseLists];
   };
 
   // // TODO: jests

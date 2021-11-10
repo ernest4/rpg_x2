@@ -1,5 +1,4 @@
-import { connectAdvanced } from "react-redux";
-import Component, { ComponentSchema, TypedArray } from "./Component";
+import { TypedArray } from "./Component";
 import { ComponentsSchema } from "./Engine";
 import { EntityId } from "./types";
 
@@ -30,8 +29,12 @@ class Archetype {
   ); // TODO: 1e6 enough??
   components: { [componentId: number]: { [componentField: string]: TypedArray } } = {};
   maxEntities: number;
+  componentFields: { [componentId: number]: string[] } = {};
   componentDenseLists: { [componentId: number]: TypedArray[] } = {};
+  fields: string[] = [];
   denseLists: TypedArray[] = [];
+  cachedComponentIds: number[] = [];
+  cacheFields: string[] = [];
 
   constructor(
     mask: Mask,
@@ -47,9 +50,11 @@ class Archetype {
       const componentId = componentIds[i];
       const componentInstance = componentsSchema[componentId];
       // this.components[componentId] = componentInstance._newSoa(maxEntities);
-      const [soa, denseLists] = componentInstance._newSoa(maxEntities);
+      const [soa, fields, denseLists] = componentInstance._newSoa(maxEntities);
       this.components[componentId] = soa;
       this.componentDenseLists[componentId] = denseLists;
+      this.componentFields[componentId] = fields;
+      this.fields = [...this.fields, ...fields];
       this.denseLists = [...this.denseLists, ...denseLists];
     }
   }
@@ -112,7 +117,13 @@ class Archetype {
   remove = (entityId: EntityId): [ComponentIds, Fields, Values] => {
     // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
-    const { _sparseEntityIdList, elementCount, entityIdDenseList, components } = this;
+    const {
+      _sparseEntityIdList,
+      elementCount,
+      entityIdDenseList,
+      componentFields,
+      componentDenseLists,
+    } = this;
     const denseListIndex = _sparseEntityIdList[entityId];
     _sparseEntityIdList[entityId] = TOMBSTONE_ENTITY;
     // swap ids of last entity with deleted entity to overwrite
@@ -131,16 +142,23 @@ class Archetype {
     // TODO: once above cached, i think this can become single for loop
     for (let i = 0, l = this.componentIds.length; i < l; i++) {
       const componentId = this.componentIds[i];
-      const componentEntries = Object.entries(components[componentId]);
-      for (let j = 0, ll = componentEntries.length; j < ll; j++) {
-        // capture data
+      const _fields = componentFields[componentId];
+      const _values = componentDenseLists[componentId];
+      for (let k = 0, ll = _fields.length; k < ll; k++) {
         componentIds.push(componentId);
-        const [field, valuesDenseList] = componentEntries[j];
-        fields.push(field);
-        values.push(valuesDenseList[denseListIndex]);
-        // replace with last item to 'delete' but keep list packed
-        valuesDenseList[denseListIndex] = valuesDenseList[elementCount - 1];
+        fields.push(_fields[k]);
+        values.push(_values[k]);
       }
+      // const componentEntries = Object.entries(components[componentId]);
+      // for (let j = 0, ll = componentEntries.length; j < ll; j++) {
+      //   // capture data
+      //   cachedComponentIds.push(componentId);
+      //   const [field, valuesDenseList] = componentEntries[j];
+      //   cacheFields.push(field);
+      //   values.push(valuesDenseList[denseListIndex]);
+      //   // replace with last item to 'delete' but keep list packed
+      //   valuesDenseList[denseListIndex] = valuesDenseList[elementCount - 1];
+      // }
     }
 
     this.elementCount--;
@@ -190,6 +208,3 @@ class Archetype {
 }
 
 export default Archetype;
-
-// TODO: need to get soa archetype working
-// only chance to get good perf...

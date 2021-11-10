@@ -59,7 +59,7 @@ class QuerySystem extends System {
 
   start(): void {}
   update(): void {
-    const archetypes = this.query(Components.component0, Components.component1);
+    const archetypes = this.view(Components.component0, Components.component1);
     for (let j = 0, l = archetypes.length; j < l; j++) {
       const {
         components: {
