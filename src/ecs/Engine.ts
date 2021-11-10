@@ -7,7 +7,7 @@ import Entity from "./Entity";
 import Stats from "./utils/Stats";
 import Archetype, { Fields, Mask, Values } from "./Archetype";
 import { benchmarkSubject } from "./utils/benchmark";
-import Component, { ComponentSchema } from "./Component";
+import { ComponentsSchema } from "./Component";
 
 // TODO: move out to own class?
 // class EntityIdAlias extends SparseSetItem {
@@ -18,27 +18,6 @@ import Component, { ComponentSchema } from "./Component";
 //     this.entityId = entityId;
 //   }
 // }
-
-// TODO: more number types?
-// export const enum Type {
-//   f32,
-//   i32,
-// }
-export const i32 = <T extends string>(field: T) => `${field}_i32` as const;
-export const f32 = <T extends string>(field: T) => `${field}_f32` as const;
-
-export const Vector2i = [i32("x"), i32("y")] as const;
-export const Vector2f = [f32("x"), f32("y")] as const;
-export const Vector3i = [...Vector2i, i32("z")] as const;
-export const Vector3f = [...Vector2f, f32("z")] as const;
-// export const Vector3f = <X extends string, Y extends string, Z extends string>(x: X, y: Y, z: Z) =>
-//   [i32(x), i32(y), f32(z)] as const;
-
-export const NullVector3 = [0, 0, 0] as const;
-
-// type KeyAndType = string;
-// export type ComponentsSchema = { [componentId: number]: readonly KeyAndType[] };
-export type ComponentsSchema = { [componentId: number]: Component<any> };
 
 // TODO: jest tests !!!!
 class Engine {
@@ -158,19 +137,11 @@ class Engine {
   //   return component;
   // };
 
-  // addComponent = <F extends readonly [] | readonly any[]>(
-  //   entityId: EntityId,
-  //   componentId: number,
-  //   fields: F,
-  //   values: { [key in keyof F]: number }
-  // ) => {
-  addComponent = <T extends ComponentSchema>(
+  addComponent = <F extends readonly [] | readonly any[]>(
+    componentId: number,
     entityId: EntityId,
-    {
-      _componentInstance,
-      _componentInstance: { id: componentId },
-      ...fields
-    }: { [key in keyof T]: T[key] } & { _componentInstance: Component<T> }
+    fields: F,
+    values: { [key in keyof F]: number }
   ) => {
     const currentArchetype = this.getEntityArchetype(entityId);
     const currentArchetypeMask = currentArchetype?.mask || []; // first component wont have any archetypes

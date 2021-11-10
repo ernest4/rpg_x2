@@ -1,5 +1,4 @@
 import Archetype from "./Archetype";
-import Component, { ComponentSchema } from "./Component";
 import Engine from "./Engine";
 import { EntityId } from "./types";
 import { benchmarkSubject } from "./utils/benchmark";
@@ -8,13 +7,11 @@ import { benchmarkSubject } from "./utils/benchmark";
 abstract class System {
   private readonly _engine: Engine;
   view: (...componentIds: number[]) => Archetype[];
-  addComponent: <T extends ComponentSchema>(
+  addComponent: <F extends readonly [] | readonly any[]>(
+    componentId: number,
     entityId: EntityId,
-    {
-      _componentInstance,
-      _componentInstance: { id: componentId },
-      ...fields
-    }: { [key in keyof T]: T[key] } & { _componentInstance: Component<T> }
+    fields: F,
+    values: { [key in keyof F]: number }
   ) => void;
   removeComponent: (componentId: number, entityId: EntityId) => void;
 

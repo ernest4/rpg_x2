@@ -1,5 +1,4 @@
-import { TypedArray } from "./Component";
-import { ComponentsSchema } from "./Engine";
+import { ComponentsSchema } from "./Component";
 import { EntityId } from "./types";
 
 export type Mask = number[];
@@ -8,12 +7,13 @@ export type Fields = string[];
 export type Values = any[];
 // export type ComponentsSchema = { [key: number]: readonly string[] };
 
-// const TYPE_TO_ARRAY = {
-//   [Type.f32]: Float32Array,
-//   [Type.i32]: Int32Array,
-// };
+export type TypedArray = Float32Array | Int32Array;
+export type SOA = TypedArray[];
 
-// type TypedArray = Float32Array | Int32Array;
+const TYPE_TO_ARRAY = {
+  f32: Float32Array,
+  i32: Int32Array,
+};
 
 const MAX_SPARSE_ENTITIES = 1e6;
 const TOMBSTONE_ENTITY = MAX_SPARSE_ENTITIES - 1;
@@ -27,7 +27,7 @@ class Archetype {
   private _sparseEntityIdList: Uint32Array = new Uint32Array(MAX_SPARSE_ENTITIES).fill(
     TOMBSTONE_ENTITY
   ); // TODO: 1e6 enough??
-  components: { [componentId: number]: { [componentField: string]: TypedArray } } = {};
+  components: { [componentId: number]: SOA } = {};
   maxEntities: number;
   componentFields: { [componentId: number]: string[] } = {};
   componentDenseLists: { [componentId: number]: TypedArray[] } = {};
@@ -48,14 +48,18 @@ class Archetype {
 
     for (let i = 0, l = componentIds.length; i < l; i++) {
       const componentId = componentIds[i];
-      const componentInstance = componentsSchema[componentId];
-      // this.components[componentId] = componentInstance._newSoa(maxEntities);
-      const [soa, fields, denseLists] = componentInstance._newSoa(maxEntities);
+      const componentSchema = componentsSchema[componentId];
+
+      const soa: SOA = [];
+      for (let k = 0, ll = componentSchema.length; k < ll; k++) {
+        const [field, type] = componentSchema[k].split("_");
+        soa[k] = new TYPE_TO_ARRAY[type](maxEntities); // denseList per field
+      }
       this.components[componentId] = soa;
-      this.componentDenseLists[componentId] = denseLists;
-      this.componentFields[componentId] = fields;
-      this.fields = [...this.fields, ...fields];
-      this.denseLists = [...this.denseLists, ...denseLists];
+      // this.componentDenseLists[componentId] = denseLists;
+      // this.componentFields[componentId] = fields;
+      // this.fields = [...this.fields, ...fields];
+      // this.denseLists = [...this.denseLists, ...denseLists];
     }
   }
 
@@ -95,23 +99,70 @@ class Archetype {
   };
 
   // TODO: jests !!!
-  add = (entityId: EntityId, componentIds: ComponentIds, fields: Fields, values: Values): void => {
+  add = (
+    entityId: EntityId,
+    oldComponentsDataStream: number[],
+    newComponentDataStream: number[]
+  ): void => {
     // if (this.hasEntity(entityId)) return; // TODO: is this needed?
 
     const { elementCount, entityIdDenseList, _sparseEntityIdList, components } = this;
     entityIdDenseList[elementCount] = entityId;
 
-    // TODO: can optimize this further by reducing indirection?
-    // pass in another array that specifies how many iterations per componentId?
-    for (let i = 0, l = componentIds.length; i < l; i++) {
-      const component = components[componentIds[i]];
-      if (!component) continue;
-      component[fields[i]][elementCount] = values[i];
+    // old components
+    for (let i = 0, l = oldComponentsDataStream.length; i < l; ) {
+      const componentId = i;
+      const valuesCount = i + 1;
+      const firstValue = i + 2;
+      const soa = components[oldComponentsDataStream[componentId]];
+
+      for (
+        let k = firstValue, ll = firstValue + oldComponentsDataStream[valuesCount];
+        k < ll;
+        k++
+      ) {
+        const zeroIndexed = k - firstValue;
+        const newValue = oldComponentsDataStream[k];
+        soa[zeroIndexed][elementCount] = newValue;
+      }
+
+      i += 1 + 1 + valuesCount;
+    }
+
+    // new component
+    const componentId = 0;
+    const valuesCount = 1;
+    const firstValue = 2;
+    const soa = components[newComponentDataStream[componentId]];
+
+    for (let k = firstValue, ll = firstValue + newComponentDataStream[valuesCount]; k < ll; k++) {
+      const zeroIndexed = k - firstValue;
+      const newValue = newComponentDataStream[k];
+      soa[zeroIndexed][elementCount] = newValue;
     }
 
     _sparseEntityIdList[entityId] = elementCount;
     this.elementCount++;
   };
+
+  // // TODO: jests !!!
+  // add = (entityId: EntityId, componentIds: ComponentIds, fields: Fields, values: Values): void => {
+  //   // if (this.hasEntity(entityId)) return; // TODO: is this needed?
+
+  //   const { elementCount, entityIdDenseList, _sparseEntityIdList, components } = this;
+  //   entityIdDenseList[elementCount] = entityId;
+
+  //   // TODO: can optimize this further by reducing indirection?
+  //   // pass in another array that specifies how many iterations per componentId?
+  //   for (let i = 0, l = componentIds.length; i < l; i++) {
+  //     const component = components[componentIds[i]];
+  //     if (!component) continue;
+  //     component[fields[i]][elementCount] = values[i];
+  //   }
+
+  //   _sparseEntityIdList[entityId] = elementCount;
+  //   this.elementCount++;
+  // };
 
   // TODO: jests !!!
   remove = (entityId: EntityId): [ComponentIds, Fields, Values] => {

@@ -9,8 +9,7 @@ import Movement from "../systems/Movement";
 import FpsCounter from "../../utils/FpsCounter";
 import { DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import {} from "../components";
-import { i32, Vector3f } from "../../ecs/Engine";
+import { i32, Vector3f } from "../../ecs/Component";
 // import FpsCounter from "./utils/FpsCounter";
 
 // TODO: move this to own file?

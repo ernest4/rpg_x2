@@ -1,7 +1,7 @@
 import { Engine } from "../../ecs";
 // import { Vector3 } from "../../ecs/Component";
 import System from "../../ecs/System";
-import { Components } from "../components";
+import { Components } from "../scenes/Main";
 // import PhysicsBody from "../components/PhysicsBody";
 // import Position from "../components/Position";
 // import Velocity from "../components/Velocity";
