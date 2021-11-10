@@ -1,3 +1,4 @@
+import { connectAdvanced } from "react-redux";
 import Component, { ComponentSchema, TypedArray } from "./Component";
 import { ComponentsSchema } from "./Engine";
 import { EntityId } from "./types";
@@ -29,6 +30,7 @@ class Archetype {
   ); // TODO: 1e6 enough??
   components: { [componentId: number]: { [componentField: string]: TypedArray } };
   maxEntities: number;
+  denseLists: { [componentId: number]: TypedArray[] };
 
   constructor(
     mask: Mask,
@@ -41,10 +43,14 @@ class Archetype {
     this.maxEntities = maxEntities;
 
     this.components = {};
+    this.denseLists = {};
     for (let i = 0, l = componentIds.length; i < l; i++) {
       const componentId = componentIds[i];
       const componentInstance = componentsSchema[componentId];
-      this.components[componentId] = componentInstance._newSoa(maxEntities);
+      // this.components[componentId] = componentInstance._newSoa(maxEntities);
+      const [soa, denseLists] = componentInstance._newSoa(maxEntities);
+      this.components[componentId] = soa;
+      this.denseLists[componentId] = denseLists;
     }
   }
 
@@ -145,7 +151,14 @@ class Archetype {
   destroy = (entityId: EntityId): void => {
     // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
-    const { _sparseEntityIdList, elementCount, entityIdDenseList, componentIds, components } = this;
+    const {
+      _sparseEntityIdList,
+      elementCount,
+      entityIdDenseList,
+      componentIds,
+      components,
+      denseLists,
+    } = this;
     const denseListIndex = _sparseEntityIdList[entityId];
     _sparseEntityIdList[entityId] = TOMBSTONE_ENTITY;
     // swap ids of last entity with deleted entity to overwrite
@@ -155,9 +168,11 @@ class Archetype {
 
     // TODO: once above cached, i think this can become single for loop
     for (let i = 0, l = componentIds.length; i < l; i++) {
-      const valuesDenseLists = Object.values(components[componentIds[i]]);
-      for (let j = 0, ll = valuesDenseLists.length; j < ll; j++) {
-        const valuesDenseList = valuesDenseLists[j];
+      // const valuesDenseLists = Object.values(components[componentIds[i]]);
+      const componentId = componentIds[i];
+      const valueDenseLists = denseLists[componentId];
+      for (let k = 0, ll = valueDenseLists.length; k < ll; k++) {
+        const valuesDenseList = valueDenseLists[k];
         // replace with last item to 'delete' but keep list packed
         valuesDenseList[denseListIndex] = valuesDenseList[elementCount - 1];
       }

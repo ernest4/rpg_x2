@@ -338,7 +338,7 @@ describe(Archetype, () => {
         expect(subject.hasEntity(entityId)).toBeFalse();
 
         expect(subject.hasEntity(entityId2)).toBeTrue();
-        subject.destroy(entityId2);
+        subject.remove(entityId2);
         expect(subject.hasEntity(entityId2)).toBeFalse();
       });
 
@@ -467,7 +467,7 @@ describe(Archetype, () => {
         subject.destroy(entityId);
         expect(subject.elementCount).toEqual(previousElementCount - 1);
 
-        subject.remove(entityId2);
+        subject.destroy(entityId2);
         expect(subject.elementCount).toEqual(previousElementCount - 2);
       });
     });
