@@ -98,11 +98,12 @@ class Archetype {
     // return entityIdIndex < this.elementCount && this.entityIdDenseList[entityIdIndex] !== entityId;
   };
 
+  // data stream => [componentId, valuesCount, value0, value1..., componentId, valuesCount, value0,...]
   // TODO: jests !!!
   add = (
     entityId: EntityId,
     oldComponentsDataStream: number[],
-    newComponentDataStream: number[]
+    newComponentDataStream?: number[]
   ): void => {
     // if (this.hasEntity(entityId)) return; // TODO: is this needed?
 
@@ -111,17 +112,13 @@ class Archetype {
 
     // old components
     for (let i = 0, l = oldComponentsDataStream.length; i < l; ) {
-      const componentId = i;
-      const valuesCount = i + 1;
-      const firstValue = i + 2;
-      const soa = components[oldComponentsDataStream[componentId]];
+      const componentId = oldComponentsDataStream[i];
+      const valuesCount = oldComponentsDataStream[i + 1];
+      const value0 = i + 2;
+      const soa = components[componentId];
 
-      for (
-        let k = firstValue, ll = firstValue + oldComponentsDataStream[valuesCount];
-        k < ll;
-        k++
-      ) {
-        const zeroIndexed = k - firstValue;
+      for (let k = value0, ll = value0 + valuesCount; k < ll; k++) {
+        const zeroIndexed = k - value0;
         const newValue = oldComponentsDataStream[k];
         soa[zeroIndexed][elementCount] = newValue;
       }
@@ -130,15 +127,17 @@ class Archetype {
     }
 
     // new component
-    const componentId = 0;
-    const valuesCount = 1;
-    const firstValue = 2;
-    const soa = components[newComponentDataStream[componentId]];
+    if (newComponentDataStream) {
+      const componentId = newComponentDataStream[0];
+      const valuesCount = newComponentDataStream[1];
+      const value0 = 2;
+      const soa = components[componentId];
 
-    for (let k = firstValue, ll = firstValue + newComponentDataStream[valuesCount]; k < ll; k++) {
-      const zeroIndexed = k - firstValue;
-      const newValue = newComponentDataStream[k];
-      soa[zeroIndexed][elementCount] = newValue;
+      for (let k = value0, ll = value0 + valuesCount; k < ll; k++) {
+        const zeroIndexed = k - value0;
+        const newValue = newComponentDataStream[k];
+        soa[zeroIndexed][elementCount] = newValue;
+      }
     }
 
     _sparseEntityIdList[entityId] = elementCount;
@@ -247,15 +246,15 @@ class Archetype {
     return this.entityIdDenseList[this._sparseEntityIdList[entityId]];
   };
 
-  // TODO: jests !!!
-  getEntity = (
-    entityId: EntityId
-  ): [{ [componentId: number]: { [componentField: string]: TypedArray } }, number] | null => {
-    if (!this.hasEntity(entityId)) return null;
+  // // TODO: jests !!!
+  // getEntity = (
+  //   entityId: EntityId
+  // ): [{ [componentId: number]: { [componentField: string]: TypedArray } }, number] | null => {
+  //   if (!this.hasEntity(entityId)) return null;
 
-    const entityIndex = this.entityIdDenseList[this._sparseEntityIdList[entityId]];
-    return [this.components, entityIndex];
-  };
+  //   const entityIndex = this.entityIdDenseList[this._sparseEntityIdList[entityId]];
+  //   return [this.components, entityIndex];
+  // };
 }
 
 export default Archetype;
