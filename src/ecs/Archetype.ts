@@ -28,9 +28,10 @@ class Archetype {
   private _sparseEntityIdList: Uint32Array = new Uint32Array(MAX_SPARSE_ENTITIES).fill(
     TOMBSTONE_ENTITY
   ); // TODO: 1e6 enough??
-  components: { [componentId: number]: { [componentField: string]: TypedArray } };
+  components: { [componentId: number]: { [componentField: string]: TypedArray } } = {};
   maxEntities: number;
-  denseLists: { [componentId: number]: TypedArray[] };
+  componentDenseLists: { [componentId: number]: TypedArray[] } = {};
+  denseLists: TypedArray[] = [];
 
   constructor(
     mask: Mask,
@@ -42,15 +43,14 @@ class Archetype {
     this.componentIds = componentIds;
     this.maxEntities = maxEntities;
 
-    this.components = {};
-    this.denseLists = {};
     for (let i = 0, l = componentIds.length; i < l; i++) {
       const componentId = componentIds[i];
       const componentInstance = componentsSchema[componentId];
       // this.components[componentId] = componentInstance._newSoa(maxEntities);
       const [soa, denseLists] = componentInstance._newSoa(maxEntities);
       this.components[componentId] = soa;
-      this.denseLists[componentId] = denseLists;
+      this.componentDenseLists[componentId] = denseLists;
+      this.denseLists = [...this.denseLists, ...denseLists];
     }
   }
 
@@ -151,14 +151,7 @@ class Archetype {
   destroy = (entityId: EntityId): void => {
     // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
-    const {
-      _sparseEntityIdList,
-      elementCount,
-      entityIdDenseList,
-      componentIds,
-      components,
-      denseLists,
-    } = this;
+    const { _sparseEntityIdList, elementCount, entityIdDenseList, denseLists } = this;
     const denseListIndex = _sparseEntityIdList[entityId];
     _sparseEntityIdList[entityId] = TOMBSTONE_ENTITY;
     // swap ids of last entity with deleted entity to overwrite
@@ -166,16 +159,10 @@ class Archetype {
     entityIdDenseList[denseListIndex] = lastEntityId;
     _sparseEntityIdList[lastEntityId] = denseListIndex;
 
-    // TODO: once above cached, i think this can become single for loop
-    for (let i = 0, l = componentIds.length; i < l; i++) {
-      // const valuesDenseLists = Object.values(components[componentIds[i]]);
-      const componentId = componentIds[i];
-      const valueDenseLists = denseLists[componentId];
-      for (let k = 0, ll = valueDenseLists.length; k < ll; k++) {
-        const valuesDenseList = valueDenseLists[k];
-        // replace with last item to 'delete' but keep list packed
-        valuesDenseList[denseListIndex] = valuesDenseList[elementCount - 1];
-      }
+    for (let k = 0, ll = denseLists.length; k < ll; k++) {
+      const valuesDenseList = denseLists[k];
+      // replace with last item to 'delete' but keep list packed
+      valuesDenseList[denseListIndex] = valuesDenseList[elementCount - 1];
     }
 
     this.elementCount--;
