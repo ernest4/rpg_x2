@@ -297,11 +297,26 @@ describe(Archetype, () => {
   describe("#remove", () => {
     context("when archetype has the entity", () => {
       let entityId = 123;
+      let entityId2 = 456;
       let previousElementCount: number;
 
       beforeEach(() => {
         subject.add(
           entityId,
+          [
+            component0.id,
+            component0.id,
+            component1.id,
+            component1.id,
+            component2.id,
+            component2.id,
+            component2.id,
+          ],
+          ["x", "y", "dx", "dy", "u", "v", "t"],
+          [1, 2, 3, 4, 0, 1, 1]
+        );
+        subject.add(
+          entityId2,
           [
             component0.id,
             component0.id,
@@ -321,11 +336,18 @@ describe(Archetype, () => {
         expect(subject.hasEntity(entityId)).toBeTrue();
         subject.remove(entityId);
         expect(subject.hasEntity(entityId)).toBeFalse();
+
+        expect(subject.hasEntity(entityId2)).toBeTrue();
+        subject.destroy(entityId2);
+        expect(subject.hasEntity(entityId2)).toBeFalse();
       });
 
       it("reduces elementCount", () => {
         subject.remove(entityId);
         expect(subject.elementCount).toEqual(previousElementCount - 1);
+
+        subject.remove(entityId2);
+        expect(subject.elementCount).toEqual(previousElementCount - 2);
       });
 
       it("returns component data", () => {
@@ -340,7 +362,7 @@ describe(Archetype, () => {
             component2.id,
           ],
           ["x", "y", "dx", "dy", "u", "v", "t"],
-          [1, 2, 3, 4, 0, 0, 0],
+          [1, 2, 3, 4, 0, 1, 1],
         ]);
       });
     });
@@ -396,10 +418,38 @@ describe(Archetype, () => {
   describe("#destroy", () => {
     context("when archetype has the entity", () => {
       let entityId = 123;
+      let entityId2 = 456;
       let previousElementCount: number;
 
       beforeEach(() => {
-        subject.add(entityId, [], [], []);
+        subject.add(
+          entityId,
+          [
+            component0.id,
+            component0.id,
+            component1.id,
+            component1.id,
+            component2.id,
+            component2.id,
+            component2.id,
+          ],
+          ["x", "y", "dx", "dy", "u", "v", "t"],
+          [1, 2, 3, 4, 0, 0, 0]
+        );
+        subject.add(
+          entityId2,
+          [
+            component0.id,
+            component0.id,
+            component1.id,
+            component1.id,
+            component2.id,
+            component2.id,
+            component2.id,
+          ],
+          ["x", "y", "dx", "dy", "u", "v", "t"],
+          [1, 2, 3, 4, 0, 0, 0]
+        );
         previousElementCount = subject.elementCount;
       });
 
@@ -407,11 +457,18 @@ describe(Archetype, () => {
         expect(subject.hasEntity(entityId)).toBeTrue();
         subject.destroy(entityId);
         expect(subject.hasEntity(entityId)).toBeFalse();
+
+        expect(subject.hasEntity(entityId2)).toBeTrue();
+        subject.destroy(entityId2);
+        expect(subject.hasEntity(entityId2)).toBeFalse();
       });
 
       it("reduces elementCount", () => {
         subject.destroy(entityId);
         expect(subject.elementCount).toEqual(previousElementCount - 1);
+
+        subject.remove(entityId2);
+        expect(subject.elementCount).toEqual(previousElementCount - 2);
       });
     });
 

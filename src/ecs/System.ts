@@ -7,7 +7,7 @@ import { benchmarkSubject } from "./utils/benchmark";
 // TODO: jest tests !!!!
 abstract class System {
   private readonly _engine: Engine;
-  query: (...componentIds: number[]) => Archetype[];
+  view: (...componentIds: number[]) => Archetype[];
   addComponent: <T extends ComponentSchema>(
     entityId: EntityId,
     {
@@ -20,7 +20,7 @@ abstract class System {
 
   constructor(engine: Engine) {
     this._engine = engine;
-    // this.view = this.engine.view;
+    this.view = this.engine.view;
     this.addComponent = this.engine.addComponent;
     this.removeComponent = this.engine.removeComponent;
   }

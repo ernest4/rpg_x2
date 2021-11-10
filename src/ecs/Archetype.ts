@@ -16,7 +16,7 @@ export type Values = any[];
 // type TypedArray = Float32Array | Int32Array;
 
 const MAX_SPARSE_ENTITIES = 1e6;
-const TOMBSTONE_ENTITY = 1e6 - 1;
+const TOMBSTONE_ENTITY = MAX_SPARSE_ENTITIES - 1;
 // this is optimized version of sparseSet...
 class Archetype {
   mask: Mask;
@@ -79,11 +79,13 @@ class Archetype {
     const { _sparseEntityIdList } = this;
     const entityIdIndex = _sparseEntityIdList[entityId];
     return entityIdIndex < this.elementCount && entityIdIndex !== TOMBSTONE_ENTITY;
+    // return this._sparseEntityIdList[entityId] !== TOMBSTONE_ENTITY;
+    // return entityIdIndex < this.elementCount && this.entityIdDenseList[entityIdIndex] !== entityId;
   };
 
   // TODO: jests !!!
   add = (entityId: EntityId, componentIds: ComponentIds, fields: Fields, values: Values): void => {
-    if (this.hasEntity(entityId)) return; // TODO: is this needed?
+    // if (this.hasEntity(entityId)) return; // TODO: is this needed?
 
     const { elementCount, entityIdDenseList, _sparseEntityIdList, components } = this;
     entityIdDenseList[elementCount] = entityId;
@@ -102,10 +104,15 @@ class Archetype {
 
   // TODO: jests !!!
   remove = (entityId: EntityId): [ComponentIds, Fields, Values] => {
-    if (!this.hasEntity(entityId)) return; // TODO: is this needed?
+    // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
     const { _sparseEntityIdList, elementCount, entityIdDenseList, components } = this;
     const denseListIndex = _sparseEntityIdList[entityId];
+    _sparseEntityIdList[entityId] = TOMBSTONE_ENTITY;
+    // swap ids of last entity with deleted entity to overwrite
+    const lastEntityId = entityIdDenseList[elementCount - 1];
+    entityIdDenseList[denseListIndex] = lastEntityId;
+    _sparseEntityIdList[lastEntityId] = denseListIndex;
 
     // TODO: caching!!
     const componentIds: ComponentIds = []; // TODO: cache on class no initialization
@@ -130,21 +137,21 @@ class Archetype {
       }
     }
 
-    // swap ids of last entity with deleted entity to overwrite
-    const lastEntityId = entityIdDenseList[elementCount - 1];
-    entityIdDenseList[denseListIndex] = lastEntityId;
-    _sparseEntityIdList[lastEntityId] = denseListIndex;
-
     this.elementCount--;
     return [componentIds, fields, values];
   };
 
   // TODO: jests !!!
   destroy = (entityId: EntityId): void => {
-    if (!this.hasEntity(entityId)) return; // TODO: is this needed?
+    // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
     const { _sparseEntityIdList, elementCount, entityIdDenseList, componentIds, components } = this;
     const denseListIndex = _sparseEntityIdList[entityId];
+    _sparseEntityIdList[entityId] = TOMBSTONE_ENTITY;
+    // swap ids of last entity with deleted entity to overwrite
+    const lastEntityId = entityIdDenseList[elementCount - 1];
+    entityIdDenseList[denseListIndex] = lastEntityId;
+    _sparseEntityIdList[lastEntityId] = denseListIndex;
 
     // TODO: once above cached, i think this can become single for loop
     for (let i = 0, l = componentIds.length; i < l; i++) {
@@ -155,11 +162,6 @@ class Archetype {
         valuesDenseList[denseListIndex] = valuesDenseList[elementCount - 1];
       }
     }
-
-    // swap ids of last entity with deleted entity to overwrite
-    const lastEntityId = entityIdDenseList[elementCount - 1];
-    entityIdDenseList[denseListIndex] = lastEntityId;
-    _sparseEntityIdList[lastEntityId] = denseListIndex;
 
     this.elementCount--;
   };
