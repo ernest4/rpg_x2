@@ -53,7 +53,9 @@ class Archetype {
       const soa: SOA = [];
       for (let k = 0, ll = componentSchema.length; k < ll; k++) {
         const [field, type] = componentSchema[k].split("_");
-        soa[k] = new TYPE_TO_ARRAY[type](maxEntities); // denseList per field
+        const denseList = new TYPE_TO_ARRAY[type](maxEntities); // denseList per field
+        soa[k] = denseList;
+        this.denseLists.push(denseList); // caching
       }
       this.components[componentId] = soa;
       // this.componentDenseLists[componentId] = denseLists;
@@ -223,14 +225,15 @@ class Archetype {
     const denseListIndex = _sparseEntityIdList[entityId];
     _sparseEntityIdList[entityId] = TOMBSTONE_ENTITY;
     // swap ids of last entity with deleted entity to overwrite
-    const lastEntityId = entityIdDenseList[elementCount - 1];
+    const lastElement = elementCount - 1;
+    const lastEntityId = entityIdDenseList[lastElement];
     entityIdDenseList[denseListIndex] = lastEntityId;
     _sparseEntityIdList[lastEntityId] = denseListIndex;
 
     for (let k = 0, ll = denseLists.length; k < ll; k++) {
       const valuesDenseList = denseLists[k];
       // replace with last item to 'delete' but keep list packed
-      valuesDenseList[denseListIndex] = valuesDenseList[elementCount - 1];
+      valuesDenseList[denseListIndex] = valuesDenseList[lastElement];
     }
 
     this.elementCount--;
