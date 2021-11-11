@@ -64,8 +64,36 @@ describe(Archetype, () => {
       expect(t).toBeInstanceOf(Int32Array);
     });
 
+    it("creates dataStreamTemplate", () => {
+      expect(subject.dataStreamTemplate).toEqual([
+        Components.component0,
+        component0.length,
+        new Float32Array(1e6),
+        new Float32Array(1e6),
+        Components.component1,
+        component1.length,
+        new Float32Array(1e6),
+        new Float32Array(1e6),
+        Components.component2,
+        component2.length,
+        new Float32Array(1e6),
+        new Int32Array(1e6),
+        new Int32Array(1e6),
+      ]);
+    });
+
     it("stores componentIds", () => {
       expect(subject.componentIds).toEqual(componentIds);
+    });
+
+    context("when componentIds out of order", () => {
+      beforeEach(() => {
+        componentIds = [Components.component2, Components.component0, Components.component1];
+      });
+
+      it("stores sorted componentIds", () => {
+        expect(subject.componentIds).toEqual(componentIds.sort());
+      });
     });
 
     it("stores mask", () => {
@@ -296,194 +324,130 @@ describe(Archetype, () => {
   //   });
   // });
 
-  // describe("#remove", () => {
-  //   context("when entity has the component", () => {
-  //     let previousSize: number;
+  describe("#remove", () => {
+    context("when archetype has the entity", () => {
+      let entityId = 123;
+      let entityId2 = 456;
+      let previousElementCount: number;
 
-  //     beforeEach(() => (previousSize = subject.size));
+      beforeEach(() => {
+        subject.add(entityId, [
+          Components.component0,
+          component0.length,
+          111,
+          222,
+          Components.component1,
+          component1.length,
+          333,
+          444,
+          Components.component2,
+          component2.length,
+          777,
+          888,
+          999,
+        ]);
+        subject.add(entityId2, [
+          Components.component0,
+          component0.length,
+          111,
+          222,
+          Components.component1,
+          component1.length,
+          333,
+          444,
+          Components.component2,
+          component2.length,
+          777,
+          888,
+          666,
+        ]);
+        previousElementCount = subject.elementCount;
+      });
 
-  //     it("returns removed component's original entityId", () => {
-  //       expect(subject.remove(sparseSetItem1)).toEqual(entityId1);
-  //     });
+      it("removes the entity", () => {
+        expect(subject.hasEntity(entityId)).toBeTrue();
+        subject.remove(entityId);
+        expect(subject.hasEntity(entityId)).toBeFalse();
 
-  //     it("allows you to remove component by id", () => {
-  //       expect(subject.remove(entityId1)).toEqual(entityId1);
-  //     });
+        expect(subject.hasEntity(entityId2)).toBeTrue();
+        subject.remove(entityId2);
+        expect(subject.hasEntity(entityId2)).toBeFalse();
+      });
 
-  //     it("reduces list size", () => {
-  //       subject.remove(sparseSetItem1);
-  //       expect(subject.size).toEqual(previousSize - 1);
-  //     });
-  //   });
+      it("reduces elementCount", () => {
+        subject.remove(entityId);
+        expect(subject.elementCount).toEqual(previousElementCount - 1);
 
-  //   context("when entity does not have the component", () => {
-  //     beforeEach(() => {
-  //       subject = new SparseSet();
-  //       sparseSetItem1 = new SparseSetItem(entityId1);
-  //     });
+        subject.remove(entityId2);
+        expect(subject.elementCount).toEqual(previousElementCount - 2);
+      });
 
-  //     context("when component never existed", () => {
-  //       it("returns null", () => {
-  //         expect(subject.remove(sparseSetItem1)).toEqual(null);
-  //       });
-  //     });
+      it("returns component data", () => {
+        expect(subject.remove(entityId)).toEqual([
+          Components.component0,
+          component0.length,
+          111,
+          222,
+          Components.component1,
+          component1.length,
+          333,
+          444,
+          Components.component2,
+          component2.length,
+          777,
+          888,
+          999,
+        ]);
+      });
+    });
 
-  //     context("when component was added", () => {
-  //       beforeEach(() => {
-  //         sparseSetItem1 = new SparseSetItem(entityId1);
-  //         sparseSetItem2 = new SparseSetItem(entityId2);
+    // context("when entity does not have the component", () => {
+    //   beforeEach(() => {
+    //     subject = new SparseSet();
+    //     sparseSetItem1 = new SparseSetItem(entityId1);
+    //   });
 
-  //         subject.add(sparseSetItem1);
-  //         subject.add(sparseSetItem2);
-  //       });
+    //   context("when component never existed", () => {
+    //     it("returns null", () => {
+    //       expect(subject.remove(sparseSetItem1)).toEqual(null);
+    //     });
+    //   });
 
-  //       context("when component was removed", () => {
-  //         beforeEach(() => subject.remove(sparseSetItem1));
+    //   context("when component was added", () => {
+    //     beforeEach(() => {
+    //       sparseSetItem1 = new SparseSetItem(entityId1);
+    //       sparseSetItem2 = new SparseSetItem(entityId2);
 
-  //         context("when removing it again", () => {
-  //           it("returns null", () => {
-  //             expect(subject.remove(sparseSetItem1)).toEqual(null);
-  //           });
-  //         });
+    //       subject.add(sparseSetItem1);
+    //       subject.add(sparseSetItem2);
+    //     });
 
-  //         context("when removing a component with same entityId (before it was even added)", () => {
-  //           it("returns null", () => {
-  //             expect(subject.remove(new SparseSetItem(entityId1))).toEqual(null);
-  //           });
-  //         });
-  //       });
+    //     context("when component was removed", () => {
+    //       beforeEach(() => subject.remove(sparseSetItem1));
 
-  //       context("when all components were cleared", () => {
-  //         beforeEach(() => subject.clear());
+    //       context("when removing it again", () => {
+    //         it("returns null", () => {
+    //           expect(subject.remove(sparseSetItem1)).toEqual(null);
+    //         });
+    //       });
 
-  //         it("returns null", () => {
-  //           expect(subject.remove(sparseSetItem1)).toEqual(null);
-  //         });
-  //       });
-  //     });
-  //   });
-  // });
+    //       context("when removing a component with same entityId (before it was even added)", () => {
+    //         it("returns null", () => {
+    //           expect(subject.remove(new SparseSetItem(entityId1))).toEqual(null);
+    //         });
+    //       });
+    //     });
 
-  // describe("#remove", () => {
-  //   context("when archetype has the entity", () => {
-  //     let entityId = 123;
-  //     let entityId2 = 456;
-  //     let previousElementCount: number;
+    //     context("when all components were cleared", () => {
+    //       beforeEach(() => subject.clear());
 
-  //     beforeEach(() => {
-  //       subject.add(
-  //         entityId,
-  //         [
-  //           Components.component0,
-  //           Components.component0,
-  //           Components.component1,
-  //           Components.component1,
-  //           Components.component2,
-  //           Components.component2,
-  //           Components.component2,
-  //         ],
-  //         ["x", "y", "dx", "dy", "u", "v", "t"],
-  //         [1, 2, 3, 4, 0, 1, 1]
-  //       );
-  //       subject.add(
-  //         entityId2,
-  //         [
-  //           Components.component0,
-  //           Components.component0,
-  //           Components.component1,
-  //           Components.component1,
-  //           Components.component2,
-  //           Components.component2,
-  //           Components.component2,
-  //         ],
-  //         ["x", "y", "dx", "dy", "u", "v", "t"],
-  //         [1, 2, 3, 4, 0, 0, 0]
-  //       );
-  //       previousElementCount = subject.elementCount;
-  //     });
-
-  //     it("removes the entity", () => {
-  //       expect(subject.hasEntity(entityId)).toBeTrue();
-  //       subject.remove(entityId);
-  //       expect(subject.hasEntity(entityId)).toBeFalse();
-
-  //       expect(subject.hasEntity(entityId2)).toBeTrue();
-  //       subject.remove(entityId2);
-  //       expect(subject.hasEntity(entityId2)).toBeFalse();
-  //     });
-
-  //     it("reduces elementCount", () => {
-  //       subject.remove(entityId);
-  //       expect(subject.elementCount).toEqual(previousElementCount - 1);
-
-  //       subject.remove(entityId2);
-  //       expect(subject.elementCount).toEqual(previousElementCount - 2);
-  //     });
-
-  //     it("returns component data", () => {
-  //       expect(subject.remove(entityId)).toEqual([
-  //         [
-  //           Components.component0,
-  //           Components.component0,
-  //           Components.component1,
-  //           Components.component1,
-  //           Components.component2,
-  //           Components.component2,
-  //           Components.component2,
-  //         ],
-  //         ["x", "y", "dx", "dy", "u", "v", "t"],
-  //         [1, 2, 3, 4, 0, 1, 1],
-  //       ]);
-  //     });
-  //   });
-
-  //   // context("when entity does not have the component", () => {
-  //   //   beforeEach(() => {
-  //   //     subject = new SparseSet();
-  //   //     sparseSetItem1 = new SparseSetItem(entityId1);
-  //   //   });
-
-  //   //   context("when component never existed", () => {
-  //   //     it("returns null", () => {
-  //   //       expect(subject.remove(sparseSetItem1)).toEqual(null);
-  //   //     });
-  //   //   });
-
-  //   //   context("when component was added", () => {
-  //   //     beforeEach(() => {
-  //   //       sparseSetItem1 = new SparseSetItem(entityId1);
-  //   //       sparseSetItem2 = new SparseSetItem(entityId2);
-
-  //   //       subject.add(sparseSetItem1);
-  //   //       subject.add(sparseSetItem2);
-  //   //     });
-
-  //   //     context("when component was removed", () => {
-  //   //       beforeEach(() => subject.remove(sparseSetItem1));
-
-  //   //       context("when removing it again", () => {
-  //   //         it("returns null", () => {
-  //   //           expect(subject.remove(sparseSetItem1)).toEqual(null);
-  //   //         });
-  //   //       });
-
-  //   //       context("when removing a component with same entityId (before it was even added)", () => {
-  //   //         it("returns null", () => {
-  //   //           expect(subject.remove(new SparseSetItem(entityId1))).toEqual(null);
-  //   //         });
-  //   //       });
-  //   //     });
-
-  //   //     context("when all components were cleared", () => {
-  //   //       beforeEach(() => subject.clear());
-
-  //   //       it("returns null", () => {
-  //   //         expect(subject.remove(sparseSetItem1)).toEqual(null);
-  //   //       });
-  //   //     });
-  //   //   });
-  //   // });
-  // });
+    //       it("returns null", () => {
+    //         expect(subject.remove(sparseSetItem1)).toEqual(null);
+    //       });
+    //     });
+    //   });
+    // });
+  });
 
   describe("#destroy", () => {
     context("when archetype has the entity", () => {
@@ -520,7 +484,7 @@ describe(Archetype, () => {
           component2.length,
           777,
           888,
-          999,
+          666,
         ]);
         previousElementCount = subject.elementCount;
       });

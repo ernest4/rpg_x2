@@ -35,6 +35,7 @@ class Archetype {
   denseLists: TypedArray[] = [];
   cachedComponentIds: number[] = [];
   cacheFields: string[] = [];
+  dataStreamTemplate: number[] = [];
 
   constructor(
     mask: Mask,
@@ -43,19 +44,24 @@ class Archetype {
     ...componentIds: number[]
   ) {
     this.mask = mask;
-    this.componentIds = componentIds;
+    this.componentIds = componentIds.sort();
     this.maxEntities = maxEntities;
 
+    const { dataStreamTemplate: dataStream } = this;
     for (let i = 0, l = componentIds.length; i < l; i++) {
       const componentId = componentIds[i];
+      dataStream.push(componentId);
       const componentSchema = componentsSchema[componentId];
 
       const soa: SOA = [];
-      for (let k = 0, ll = componentSchema.length; k < ll; k++) {
+      const valuesCount = componentSchema.length;
+      dataStream.push(valuesCount);
+      for (let k = 0; k < valuesCount; k++) {
         const [field, type] = componentSchema[k].split("_");
         const denseList = new TYPE_TO_ARRAY[type](maxEntities); // denseList per field
         soa[k] = denseList;
         this.denseLists.push(denseList); // caching
+        dataStream.push(denseList);
       }
       this.components[componentId] = soa;
       // this.componentDenseLists[componentId] = denseLists;
@@ -166,16 +172,10 @@ class Archetype {
   // };
 
   // TODO: jests !!!
-  remove = (entityId: EntityId): [ComponentIds, Fields, Values] => {
+  remove = (entityId: EntityId): number[] => {
     // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
-    const {
-      _sparseEntityIdList,
-      elementCount,
-      entityIdDenseList,
-      componentFields,
-      componentDenseLists,
-    } = this;
+    const { _sparseEntityIdList, elementCount, entityIdDenseList, dataStreamTemplate } = this;
     const denseListIndex = _sparseEntityIdList[entityId];
     _sparseEntityIdList[entityId] = TOMBSTONE_ENTITY;
     // swap ids of last entity with deleted entity to overwrite
@@ -183,38 +183,28 @@ class Archetype {
     entityIdDenseList[denseListIndex] = lastEntityId;
     _sparseEntityIdList[lastEntityId] = denseListIndex;
 
-    // TODO: caching!!
-    const componentIds: ComponentIds = []; // TODO: cache on class no initialization
-    const fields: Fields = []; // TODO: cache on class no initialization
-    const values: Values = [];
-    // [1, 1, 2,...]
-    // [x, y, name,...]
-    // [123, 456, 'abc',...]
+    // TODO cache most of this return array? just plug the values in?
+    const dataStream: number[] = [];
 
-    // TODO: once above cached, i think this can become single for loop
-    for (let i = 0, l = this.componentIds.length; i < l; i++) {
-      const componentId = this.componentIds[i];
-      const _fields = componentFields[componentId];
-      const _values = componentDenseLists[componentId];
-      for (let k = 0, ll = _fields.length; k < ll; k++) {
-        componentIds.push(componentId);
-        fields.push(_fields[k]);
-        values.push(_values[k]);
+    const lastElement = elementCount - 1;
+    for (let i = 0, l = dataStreamTemplate.length; i < l; ) {
+      const componentId = dataStreamTemplate[i];
+      dataStream.push(componentId);
+      const valuesCount = dataStreamTemplate[i + 1];
+      dataStream.push(valuesCount);
+      const value0 = i + 2;
+
+      for (let k = value0, ll = value0 + valuesCount; k < ll; k++) {
+        const denseList = dataStreamTemplate[k];
+        dataStream.push(denseList[denseListIndex]);
+        denseList[denseListIndex] = denseList[lastElement];
       }
-      // const componentEntries = Object.entries(components[componentId]);
-      // for (let j = 0, ll = componentEntries.length; j < ll; j++) {
-      //   // capture data
-      //   cachedComponentIds.push(componentId);
-      //   const [field, valuesDenseList] = componentEntries[j];
-      //   cacheFields.push(field);
-      //   values.push(valuesDenseList[denseListIndex]);
-      //   // replace with last item to 'delete' but keep list packed
-      //   valuesDenseList[denseListIndex] = valuesDenseList[elementCount - 1];
-      // }
+
+      i += 1 + 1 + valuesCount;
     }
 
     this.elementCount--;
-    return [componentIds, fields, values];
+    return dataStream;
   };
 
   // TODO: jests !!!
