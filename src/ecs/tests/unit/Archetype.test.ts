@@ -226,7 +226,7 @@ describe(Archetype, () => {
         expect(t[lastEntity]).toEqual(999);
       });
 
-      context("when passing in new component data stream", () => {
+      context("when passing in new component data", () => {
         it("adds entity components", () => {
           subject.add(
             entityId,
@@ -240,7 +240,8 @@ describe(Archetype, () => {
               333,
               444,
             ],
-            [Components.component2, component2.length, 777, 888, 999]
+            Components.component2,
+            [777, 888, 999]
           );
           const [x, y] = subject.components[Components.component0];
           const [dx, dy] = subject.components[Components.component1];

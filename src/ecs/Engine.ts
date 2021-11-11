@@ -159,34 +159,10 @@ class Engine {
       currentArchetype,
       nextArchetype,
       entityId,
-      _componentInstance,
-      // @ts-ignore
-      fields
+      componentId,
+      <number[]>(<any>values)
     );
   };
-
-  // getCurrentAndNextEntityArchetype = (
-  //   entityId: EntityId,
-  //   nextArchetypeMask: Mask
-  // ): [Archetype | null, Archetype] => {
-  //   let currentArchetype: Archetype | null;
-  //   let nextArchetype: Archetype;
-
-  //   const { _archetypes } = this;
-  //   for (let i = 0, l = _archetypes.length; i < l; i++) {
-  //     const archetype = _archetypes[i];
-  //     if (!nextArchetype && archetype.maskMatches(nextArchetypeMask)) {
-  //       if (currentArchetype) return [currentArchetype, archetype];
-
-  //       nextArchetype = archetype;
-  //     }
-  //     if (!currentArchetype && archetype.hasEntity(entityId)) {
-  //       if (nextArchetype) return [archetype, nextArchetype];
-
-  //       currentArchetype = archetype;
-  //     }
-  //   }
-  // };
 
   getEntityArchetype = (entityId: EntityId): Archetype | null => {
     const { _archetypes } = this;
@@ -236,58 +212,15 @@ class Engine {
     return newArchetype;
   };
 
-  changeUpEntityArchetype = <T extends ComponentSchema>(
+  changeUpEntityArchetype = (
     currentArchetype: Archetype,
     newArchetype: Archetype,
     entityId: EntityId,
-    componentInstance: Component<T>,
-    newComponentObject: { [key in keyof T]: T[key] }
-    // newComponentFields: Fields,
-    // newComponentValues: Values
+    newComponentId: number,
+    newComponentValues: number[]
   ) => {
-    // let benchReport: any = [];
-
-    // benchReport.push(
-    //   benchmarkSubject("currentArchetype.remove", () => {
-    //     currentArchetype?.remove(entityId) || [[], [], []]; // first component wont have any archetypes
-    //   })
-    // );
-    const [componentIds, fields, values] = currentArchetype?.remove(entityId) || [[], [], []]; // first component wont have any archetypes
-
-    // benchReport.push(
-    //   benchmarkSubject("newComponentObject", () => {
-    //     const newComponentEntries = Object.entries(newComponentObject);
-    //     for (let i = 0, l = newComponentEntries.length; i < l; i++) {
-    //       const [field, value] = newComponentEntries[i];
-    //       componentIds.push(componentInstance.id);
-    //       fields.push(field);
-    //       values.push(value);
-    //     }
-    //   })
-    // );
-    // combine new and old components in single data stream
-    const newComponentEntries = Object.entries(newComponentObject);
-    for (let i = 0, l = newComponentEntries.length; i < l; i++) {
-      const [field, value] = newComponentEntries[i];
-      componentIds.push(componentInstance.id);
-      fields.push(field);
-      values.push(value);
-    }
-    // for (let i = 0, l = newComponentFields.length; i < l; i++) {
-    //   componentIds.push(componentId);
-    //   fields.push(newComponentFields[i]);
-    //   values.push(newComponentValues[i]);
-    // }
-
-    // benchReport.push(
-    //   benchmarkSubject("newArchetype.add", () => {
-    //     newArchetype.add(entityId, componentIds, fields, values);
-    //   })
-    // );
-
-    newArchetype.add(entityId, componentIds, fields, values);
-
-    // console.log(JSON.stringify(benchReport));
+    const oldDataStream = currentArchetype?.remove(entityId) || []; // first component wont have any archetypes
+    newArchetype.add(entityId, oldDataStream, newComponentId, newComponentValues);
   };
 
   // addComponents = (...components: Component[]) => components.forEach(this.addComponent);
@@ -358,7 +291,7 @@ class Engine {
     newArchetype: Archetype,
     entityId: EntityId
   ) => {
-    newArchetype.add(entityId, ...currentArchetype.remove(entityId));
+    newArchetype.add(entityId, currentArchetype.remove(entityId));
   };
 
   // removeComponents = (...components: Component[]) => components.forEach(this.removeComponent);

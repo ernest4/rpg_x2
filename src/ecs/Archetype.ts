@@ -111,7 +111,8 @@ class Archetype {
   add = (
     entityId: EntityId,
     oldComponentsDataStream: number[],
-    newComponentDataStream?: number[]
+    newComponentId?: number,
+    newValues?: number[]
   ): void => {
     // if (this.hasEntity(entityId)) return; // TODO: is this needed?
 
@@ -135,16 +136,12 @@ class Archetype {
     }
 
     // new component
-    if (newComponentDataStream) {
-      const componentId = newComponentDataStream[0];
-      const valuesCount = newComponentDataStream[1];
-      const value0 = 2;
-      const soa = components[componentId];
+    if (newValues) {
+      const valuesCount = newValues.length;
+      const soa = components[newComponentId];
 
-      for (let k = value0, ll = value0 + valuesCount; k < ll; k++) {
-        const zeroIndexed = k - value0;
-        const newValue = newComponentDataStream[k];
-        soa[zeroIndexed][elementCount] = newValue;
+      for (let k = 0; k < valuesCount; k++) {
+        soa[k][elementCount] = newValues[k];
       }
     }
 
