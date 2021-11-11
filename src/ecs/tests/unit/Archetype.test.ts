@@ -169,6 +169,25 @@ describe(Archetype, () => {
     });
   });
 
+  describe("#componentIdsWithout", () => {
+    it("returns componentIds without given componentId", () => {
+      expect(subject.componentIdsWithout(Components.component1)).toEqual([
+        Components.component0,
+        Components.component2,
+      ]);
+    });
+
+    context("when archetype doesn't have that componentId", () => {
+      it("returns all componentIds", () => {
+        expect(subject.componentIdsWithout(Components.component3)).toEqual([
+          Components.component0,
+          Components.component1,
+          Components.component2,
+        ]);
+      });
+    });
+  });
+
   describe("#add", () => {
     let entityId = 123;
     let entityId2 = 456;

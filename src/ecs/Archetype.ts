@@ -106,6 +106,22 @@ class Archetype {
     // return entityIdIndex < this.elementCount && this.entityIdDenseList[entityIdIndex] !== entityId;
   };
 
+  componentIdsWithout = (componentId: number): number[] => {
+    const {
+      componentIds: ids,
+      componentIds: { length: idsLength },
+    } = this;
+
+    const componentIds: number[] = [];
+
+    for (let i = 0; i < idsLength; i++) {
+      const id = ids[i];
+      if (id !== componentId) componentIds.push(id);
+    }
+
+    return componentIds;
+  };
+
   // data stream => [componentId, valuesCount, value0, value1..., componentId, valuesCount, value0,...]
   // TODO: jests !!!
   add = (
