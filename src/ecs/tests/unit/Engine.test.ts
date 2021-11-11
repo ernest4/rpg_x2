@@ -1,5 +1,5 @@
 import { context } from "../../../../tests/jestHelpers";
-import Component, { Floats32, Vector2f, _f32, _i32 } from "../../Component";
+import { Vector2f, f32, i32, Vector2i } from "../../Component";
 // import Component from "../../Component";
 import Engine from "../../Engine";
 import System from "../../System";
@@ -21,16 +21,20 @@ const createMaskFromComponentIds = (...componentIds: number[]) => {
 const enum Components {
   component0,
   component1,
-  // component2,
-  // component3,
+  component2,
+  component3,
 }
 
+let component0 = Vector2f;
+let component1 = [f32("dx"), f32("dy")];
+let component2 = [f32("u"), i32("v"), i32("t")];
+let component3 = [i32("t")];
+
 let schema = {
-  [Components.component0]: new Component(Components.component0, Vector2f),
-  // [Components.component1]: new Component(Components.component1, { dx: _f32(), dy: _f32() }),
-  [Components.component1]: new Component(Components.component1, Floats32("dx", "dy")),
-  // [component2.id]: new Component({ u: _f32(), v: _i32(), t: _i32() }),
-  // [component3.id]: new Component({ t: _i32() }),
+  [Components.component0]: component0,
+  [Components.component1]: component1,
+  // [Components.component2]: component2,
+  // [Components.component3]: component3,
 };
 
 class TestySystem extends System {
@@ -63,8 +67,8 @@ class QuerySystem extends System {
     for (let j = 0, l = archetypes.length; j < l; j++) {
       const {
         components: {
-          [Components.component0]: { x, y },
-          [Components.component1]: { dx, dy },
+          [Components.component0]: [x, y],
+          [Components.component1]: [dx, dy],
         },
         elementCount,
       } = archetypes[j];
@@ -155,11 +159,14 @@ describe(Engine, () => {
         benchmarkSubject("setup", () => {
           for (let i = 0; i < 40000; i++) {
             const entityId = engine.newEntityId();
-            engine.addComponent(entityId, schema[Components.component0].new({ x: i, y: i + 1 }));
-            engine.addComponent(
-              entityId,
-              schema[Components.component1].new({ dx: i + 2, dy: i + 3 })
-            );
+            engine.addComponent(Components.component0, entityId, schema[Components.component0], [
+              i,
+              i + 1,
+            ]);
+            engine.addComponent(Components.component1, entityId, schema[Components.component1], [
+              i + 2,
+              i + 3,
+            ]);
           }
         })
       );
@@ -179,8 +186,8 @@ describe(Engine, () => {
           for (let j = 0, l = archetypes.length; j < l; j++) {
             const {
               components: {
-                [Components.component0]: { x, y },
-                [Components.component1]: { dx, dy },
+                [Components.component0]: [x, y],
+                [Components.component1]: [dx, dy],
               },
               elementCount,
             } = archetypes[j];
