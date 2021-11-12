@@ -142,10 +142,12 @@ class Archetype {
       const value0 = i + 2;
       const soa = components[componentId];
 
-      for (let k = value0, ll = value0 + valuesCount; k < ll; k++) {
-        const zeroIndexed = k - value0;
-        const newValue = oldComponentsDataStream[k];
-        soa[zeroIndexed][elementCount] = newValue;
+      if (soa) { // if component is part of this archetype..
+        for (let k = value0, ll = value0 + valuesCount; k < ll; k++) {
+          const zeroIndexed = k - value0;
+          const newValue = oldComponentsDataStream[k];
+          soa[zeroIndexed][elementCount] = newValue;
+        }
       }
 
       i += 1 + 1 + valuesCount;

@@ -275,6 +275,40 @@ describe(Archetype, () => {
           expect(t[lastEntity]).toEqual(999);
         });
       });
+
+      context("when adding component data archetype does not have", () => {
+        it("ignores the extra data entity components", () => {
+          subject.add(
+            entityId,
+            [
+              Components.component0,
+              component0.length,
+              111,
+              222,
+              Components.component1,
+              component1.length,
+              333,
+              444,
+              Components.component3,
+              component3.length,
+              345
+            ],
+            Components.component2,
+            [777, 888, 999]
+          );
+          const [x, y] = subject.components[Components.component0];
+          const [dx, dy] = subject.components[Components.component1];
+          const [u, v, t] = subject.components[Components.component2];
+          const lastEntity = subject.elementCount - 1;
+          expect(x[lastEntity]).toEqual(111);
+          expect(y[lastEntity]).toEqual(222);
+          expect(dx[lastEntity]).toEqual(333);
+          expect(dy[lastEntity]).toEqual(444);
+          expect(u[lastEntity]).toEqual(777);
+          expect(v[lastEntity]).toEqual(888);
+          expect(t[lastEntity]).toEqual(999);
+        });
+      });
     });
 
     // context("when item already exists", () => {

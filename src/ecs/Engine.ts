@@ -150,7 +150,7 @@ class Engine {
     if (!nextArchetype) {
       nextArchetype = this.createArchetype(
         unionMask,
-        ...(currentArchetype?.componentIds || []), // first component wont have any archetypes
+        ...(currentArchetype?.componentIds || []), // first component wont have current archetype
         componentId
       );
     }
@@ -271,6 +271,7 @@ class Engine {
         return;
       } else {
         // TODO: some error case? is this possible?
+        throw Error("Removing component entity doesn't have. TODO: handle this!");
       }
     }
 
