@@ -1,22 +1,17 @@
 import { context } from "../../../../tests/jestHelpers";
 import { Vector2f, f32, i32, Vector2i } from "../../Component";
-// import Component from "../../Component";
 import Engine from "../../Engine";
 import System from "../../System";
 import { benchmark, benchmarkSubject } from "../../utils/benchmark";
-import SparseSet from "../../utils/SparseSet";
-import NumberComponent from "../helpers/components/NumberComponent";
-import StrictNumberComponent from "../helpers/components/StrictNumberComponent";
-import StringComponent from "../helpers/components/StringComponent";
 
-const createMaskFromComponentIds = (...componentIds: number[]) => {
-  const newMask = [];
-  for (let i = 0, l = componentIds.length; i < l; i++) {
-    const componentId = componentIds[i];
-    newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
-  }
-  return newMask;
-};
+// const createMaskFromComponentIds = (...componentIds: number[]) => {
+//   const newMask = [];
+//   for (let i = 0, l = componentIds.length; i < l; i++) {
+//     const componentId = componentIds[i];
+//     newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
+//   }
+//   return newMask;
+// };
 
 const enum Components {
   component0,
@@ -122,8 +117,8 @@ describe(Engine, () => {
   beforeEach(() => {
     engine = new Engine(schema);
 
-    querySystem1 = new QuerySystem(engine);
-    engine.addSystem(querySystem1);
+    // querySystem1 = new QuerySystem(engine);
+    // engine.addSystem(querySystem1);
 
     // testySystem1 = new TestySystem(engine);
     // testySystem1.start = jest.fn();
@@ -140,8 +135,6 @@ describe(Engine, () => {
     // queryCallBackFunction = jest.fn();
     // queryCallBackFunction2 = jest.fn();
   });
-
-  it("placeholder", () => {});
 
   describe("benchmarks", () => {
     // it("benchmarks add/remove", () => {
@@ -171,18 +164,10 @@ describe(Engine, () => {
         })
       );
 
-      // const queryId = engine.registerQuery(component0.id, component1.id);
-      // const archetypes = engine.queries[queryId];
-
       let totalTimes = 0;
-      // const queryString = engine.registerQuery(component1.id, component0.id);
       const archetypes = engine.view(Components.component1, Components.component0);
       for (let i = 0; i < queryIterations; i++) {
         totalTimes += benchmark(() => {
-          // const archetypes = engine.query(queryString);
-          // const archetypes = engine.query(queryId);
-          // const archetypes = engine.queries[queryId];
-          // const archetypes = engine.query(component1.id, component0.id, 6, 4, 3, 7);
           for (let j = 0, l = archetypes.length; j < l; j++) {
             const {
               components: {
@@ -191,8 +176,6 @@ describe(Engine, () => {
               },
               elementCount,
             } = archetypes[j];
-
-            // console.log(JSON.stringify([archetypes[j].components, elementCount]));
 
             for (let i = 0; i < elementCount; i++) {
               x[i] += dx[i];
