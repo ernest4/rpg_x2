@@ -256,7 +256,12 @@ describe(Engine, () => {
       });
 
       it("adds the component", () => {
-        const [[Components.component0]: [x,y], entity] = engine.getEntity(entityId)
+        const [
+          {
+            [Components.component0]: [x, y],
+          },
+          entity,
+        ] = engine.getEntity(entityId);
         expect(engine.getEntity(entityId));
         // expect(queryCallBackFunction).toBeCalledTimes(1);
         // expect(queryCallBackFunction).toBeCalledWith([component]);

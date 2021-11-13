@@ -5,7 +5,7 @@ import System from "./System";
 import { isNumber } from "./utils/Number";
 import Entity from "./Entity";
 import Stats from "./utils/Stats";
-import Archetype, { Fields, Mask, Values } from "./Archetype";
+import Archetype, { Fields, Mask, SOA, Values } from "./Archetype";
 import { benchmarkSubject } from "./utils/benchmark";
 import { ComponentsSchema } from "./Component";
 
@@ -293,8 +293,13 @@ class Engine {
   //   // return entity;
   // };
 
-  getEntity = (entityId: EntityId): [Archetype, number] => {
-    //
+  getEntity = (
+    entityId: EntityId
+  ): [components: { [componentId: number]: SOA }, entityIndex: number] | null => {
+    const archetype = this.getEntityArchetype(entityId);
+    if (!archetype) return null;
+
+    return archetype.getEntity(entityId);
   };
 
   newEntityId = (): EntityId => this.entityIdPool.getId();
