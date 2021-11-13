@@ -136,7 +136,7 @@ describe(Archetype, () => {
   });
 
   describe("#hasComponents", () => {
-    context("when archetype's mask contains given component", () => {
+    context("when archetype's mask contains given components", () => {
       it("returns true", () => {
         expect(subject.hasComponents(Components.component1, Components.component2)).toBeTrue();
       });
@@ -291,7 +291,7 @@ describe(Archetype, () => {
               444,
               Components.component3,
               component3.length,
-              345
+              345,
             ],
             Components.component2,
             [777, 888, 999]
@@ -329,54 +329,82 @@ describe(Archetype, () => {
     // });
   });
 
-  // describe("#get", () => {
-  //   let getComponentForEntity: SparseSetItem | null;
+  describe("#getEntity", () => {
+    let entityId = 123;
+    let addParams = [
+      Components.component0,
+      component0.length,
+      111,
+      222,
+      Components.component1,
+      component1.length,
+      333,
+      444,
+      Components.component2,
+      component2.length,
+      777,
+      888,
+      999,
+    ];
 
-  //   beforeEach(() => (getComponentForEntity = subject.get(entityId1)));
+    context("when archetype has the entity", () => {
+      it("returns the entity", () => {
+        subject.add(entityId, addParams);
+        const [
+          {
+            [Components.component0]: [x, y],
+            [Components.component1]: [dx, dy],
+            [Components.component2]: [u, v, t],
+          },
+          entity,
+        ] = subject.getEntity(entityId);
 
-  //   context("when entity has the component", () => {
-  //     it("returns the component", () => {
-  //       expect(getComponentForEntity).toBe(sparseSetItem1);
-  //       expect(getComponentForEntityComponents.?).toEqual(entityId1);
-  //     });
-  //   });
+        expect(x[entity]).toEqual(111);
+        expect(y[entity]).toEqual(222);
+        expect(dx[entity]).toEqual(333);
+        expect(dy[entity]).toEqual(444);
+        expect(u[entity]).toEqual(777);
+        expect(v[entity]).toEqual(888);
+        expect(t[entity]).toEqual(999);
+      });
+    });
 
-  //   context("when entity does not have the component", () => {
-  //     beforeEach(() => (subject = new SparseSet()));
+    context("when archetype does not have the entity", () => {
+      // beforeEach(() => (subject = new SparseSet()));
 
-  //     context("when component never existed", () => {
-  //       it("returns null", () => {
-  //         expect(subject.get(entityId1)).toEqual(null);
-  //       });
-  //     });
+      context("when component never existed", () => {
+        it("returns null", () => {
+          expect(subject.getEntity(entityId)).toEqual(null);
+        });
+      });
 
-  //     context("when component was added", () => {
-  //       beforeEach(() => {
-  //         sparseSetItem1 = new SparseSetItem(entityId1);
-  //         sparseSetItem2 = new SparseSetItem(entityId2);
+      // context("when component was added", () => {
+      //   beforeEach(() => {
+      //     sparseSetItem1 = new SparseSetItem(entityId1);
+      //     sparseSetItem2 = new SparseSetItem(entityId2);
 
-  //         subject.add(sparseSetItem1);
-  //         subject.add(sparseSetItem2);
-  //       });
+      //     subject.add(sparseSetItem1);
+      //     subject.add(sparseSetItem2);
+      //   });
 
-  //       context("when component was removed", () => {
-  //         beforeEach(() => subject.remove(sparseSetItem1));
+      //   context("when component was removed", () => {
+      //     beforeEach(() => subject.remove(sparseSetItem1));
 
-  //         it("returns null", () => {
-  //           expect(subject.get(entityId1)).toEqual(null);
-  //         });
-  //       });
+      //     it("returns null", () => {
+      //       expect(subject.get(entityId1)).toEqual(null);
+      //     });
+      //   });
 
-  //       context("when all components were cleared", () => {
-  //         beforeEach(() => subject.clear());
+      //   context("when all components were cleared", () => {
+      //     beforeEach(() => subject.clear());
 
-  //         it("returns null", () => {
-  //           expect(subject.get(entityId1)).toEqual(null);
-  //         });
-  //       });
-  //     });
-  //   });
-  // });
+      //     it("returns null", () => {
+      //       expect(subject.get(entityId1)).toEqual(null);
+      //     });
+      //   });
+      // });
+    });
+  });
 
   describe("#remove", () => {
     context("when archetype has the entity", () => {
@@ -620,41 +648,6 @@ describe(Archetype, () => {
   //   it("makes existing components inaccessible", () => {
   //     expect(subject.get(entityId1)).toEqual(null);
   //     expect(subject.get(entityId2)).toEqual(null);
-  //   });
-  // });
-
-  // describe("#size", () => {
-  //   it("returns the number of components in the list", () => {
-  //     expect(subject.size).toEqual(2);
-
-  //     subject.add(sparseSetItem3);
-  //     expect(subject.size).toEqual(3);
-
-  //     subject.remove(sparseSetItem1);
-  //     expect(subject.size).toEqual(2);
-
-  //     subject.remove(sparseSetItem2);
-  //     expect(subject.size).toEqual(1);
-
-  //     subject.remove(sparseSetItem3);
-  //     expect(subject.size).toEqual(0);
-  //   });
-  // });
-
-  // describe("#stream", () => {
-  //   beforeEach(() => subject.add(sparseSetItem3));
-
-  //   it("streams all the items", () => {
-  //     let items: any[] = [];
-
-  //     subject.stream((item: any) => items.push(item));
-  //     expect(items).toEqual([sparseSetItem1, sparseSetItem2, sparseSetItem3]);
-
-  //     subject.remove(sparseSetItem2);
-
-  //     items = [];
-  //     subject.stream((item: any) => items.push(item));
-  //     expect(items).toEqual([sparseSetItem1, sparseSetItem3]);
   //   });
   // });
 });

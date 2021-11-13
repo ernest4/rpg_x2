@@ -142,7 +142,8 @@ class Archetype {
       const value0 = i + 2;
       const soa = components[componentId];
 
-      if (soa) { // if component is part of this archetype..
+      if (soa) {
+        // if component is part of this archetype..
         for (let k = value0, ll = value0 + valuesCount; k < ll; k++) {
           const zeroIndexed = k - value0;
           const newValue = oldComponentsDataStream[k];
@@ -254,15 +255,14 @@ class Archetype {
     return this.entityIdDenseList[this._sparseEntityIdList[entityId]];
   };
 
-  // // TODO: jests !!!
-  // getEntity = (
-  //   entityId: EntityId
-  // ): [{ [componentId: number]: { [componentField: string]: TypedArray } }, number] | null => {
-  //   if (!this.hasEntity(entityId)) return null;
+  getEntity = (
+    entityId: EntityId
+  ): [components: { [componentId: number]: SOA }, entityIndex: number] | null => {
+    if (!this.hasEntity(entityId)) return null;
 
-  //   const entityIndex = this.entityIdDenseList[this._sparseEntityIdList[entityId]];
-  //   return [this.components, entityIndex];
-  // };
+    const entityIndex = this._sparseEntityIdList[entityId];
+    return [this.components, entityIndex];
+  };
 }
 
 export default Archetype;

@@ -236,37 +236,46 @@ describe(Engine, () => {
     });
   });
 
-  // describe("#addComponent", () => {
-  //   beforeEach(() => {
-  //     entityId = engine.newEntityId();
-  //     component = new NumberComponent(entityId);
-  //   });
+  describe("#addComponent", () => {
+    let entityId;
 
-  //   context("when component doesn't exist", () => {
-  //     beforeEach(() => {
-  //       engine.addComponent(component);
-  //       engine.query(queryCallBackFunction, NumberComponent);
-  //     });
+    beforeEach(() => {
+      entityId = engine.newEntityId();
+      // component = new NumberComponent(entityId);
+    });
 
-  //     it("adds the component", () => {
-  //       expect(queryCallBackFunction).toBeCalledTimes(1);
-  //       expect(queryCallBackFunction).toBeCalledWith([component]);
-  //     });
-  //   });
+    context("when component doesn't exist", () => {
+      beforeEach(() => {
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [34, 56]
+        );
+        // engine.query(queryCallBackFunction, NumberComponent);
+      });
 
-  //   context("when component does exist", () => {
-  //     beforeEach(() => {
-  //       engine.addComponent(component);
-  //       engine.addComponent(component);
-  //       engine.query(queryCallBackFunction, NumberComponent);
-  //     });
+      it("adds the component", () => {
+        const [[Components.component0]: [x,y], entity] = engine.getEntity(entityId)
+        expect(engine.getEntity(entityId));
+        // expect(queryCallBackFunction).toBeCalledTimes(1);
+        // expect(queryCallBackFunction).toBeCalledWith([component]);
+      });
+    });
 
-  //     it("adds the component once", () => {
-  //       expect(queryCallBackFunction).toBeCalledTimes(1);
-  //       expect(queryCallBackFunction).toBeCalledWith([component]);
-  //     });
-  //   });
-  // });
+    context("when component does exist", () => {
+      beforeEach(() => {
+        // engine.addComponent(component);
+        // engine.addComponent(component);
+        // engine.query(queryCallBackFunction, NumberComponent);
+      });
+
+      it("adds the component once", () => {
+        // expect(queryCallBackFunction).toBeCalledTimes(1);
+        // expect(queryCallBackFunction).toBeCalledWith([component]);
+      });
+    });
+  });
 
   // describe("#addComponents", () => {
   //   beforeEach(() => {

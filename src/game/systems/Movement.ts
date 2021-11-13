@@ -1,4 +1,5 @@
 import { Engine } from "../../ecs";
+import Archetype from "../../ecs/Archetype";
 // import { Vector3 } from "../../ecs/Component";
 import System from "../../ecs/System";
 import { Components } from "../scenes/Main";
@@ -8,33 +9,34 @@ import { Components } from "../scenes/Main";
 // import { Components } from "../scenes/Main";
 
 class Movement extends System {
+  archetypes: Archetype[];
+
   constructor(engine: Engine) {
     super(engine);
   }
 
-  start(): void {}
+  start(): void {
+    this.archetypes = this.view(Components.Velocity, Components.Position);
+  }
 
   update(): void {
     // this.benchmarkSubject("archetype query", () => {
     // });
+
+    const {
+      archetypes,
+      archetypes: { length },
+    } = this;
     const seconds = this.deltaTime / 1000;
 
-    const archetypes = this.view(Components.Velocity, Components.Position);
-    for (let j = 0, l = archetypes.length; j < l; j++) {
+    for (let j = 0; j < length; j++) {
       const {
         components: {
-          [Components.Velocity]: { x: dx, y: dy, z: dz },
-          [Components.Position]: { x, y, z },
+          [Components.Position]: [x, y, z],
+          [Components.Velocity]: [dx, dy, dz],
         },
         elementCount,
       } = archetypes[j];
-      // const {
-      //   components: {
-      //     [Components.Velocity]: [dx, dy, dz],
-      //     [Components.Position]: [x, y, z],
-      //   },
-      //   elementCount,
-      // } = archetypes[j];
 
       for (let i = 0; i < elementCount; i++) {
         x[i] += dx[i] * seconds;
