@@ -194,7 +194,7 @@ class Engine {
 
   removeComponent = (componentId: number, entityId: EntityId) => {
     const currentArchetype = this.getEntityArchetype(entityId);
-    // if (!currentArchetype?.hasComponents(componentId)) return; // exit early if doesn't exist
+    if (!currentArchetype?.hasComponents(componentId)) return; // exit early if doesn't exist
 
     // if last component...
     if (currentArchetype.componentIds.length === 1) {
