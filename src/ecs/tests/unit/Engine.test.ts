@@ -278,6 +278,31 @@ describe(Engine, () => {
         ]);
         expect(currentArchetype.elementCount).toEqual(1);
       });
+
+      it("changes archetypes", () => {
+        const archetype0 = engine.getEntityArchetype(entityId);
+        expect(archetype0).toBeNull();
+
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [34, 56]
+        );
+
+        const archetype1 = engine.getEntityArchetype(entityId);
+        expect(archetype1.componentIds).toEqual([Components.component0]);
+
+        engine.addComponent(
+          Components.component1,
+          entityId,
+          schema[Components.component1],
+          [78, 90]
+        );
+
+        const archetype2 = engine.getEntityArchetype(entityId);
+        expect(archetype2.componentIds).toEqual([Components.component0, Components.component1]);
+      });
     });
 
     context("when component already exists", () => {
@@ -376,6 +401,7 @@ describe(Engine, () => {
 
     context("when component doesn't exist", () => {
       it("does nothing", () => {
+        // NOTE: this jest covers error case where arch doesnt exist or arch does not have component
         engine.removeComponent(Components.component0, entityId);
       });
     });
@@ -411,10 +437,7 @@ describe(Engine, () => {
         expect(old_dy[old_entity]).toEqual(90);
 
         const oldArchetype = engine.getEntityArchetype(entityId);
-        expect(oldArchetype.componentIds).toEqual([
-          Components.component0,
-          Components.component1,
-        ]);
+        expect(oldArchetype.componentIds).toEqual([Components.component0, Components.component1]);
         expect(oldArchetype.elementCount).toEqual(1);
 
         engine.removeComponent(Components.component0, entityId);
@@ -438,28 +461,39 @@ describe(Engine, () => {
         expect(currentArchetype.elementCount).toEqual(1);
       });
 
-      // context("when no other component has the same entity Id", () => {
-      //   it("reclaims the id", () => {
-      //     expect(engine.newEntityId()).toEqual(component.id);
-      //   });
-      // });
+      it("changes archetypes", () => {
+        const archetype2 = engine.getEntityArchetype(entityId);
+        expect(archetype2.componentIds).toEqual([Components.component0, Components.component1]);
 
-      // context("when another component has the same entity Id", () => {
-      //   beforeEach(() => {
-      //     engine.newEntityId();
-      //     engine.newEntityId();
-      //     engine.newEntityId();
-      //     entityId = engine.newEntityId();
-      //     component = new NumberComponent(entityId);
-      //     engine.addComponent(component);
-      //     engine.addComponent(new StringComponent(component.id));
-      //     engine.removeComponent(component);
-      //   });
+        engine.removeComponent(Components.component1, entityId);
 
-      //   it("does not reclaim the id", () => {
-      //     expect(engine.newEntityId()).not.toEqual(component.id);
-      //   });
-      // });
+        const archetype1 = engine.getEntityArchetype(entityId);
+        expect(archetype1.componentIds).toEqual([Components.component0]);
+      });
+
+      context("when last component is removed", () => {
+        //
+        // context("when no other component has the same entity Id", () => {
+        //   it("reclaims the id", () => {
+        //     expect(engine.newEntityId()).toEqual(component.id);
+        //   });
+        // });
+        // context("when another component has the same entity Id", () => {
+        //   beforeEach(() => {
+        //     engine.newEntityId();
+        //     engine.newEntityId();
+        //     engine.newEntityId();
+        //     entityId = engine.newEntityId();
+        //     component = new NumberComponent(entityId);
+        //     engine.addComponent(component);
+        //     engine.addComponent(new StringComponent(component.id));
+        //     engine.removeComponent(component);
+        //   });
+        //   it("does not reclaim the id", () => {
+        //     expect(engine.newEntityId()).not.toEqual(component.id);
+        //   });
+        // });
+      });
     });
   });
 
