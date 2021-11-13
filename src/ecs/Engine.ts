@@ -102,7 +102,7 @@ class Engine {
     values: { [key in keyof F]: number }
   ) => {
     const currentArchetype = this.getEntityArchetype(entityId);
-    // if (currentArchetype.hasComponents(componentId)) return; // exit early if component exists
+    if (currentArchetype?.hasComponents(componentId)) return; // exit early if component exists
 
     const currentArchetypeMask = currentArchetype?.mask || []; // first component wont have any archetypes
     const unionMask = this.createMaskWithComponentBitFlip(currentArchetypeMask, componentId);
@@ -194,7 +194,7 @@ class Engine {
 
   removeComponent = (componentId: number, entityId: EntityId) => {
     const currentArchetype = this.getEntityArchetype(entityId);
-    // if (!currentArchetype.hasComponents(componentId)) return; // exit early if doesn't exist
+    // if (!currentArchetype?.hasComponents(componentId)) return; // exit early if doesn't exist
 
     // if last component...
     if (currentArchetype.componentIds.length === 1) {

@@ -241,10 +241,46 @@ describe(Engine, () => {
 
     beforeEach(() => {
       entityId = engine.newEntityId();
-      // component = new NumberComponent(entityId);
     });
 
     context("when component doesn't exist", () => {
+      it("adds the component", () => {
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [34, 56]
+        );
+        engine.addComponent(
+          Components.component1,
+          entityId,
+          schema[Components.component1],
+          [78, 90]
+        );
+
+        const [
+          {
+            [Components.component0]: [x, y],
+            [Components.component1]: [dx, dy],
+          },
+          entity,
+        ] = engine.getEntity(entityId);
+
+        expect(x[entity]).toEqual(34);
+        expect(y[entity]).toEqual(56);
+        expect(dx[entity]).toEqual(78);
+        expect(dy[entity]).toEqual(90);
+
+        const currentArchetype = engine.getEntityArchetype(entityId);
+        expect(currentArchetype.componentIds).toEqual([
+          Components.component0,
+          Components.component1,
+        ]);
+        expect(currentArchetype.elementCount).toEqual(1);
+      });
+    });
+
+    context("when component already exists", () => {
       beforeEach(() => {
         engine.addComponent(
           Components.component0,
@@ -252,32 +288,41 @@ describe(Engine, () => {
           schema[Components.component0],
           [34, 56]
         );
-        // engine.query(queryCallBackFunction, NumberComponent);
+        engine.addComponent(
+          Components.component1,
+          entityId,
+          schema[Components.component1],
+          [78, 90]
+        );
       });
 
-      it("adds the component", () => {
+      it("does not add the component again", () => {
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [888, 999]
+        );
+
         const [
           {
             [Components.component0]: [x, y],
+            [Components.component1]: [dx, dy],
           },
           entity,
         ] = engine.getEntity(entityId);
-        expect(engine.getEntity(entityId));
-        // expect(queryCallBackFunction).toBeCalledTimes(1);
-        // expect(queryCallBackFunction).toBeCalledWith([component]);
-      });
-    });
 
-    context("when component does exist", () => {
-      beforeEach(() => {
-        // engine.addComponent(component);
-        // engine.addComponent(component);
-        // engine.query(queryCallBackFunction, NumberComponent);
-      });
+        expect(x[entity]).toEqual(34);
+        expect(y[entity]).toEqual(56);
+        expect(dx[entity]).toEqual(78);
+        expect(dy[entity]).toEqual(90);
 
-      it("adds the component once", () => {
-        // expect(queryCallBackFunction).toBeCalledTimes(1);
-        // expect(queryCallBackFunction).toBeCalledWith([component]);
+        const currentArchetype = engine.getEntityArchetype(entityId);
+        expect(currentArchetype.componentIds).toEqual([
+          Components.component0,
+          Components.component1,
+        ]);
+        expect(currentArchetype.elementCount).toEqual(1);
       });
     });
   });
