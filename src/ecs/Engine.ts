@@ -53,15 +53,7 @@ class Engine {
     //   removedComponent: (component: Component, oldEntityId: EntityId) => {},
     // };
 
-    // move to helper class, some "increasing number generator" ?
-    // this.lastComponentSignatureId = 0;
-
-    // Object.entries(componentsSchema).forEach(([componentName, componentSchema]) => {
-    //   const signatureId = this.newComponentSignatureId(); // unique increasing numbers
-    //   this.components[componentName] = new Component(signatureId, componentSchema);
-    // });
-
-    // TODO: validate schema!
+    // TODO: validate schema!?!
     this._componentsSchema = componentsSchema;
 
     // TODO: optimize, maybe use arrays?
@@ -103,44 +95,10 @@ class Engine {
 
   // removeAllSystems
 
-  // addComponent = <T extends Component>(component: T) => {
-  //   // NOTE: indexing using component class name
-  //   // @ts-ignore
-  //   const componentClassName = component.constructor.className();
-  //   let componentList = this._componentLists[componentClassName];
-
-  //   if (!componentList) {
-  //     componentList = new SparseSet();
-  //     this._componentLists[componentClassName] = componentList;
-  //   }
-
-  //   componentList.add(component);
-  //   return component;
-  // };
-
-  // private defineComponent = (componentName: string, componentSchema: ComponentSchema) => {
-  //   const signatureId = this.newComponentSignatureId(); // unique increasing numbers
-  //   this.components[componentName] = new Component(signatureId, componentSchema);
-  // };
-
-  // private newComponentSignatureId = () => ++this.lastComponentSignatureId;
-
-  // addComponent = <T extends Component>(tag: number, component: T) => {
-  //   let componentList = this._componentLists[tag];
-
-  //   if (!componentList) {
-  //     componentList = new SparseSet();
-  //     this._componentLists[tag] = componentList;
-  //   }
-
-  //   componentList.add(component);
-  //   return component;
-  // };
-
   addComponent = <F extends readonly [] | readonly any[]>(
     componentId: number,
     entityId: EntityId,
-    fields: F,
+    _fields: F,
     values: { [key in keyof F]: number }
   ) => {
     const currentArchetype = this.getEntityArchetype(entityId);
@@ -232,32 +190,6 @@ class Engine {
   //   return this.addComponent(component);
   // };
 
-  // removeComponent = (component: Component) => {
-  //   // NOTE: indexing using component class name
-  //   // @ts-ignore
-  //   const componentClassName = component.constructor.className();
-  //   const componentList = this._componentLists[componentClassName];
-  //   if (!componentList) return;
-
-  //   const oldEntityId = component.id;
-  //   // this._events.removedComponent(component, oldEntityId);
-  //   componentList.remove(component);
-  //   if (isNumber(oldEntityId)) this.reclaimEntityIdIfFree(oldEntityId);
-  // };
-
-  // removeComponent = (tag: number, component: Component) => {
-  //   // NOTE: indexing using component class name
-  //   // @ts-ignore
-  //   // const componentClassName = component.constructor.className();
-  //   const componentList = this._componentLists[tag];
-  //   if (!componentList) return;
-
-  //   const oldEntityId = component.id;
-  //   // this._events.removedComponent(component, oldEntityId);
-  //   componentList.remove(component);
-  //   if (isNumber(oldEntityId)) this.reclaimEntityIdIfFree(oldEntityId);
-  // };
-
   removeComponent = (componentId: number, entityId: EntityId) => {
     const currentArchetype = this.getEntityArchetype(entityId);
 
@@ -296,32 +228,6 @@ class Engine {
   };
 
   // removeComponents = (...components: Component[]) => components.forEach(this.removeComponent);
-
-  // removeComponentById = <T extends Component>(
-  //   entityId: EntityId,
-  //   componentClass: ComponentClass<T>
-  // ) => {
-  //   const componentList = this._componentLists[componentClass.className()];
-  //   if (!componentList) return;
-
-  //   componentList.remove(entityId);
-  //   if (isNumber(entityId)) this.reclaimEntityIdIfFree(entityId);
-  // };
-
-  // removeComponentById = (entityId: EntityId, tag: number) => {
-  //   const componentList = this._componentLists[tag];
-  //   if (!componentList) return;
-
-  //   componentList.remove(entityId);
-  //   if (isNumber(entityId)) this.reclaimEntityIdIfFree(entityId);
-  // };
-
-  // removeComponentsById = (entityId: EntityId, ...componentClasses: ComponentClass<any>[]) => {
-  //   const callback = (componentClass: ComponentClass<any>) => {
-  //     this.removeComponentById(entityId, componentClass);
-  //   };
-  //   componentClasses.forEach(callback);
-  // };
 
   // removeComponentsOfClass = <T extends Component>(componentClass: ComponentClass<T>) => {
   //   this._componentLists[componentClass.className()]?.stream(this.removeComponent);
@@ -457,71 +363,6 @@ class Engine {
     this._updating = false;
     // this.updateComplete.dispatch(); // TODO: signals??
   };
-
-  // TODO: jests
-  // For systems that query 1 component, can't be faster than this!
-  // queryOne = <T extends Component>(queryTag: number): [T[], number] => {
-  //   return (<SparseSet<T>>this._componentLists[queryTag]).iterable();
-  // };
-
-  // query = (...componentIds: number[]): Archetype[] => {
-  //   const resultArchetypes: Archetype[] = [];
-  //   const searchMask = this.createMaskFromComponentIds(...componentIds);
-
-  //   const { _archetypes } = this;
-  //   for (let i = 0, l = _archetypes.length; i < l; i++) {
-  //     if (_archetypes[i].maskContains(searchMask)) resultArchetypes.push(_archetypes[i]);
-  //   }
-
-  //   return resultArchetypes;
-  // };
-
-  // registerQuery = (...componentIds: number[]): string => {
-  //   const { _archetypes, _queries } = this;
-  //   const queryString = componentIds.sort().toString();
-  //   if (_queries[queryString]) return queryString;
-
-  //   const resultArchetypes: Archetype[] = [];
-  //   const searchMask = this.createMaskFromComponentIds(...componentIds);
-
-  //   for (let i = 0, l = _archetypes.length; i < l; i++) {
-  //     if (_archetypes[i].maskContains(searchMask)) resultArchetypes.push(_archetypes[i]);
-  //   }
-
-  //   // const queryId = this.queries.push(resultArchetypes) - 1;
-  //   // _queryStringToId[queryString] = queryId;
-  //   // return queryId;
-  //   _queries[queryString] = resultArchetypes;
-  //   // return resultArchetypes;
-  //   return queryString;
-  // };
-
-  // // query = (queryId: number): Archetype[] => {
-  // //   return this._queriesById[queryId];
-  // // };
-
-  // query = (queryString: string): Archetype[] => {
-  //   return this._queries[queryString];
-  // };
-
-  // query = (...componentIds: number[]): Archetype[] => {
-  //   const { _archetypes, _queries } = this;
-  //   const queryString = componentIds.sort().toString();
-  //   if (_queries[queryString]) return _queries[queryString];
-
-  //   const resultArchetypes: Archetype[] = [];
-  //   const searchMask = this.createMaskFromComponentIds(...componentIds);
-
-  //   for (let i = 0, l = _archetypes.length; i < l; i++) {
-  //     if (_archetypes[i].maskContains(searchMask)) resultArchetypes.push(_archetypes[i]);
-  //   }
-
-  //   // const queryId = this.queries.push(resultArchetypes) - 1;
-  //   // _queryStringToId[queryString] = queryId;
-  //   // return queryId;
-  //   _queries[queryString] = resultArchetypes;
-  //   return resultArchetypes;
-  // };
 
   view = (...componentIds: number[]): Archetype[] => {
     const { _archetypes, _queries } = this;

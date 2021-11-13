@@ -99,9 +99,9 @@ describe(Engine, () => {
 
   let engine: Engine;
   let querySystem1: System;
-  // let testySystem1: System;
-  // let testySystem2: System;
-  // let testySystem3: System;
+  let testySystem1: System;
+  let testySystem2: System;
+  let testySystem3: System;
 
   // let entityId = 0;
   // let entityId2 = 1;
@@ -120,17 +120,17 @@ describe(Engine, () => {
     // querySystem1 = new QuerySystem(engine);
     // engine.addSystem(querySystem1);
 
-    // testySystem1 = new TestySystem(engine);
-    // testySystem1.start = jest.fn();
-    // testySystem1.update = jest.fn();
+    testySystem1 = new TestySystem(engine);
+    testySystem1.start = jest.fn();
+    testySystem1.update = jest.fn();
 
-    // testySystem2 = new TestySystem(engine);
-    // testySystem2.start = jest.fn();
-    // testySystem2.update = jest.fn();
+    testySystem2 = new TestySystem(engine);
+    testySystem2.start = jest.fn();
+    testySystem2.update = jest.fn();
 
-    // testySystem3 = new TestySystem(engine);
-    // testySystem3.start = jest.fn();
-    // testySystem3.update = jest.fn();
+    testySystem3 = new TestySystem(engine);
+    testySystem3.start = jest.fn();
+    testySystem3.update = jest.fn();
 
     // queryCallBackFunction = jest.fn();
     // queryCallBackFunction2 = jest.fn();
@@ -222,19 +222,19 @@ describe(Engine, () => {
     });
   });
 
-  // describe("#addSystem", () => {
-  //   beforeEach(() => {
-  //     engine.addSystem(testySystem1);
-  //     engine.addSystem(testySystem2);
-  //     engine.addSystem(testySystem3);
-  //   });
+  describe("#addSystem", () => {
+    beforeEach(() => {
+      engine.addSystem(testySystem1);
+      engine.addSystem(testySystem2);
+      engine.addSystem(testySystem3);
+    });
 
-  //   it("calls start() on the system", () => {
-  //     expect(testySystem1.start).toBeCalledTimes(1);
-  //     expect(testySystem2.start).toBeCalledTimes(1);
-  //     expect(testySystem3.start).toBeCalledTimes(1);
-  //   });
-  // });
+    it("calls start() on the system", () => {
+      expect(testySystem1.start).toBeCalledTimes(1);
+      expect(testySystem2.start).toBeCalledTimes(1);
+      expect(testySystem3.start).toBeCalledTimes(1);
+    });
+  });
 
   // describe("#addComponent", () => {
   //   beforeEach(() => {
@@ -719,11 +719,11 @@ describe(Engine, () => {
   //   });
   // });
 
-  // describe("#newEntityId", () => {
-  //   it("returns entityId", () => {
-  //     expect(engine.newEntityId()).toBeNumber();
-  //   });
-  // });
+  describe("#newEntityId", () => {
+    it("returns entityId", () => {
+      expect(engine.newEntityId()).toBeNumber();
+    });
+  });
 
   // describe("#newEntityIdWithAlias", () => {
   //   let aliasId = 123456;
@@ -923,34 +923,34 @@ describe(Engine, () => {
   //   });
   // });
 
-  // describe("#update", () => {
-  //   let deltaTime = 123;
+  describe("#update", () => {
+    let deltaTime = 123;
 
-  //   beforeEach(() => {
-  //     engine.addSystem(testySystem1);
-  //     engine.addSystem(testySystem2);
-  //     engine.addSystem(testySystem3);
+    beforeEach(() => {
+      engine.addSystem(testySystem1);
+      engine.addSystem(testySystem2);
+      engine.addSystem(testySystem3);
 
-  //     engine.update(deltaTime);
-  //   });
+      engine.update(deltaTime);
+    });
 
-  //   it("calls update() on all added systems", () => {
-  //     expect(testySystem1.update).toBeCalledTimes(1);
-  //     expect(testySystem2.update).toBeCalledTimes(1);
-  //     expect(testySystem3.update).toBeCalledTimes(1);
-  //   });
+    it("calls update() on all added systems", () => {
+      expect(testySystem1.update).toBeCalledTimes(1);
+      expect(testySystem2.update).toBeCalledTimes(1);
+      expect(testySystem3.update).toBeCalledTimes(1);
+    });
 
-  //   it("calls update() on all added systems in sequence of addition", () => {
-  //     expect(testySystem2.update).toHaveBeenCalledAfter(testySystem1.update as any);
-  //     expect(testySystem3.update).toHaveBeenCalledAfter(testySystem2.update as any);
-  //   });
+    it("calls update() on all added systems in sequence of addition", () => {
+      expect(testySystem2.update).toHaveBeenCalledAfter(testySystem1.update as any);
+      expect(testySystem3.update).toHaveBeenCalledAfter(testySystem2.update as any);
+    });
 
-  //   it("returns deltaTime of the engine", () => {
-  //     expect(testySystem1.deltaTime).toEqual(deltaTime);
-  //     expect(testySystem2.deltaTime).toEqual(deltaTime);
-  //     expect(testySystem3.deltaTime).toEqual(deltaTime);
-  //   });
-  // });
+    it("returns deltaTime of the engine", () => {
+      expect(testySystem1.deltaTime).toEqual(deltaTime);
+      expect(testySystem2.deltaTime).toEqual(deltaTime);
+      expect(testySystem3.deltaTime).toEqual(deltaTime);
+    });
+  });
 
   // // TODO: ... more cases ??
   // describe("#query", () => {
@@ -1026,15 +1026,15 @@ describe(Engine, () => {
   //   });
   // });
 
-  // describe("#deltaTime", () => {
-  //   let deltaTime = 123;
+  describe("#deltaTime", () => {
+    let deltaTime = 123;
 
-  //   beforeEach(() => {
-  //     engine.update(deltaTime);
-  //   });
+    beforeEach(() => {
+      engine.update(deltaTime);
+    });
 
-  //   it("calls returns deltaTime", () => {
-  //     expect(engine.deltaTime).toEqual(deltaTime);
-  //   });
-  // });
+    it("calls returns deltaTime", () => {
+      expect(engine.deltaTime).toEqual(deltaTime);
+    });
+  });
 });

@@ -1,5 +1,5 @@
 import { ComponentClass, EntityId } from "./types";
-import Component from "./Component";
+// import Component from "./Component";
 import Engine from "./Engine";
 
 // TODO: entity wrapper ??
