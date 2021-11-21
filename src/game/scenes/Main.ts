@@ -9,8 +9,25 @@ import Movement from "../systems/Movement";
 import FpsCounter from "../../utils/FpsCounter";
 import { DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import { Vector3 } from "../../ecs/Component";
+import { i32, Vector3f } from "../../ecs/Component";
 // import FpsCounter from "./utils/FpsCounter";
+
+// TODO: move this to own file?
+export const enum Components {
+  Position,
+  Velocity,
+  Speed,
+  Player,
+  Sprite,
+}
+
+export const SCHEMA = {
+  [Components.Position]: Vector3f,
+  [Components.Velocity]: Vector3f,
+  [Components.Speed]: [i32("speed")],
+  [Components.Player]: [],
+  [Components.Sprite]: [i32("url"), i32("frameWidth")],
+} as const;
 
 export default class Main extends Phaser.Scene {
   // dudeQuads!: any[];
@@ -38,7 +55,7 @@ export default class Main extends Phaser.Scene {
   }
 
   private initECS = () => {
-    this._engine = new Engine(DEVELOPMENT);
+    this._engine = new Engine(SCHEMA, DEVELOPMENT);
     // TODO: test all systems.
     this._engine.addSystems(
       new Manager(this._engine),

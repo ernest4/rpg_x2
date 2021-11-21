@@ -1,11 +1,36 @@
 import { context } from "../../../../tests/jestHelpers";
-import Component from "../../Component";
+import { Vector2f, f32, i32, Vector2i } from "../../Component";
 import Engine from "../../Engine";
 import System from "../../System";
-import SparseSet from "../../utils/SparseSet";
-import NumberComponent from "../helpers/components/NumberComponent";
-import StrictNumberComponent from "../helpers/components/StrictNumberComponent";
-import StringComponent from "../helpers/components/StringComponent";
+import { benchmark, benchmarkSubject } from "../../utils/benchmark";
+
+// const createMaskFromComponentIds = (...componentIds: number[]) => {
+//   const newMask = [];
+//   for (let i = 0, l = componentIds.length; i < l; i++) {
+//     const componentId = componentIds[i];
+//     newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
+//   }
+//   return newMask;
+// };
+
+const enum Components {
+  component0,
+  component1,
+  component2,
+  component3,
+}
+
+let component0 = Vector2f;
+let component1 = [f32("dx"), f32("dy")];
+let component2 = [f32("u"), i32("v"), i32("t")];
+let component3 = [i32("t")];
+
+let schema = {
+  [Components.component0]: component0,
+  [Components.component1]: component1,
+  // [Components.component2]: component2,
+  // [Components.component3]: component3,
+};
 
 class TestySystem extends System {
   // TODO: ...
@@ -26,6 +51,32 @@ class TestySystem extends System {
   }
 }
 
+class QuerySystem extends System {
+  constructor(engine: Engine) {
+    super(engine);
+  }
+
+  start(): void {}
+  update(): void {
+    const archetypes = this.view(Components.component0, Components.component1);
+    for (let j = 0, l = archetypes.length; j < l; j++) {
+      const {
+        components: {
+          [Components.component0]: [x, y],
+          [Components.component1]: [dx, dy],
+        },
+        elementCount,
+      } = archetypes[j];
+
+      for (let i = 0; i < elementCount; i++) {
+        x[i] += dx[i];
+        y[i] += dy[i];
+      }
+    }
+  }
+  destroy(): void {}
+}
+
 // class TestySystem2 extends System {
 //
 // }
@@ -35,24 +86,39 @@ class TestySystem extends System {
 // }
 
 describe(Engine, () => {
+  // let component0.id = 0;
+  // let component1.id = 1;
+  // let componentId2 = 2;
+  // let componentId3 = 3; // NOTE: not in schema by default
+
+  // let schema = {
+  //   [component0.id]: ["x", "y"],
+  //   [component1.id]: ["dx", "dy"],
+  //   [componentId2]: ["u", "v", "t"],
+  // };
+
   let engine: Engine;
+  let querySystem1: System;
   let testySystem1: System;
   let testySystem2: System;
   let testySystem3: System;
 
-  let entityId = 0;
-  let entityId2 = 1;
-  let entityId3 = 2;
+  // let entityId = 0;
+  // let entityId2 = 1;
+  // let entityId3 = 2;
 
-  let queryCallBackFunction: jest.Mock<any, any>;
-  let queryCallBackFunction2: jest.Mock<any, any>;
+  // let queryCallBackFunction: jest.Mock<any, any>;
+  // let queryCallBackFunction2: jest.Mock<any, any>;
 
   // let component: Component;
   // let component2: Component;
   // let component3: Component;
 
   beforeEach(() => {
-    engine = new Engine();
+    engine = new Engine(schema);
+
+    // querySystem1 = new QuerySystem(engine);
+    // engine.addSystem(querySystem1);
 
     testySystem1 = new TestySystem(engine);
     testySystem1.start = jest.fn();
@@ -66,57 +132,225 @@ describe(Engine, () => {
     testySystem3.start = jest.fn();
     testySystem3.update = jest.fn();
 
-    queryCallBackFunction = jest.fn();
-    queryCallBackFunction2 = jest.fn();
+    // queryCallBackFunction = jest.fn();
+    // queryCallBackFunction2 = jest.fn();
   });
 
-  it("placeholder", () => {});
+  describe("benchmarks", () => {
+    // it("benchmarks add/remove", () => {
+    //   for (let i = 0; i < 4000; i++) {
+    //     const entityId = engine.newEntityId();
+    //     engine.addComponent(entityId, component0.id, schema[component0.id], [i, i + 1]);
+    //     engine.addComponent(entityId, component1.id, schema[component1.id], [i + 2, i + 3]);
+    //     engine.removeComponent(component0.id, entityId);
+    //   }
+    // });
 
-  // describe("#addSystem", () => {
-  //   beforeEach(() => {
-  //     engine.addSystem(testySystem1);
-  //     engine.addSystem(testySystem2);
-  //     engine.addSystem(testySystem3);
-  //   });
+    const queryIterations = 10000;
+    it("benchmarks query", () => {
+      console.log(
+        benchmarkSubject("setup", () => {
+          for (let i = 0; i < 40000; i++) {
+            const entityId = engine.newEntityId();
+            engine.addComponent(Components.component0, entityId, schema[Components.component0], [
+              i,
+              i + 1,
+            ]);
+            engine.addComponent(Components.component1, entityId, schema[Components.component1], [
+              i + 2,
+              i + 3,
+            ]);
+          }
+        })
+      );
 
-  //   it("calls start() on the system", () => {
-  //     expect(testySystem1.start).toBeCalledTimes(1);
-  //     expect(testySystem2.start).toBeCalledTimes(1);
-  //     expect(testySystem3.start).toBeCalledTimes(1);
-  //   });
-  // });
+      let totalTimes = 0;
+      const archetypes = engine.view(Components.component1, Components.component0);
+      for (let i = 0; i < queryIterations; i++) {
+        totalTimes += benchmark(() => {
+          for (let j = 0, l = archetypes.length; j < l; j++) {
+            const {
+              components: {
+                [Components.component0]: [x, y],
+                [Components.component1]: [dx, dy],
+              },
+              elementCount,
+            } = archetypes[j];
 
-  // describe("#addComponent", () => {
-  //   beforeEach(() => {
-  //     entityId = engine.newEntityId();
-  //     component = new NumberComponent(entityId);
-  //   });
+            for (let i = 0; i < elementCount; i++) {
+              x[i] += dx[i];
+              y[i] += dy[i];
+            }
+          }
+        });
+      }
 
-  //   context("when component doesn't exist", () => {
-  //     beforeEach(() => {
-  //       engine.addComponent(component);
-  //       engine.query(queryCallBackFunction, NumberComponent);
-  //     });
+      const time = totalTimes / queryIterations;
+      console.log(`query: ${time}`);
+    });
 
-  //     it("adds the component", () => {
-  //       expect(queryCallBackFunction).toBeCalledTimes(1);
-  //       expect(queryCallBackFunction).toBeCalledWith([component]);
-  //     });
-  //   });
+    it("baseline", () => {
+      const x = [];
+      const y = [];
+      const dx = [];
+      const dy = [];
+      const elementCount = 40000;
 
-  //   context("when component does exist", () => {
-  //     beforeEach(() => {
-  //       engine.addComponent(component);
-  //       engine.addComponent(component);
-  //       engine.query(queryCallBackFunction, NumberComponent);
-  //     });
+      console.log(
+        benchmarkSubject("baseline setup", () => {
+          for (let i = 0; i < elementCount; i++) {
+            x.push(i);
+            y.push(i + 1);
+            dx.push(i + 2);
+            dy.push(i + 3);
+          }
+        })
+      );
 
-  //     it("adds the component once", () => {
-  //       expect(queryCallBackFunction).toBeCalledTimes(1);
-  //       expect(queryCallBackFunction).toBeCalledWith([component]);
-  //     });
-  //   });
-  // });
+      let totalTimes = 0;
+      for (let i = 0; i < queryIterations; i++) {
+        totalTimes += benchmark(() => {
+          for (let i = 0; i < elementCount; i++) {
+            x[i] += dx[i];
+            y[i] += dy[i];
+          }
+        });
+      }
+
+      const time = totalTimes / queryIterations;
+      console.log(`baseline query: ${time}`);
+    });
+  });
+
+  describe("#addSystem", () => {
+    beforeEach(() => {
+      engine.addSystem(testySystem1);
+      engine.addSystem(testySystem2);
+      engine.addSystem(testySystem3);
+    });
+
+    it("calls start() on the system", () => {
+      expect(testySystem1.start).toBeCalledTimes(1);
+      expect(testySystem2.start).toBeCalledTimes(1);
+      expect(testySystem3.start).toBeCalledTimes(1);
+    });
+  });
+
+  describe("#addComponent", () => {
+    let entityId;
+
+    beforeEach(() => {
+      entityId = engine.newEntityId();
+    });
+
+    context("when component doesn't exist", () => {
+      it("adds the component", () => {
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [34, 56]
+        );
+        engine.addComponent(
+          Components.component1,
+          entityId,
+          schema[Components.component1],
+          [78, 90]
+        );
+
+        const [
+          {
+            [Components.component0]: [x, y],
+            [Components.component1]: [dx, dy],
+          },
+          entity,
+        ] = engine.getEntity(entityId);
+
+        expect(x[entity]).toEqual(34);
+        expect(y[entity]).toEqual(56);
+        expect(dx[entity]).toEqual(78);
+        expect(dy[entity]).toEqual(90);
+
+        const currentArchetype = engine.getEntityArchetype(entityId);
+        expect(currentArchetype.componentIds).toEqual([
+          Components.component0,
+          Components.component1,
+        ]);
+        expect(currentArchetype.elementCount).toEqual(1);
+      });
+
+      it("changes archetypes", () => {
+        const archetype0 = engine.getEntityArchetype(entityId);
+        expect(archetype0).toBeNull();
+
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [34, 56]
+        );
+
+        const archetype1 = engine.getEntityArchetype(entityId);
+        expect(archetype1.componentIds).toEqual([Components.component0]);
+
+        engine.addComponent(
+          Components.component1,
+          entityId,
+          schema[Components.component1],
+          [78, 90]
+        );
+
+        const archetype2 = engine.getEntityArchetype(entityId);
+        expect(archetype2.componentIds).toEqual([Components.component0, Components.component1]);
+      });
+    });
+
+    context("when component already exists", () => {
+      beforeEach(() => {
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [34, 56]
+        );
+        engine.addComponent(
+          Components.component1,
+          entityId,
+          schema[Components.component1],
+          [78, 90]
+        );
+      });
+
+      it("does not add the component again", () => {
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [888, 999]
+        );
+
+        const [
+          {
+            [Components.component0]: [x, y],
+            [Components.component1]: [dx, dy],
+          },
+          entity,
+        ] = engine.getEntity(entityId);
+
+        expect(x[entity]).toEqual(34);
+        expect(y[entity]).toEqual(56);
+        expect(dx[entity]).toEqual(78);
+        expect(dy[entity]).toEqual(90);
+
+        const currentArchetype = engine.getEntityArchetype(entityId);
+        expect(currentArchetype.componentIds).toEqual([
+          Components.component0,
+          Components.component1,
+        ]);
+        expect(currentArchetype.elementCount).toEqual(1);
+      });
+    });
+  });
 
   // describe("#addComponents", () => {
   //   beforeEach(() => {
@@ -158,58 +392,102 @@ describe(Engine, () => {
   //   });
   // });
 
-  // describe("#removeComponent", () => {
-  //   beforeEach(() => {
-  //     entityId = engine.newEntityId();
-  //     component = new NumberComponent(entityId);
-  //   });
+  describe("#removeComponent", () => {
+    let entityId;
 
-  //   context("when component doesn't exist", () => {
-  //     beforeEach(() => {
-  //       engine.removeComponent(component);
-  //       engine.query(queryCallBackFunction, NumberComponent);
-  //     });
+    beforeEach(() => {
+      entityId = engine.newEntityId();
+    });
 
-  //     it("does nothing", () => {
-  //       expect(queryCallBackFunction).not.toBeCalled();
-  //     });
-  //   });
+    context("when component doesn't exist", () => {
+      it("does nothing", () => {
+        // NOTE: this jest covers error case where arch doesnt exist or arch does not have component
+        engine.removeComponent(Components.component0, entityId);
+      });
+    });
 
-  //   context("when component exists", () => {
-  //     beforeEach(() => {
-  //       engine.addComponent(component);
-  //       engine.removeComponent(component);
-  //       engine.query(queryCallBackFunction, NumberComponent);
-  //     });
+    context("when component exists", () => {
+      beforeEach(() => {
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [34, 56]
+        );
+        engine.addComponent(
+          Components.component1,
+          entityId,
+          schema[Components.component1],
+          [78, 90]
+        );
+      });
 
-  //     it("removes the component", () => {
-  //       expect(queryCallBackFunction).not.toBeCalled();
-  //     });
+      it("removes the component", () => {
+        const [
+          {
+            [Components.component0]: [old_x, old_y],
+            [Components.component1]: [old_dx, old_dy],
+          },
+          old_entity,
+        ] = engine.getEntity(entityId);
 
-  //     context("when no other component has the same entity Id", () => {
-  //       it("reclaims the id", () => {
-  //         expect(engine.newEntityId()).toEqual(component.id);
-  //       });
-  //     });
+        expect(old_x[old_entity]).toEqual(34);
+        expect(old_y[old_entity]).toEqual(56);
+        expect(old_dx[old_entity]).toEqual(78);
+        expect(old_dy[old_entity]).toEqual(90);
 
-  //     context("when another component has the same entity Id", () => {
-  //       beforeEach(() => {
-  //         engine.newEntityId();
-  //         engine.newEntityId();
-  //         engine.newEntityId();
-  //         entityId = engine.newEntityId();
-  //         component = new NumberComponent(entityId);
-  //         engine.addComponent(component);
-  //         engine.addComponent(new StringComponent(component.id));
-  //         engine.removeComponent(component);
-  //       });
+        const oldArchetype = engine.getEntityArchetype(entityId);
+        expect(oldArchetype.componentIds).toEqual([Components.component0, Components.component1]);
+        expect(oldArchetype.elementCount).toEqual(1);
 
-  //       it("does not reclaim the id", () => {
-  //         expect(engine.newEntityId()).not.toEqual(component.id);
-  //       });
-  //     });
-  //   });
-  // });
+        engine.removeComponent(Components.component0, entityId);
+
+        expect(oldArchetype.elementCount).toEqual(0);
+
+        const [
+          {
+            [Components.component0]: comp0,
+            [Components.component1]: [dx, dy],
+          },
+          entity,
+        ] = engine.getEntity(entityId);
+
+        expect(comp0).toBeUndefined();
+        expect(dx[entity]).toEqual(78);
+        expect(dy[entity]).toEqual(90);
+
+        const currentArchetype = engine.getEntityArchetype(entityId);
+        expect(currentArchetype.componentIds).toEqual([Components.component1]);
+        expect(currentArchetype.elementCount).toEqual(1);
+      });
+
+      it("changes archetypes", () => {
+        const archetype2 = engine.getEntityArchetype(entityId);
+        expect(archetype2.componentIds).toEqual([Components.component0, Components.component1]);
+
+        engine.removeComponent(Components.component1, entityId);
+
+        const archetype1 = engine.getEntityArchetype(entityId);
+        expect(archetype1.componentIds).toEqual([Components.component0]);
+      });
+
+      context("when last component is removed", () => {
+        it("recycles the id", () => {
+          engine.removeComponent(Components.component0, entityId);
+          engine.removeComponent(Components.component1, entityId);
+          expect(engine.newEntityId()).toEqual(entityId);
+        });
+
+        context("when recycleEntityIdIfFree is false", () => {
+          it("does not recycle the id", () => {
+            engine.removeComponent(Components.component0, entityId);
+            engine.removeComponent(Components.component1, entityId, false);
+            expect(engine.newEntityId()).not.toEqual(entityId);
+          });
+        });
+      });
+    });
+  });
 
   // describe("#removeComponents", () => {
   //   beforeEach(() => {
@@ -569,11 +847,11 @@ describe(Engine, () => {
   //   });
   // });
 
-  // describe("#newEntityId", () => {
-  //   it("returns entityId", () => {
-  //     expect(engine.newEntityId()).toBeNumber();
-  //   });
-  // });
+  describe("#newEntityId", () => {
+    it("returns entityId", () => {
+      expect(engine.newEntityId()).toBeNumber();
+    });
+  });
 
   // describe("#newEntityIdWithAlias", () => {
   //   let aliasId = 123456;
@@ -746,6 +1024,55 @@ describe(Engine, () => {
   //   });
   // });
 
+  describe("#destroyEntity", () => {
+    let entityId;
+
+    beforeEach(() => {
+      entityId = engine.newEntityId();
+    });
+
+    context("when entity doesn't exist", () => {
+      it("does nothing", () => {
+        engine.destroyEntity(entityId);
+      });
+    });
+
+    context("when entity exists", () => {
+      beforeEach(() => {
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [34, 56]
+        );
+        engine.addComponent(
+          Components.component1,
+          entityId,
+          schema[Components.component1],
+          [78, 90]
+        );
+      });
+
+      it("removes the component", () => {
+        const oldArchetype = engine.getEntityArchetype(entityId);
+        expect(oldArchetype.elementCount).toEqual(1);
+
+        engine.destroyEntity(entityId);
+
+        expect(oldArchetype.elementCount).toEqual(0);
+
+        const entity0 = engine.getEntity(entityId);
+        expect(entity0).toBeNull();
+        expect(engine.getEntityArchetype(entityId)).toBeNull();
+      });
+
+      it("recycles the entityId", () => {
+        engine.destroyEntity(entityId);
+        expect(engine.newEntityId()).toEqual(entityId);
+      });
+    });
+  });
+
   // describe("#removeAllEntities", () => {
   //   beforeEach(() => {
   //     entityId = engine.newEntityId();
@@ -773,34 +1100,34 @@ describe(Engine, () => {
   //   });
   // });
 
-  // describe("#update", () => {
-  //   let deltaTime = 123;
+  describe("#update", () => {
+    let deltaTime = 123;
 
-  //   beforeEach(() => {
-  //     engine.addSystem(testySystem1);
-  //     engine.addSystem(testySystem2);
-  //     engine.addSystem(testySystem3);
+    beforeEach(() => {
+      engine.addSystem(testySystem1);
+      engine.addSystem(testySystem2);
+      engine.addSystem(testySystem3);
 
-  //     engine.update(deltaTime);
-  //   });
+      engine.update(deltaTime);
+    });
 
-  //   it("calls update() on all added systems", () => {
-  //     expect(testySystem1.update).toBeCalledTimes(1);
-  //     expect(testySystem2.update).toBeCalledTimes(1);
-  //     expect(testySystem3.update).toBeCalledTimes(1);
-  //   });
+    it("calls update() on all added systems", () => {
+      expect(testySystem1.update).toBeCalledTimes(1);
+      expect(testySystem2.update).toBeCalledTimes(1);
+      expect(testySystem3.update).toBeCalledTimes(1);
+    });
 
-  //   it("calls update() on all added systems in sequence of addition", () => {
-  //     expect(testySystem2.update).toHaveBeenCalledAfter(testySystem1.update as any);
-  //     expect(testySystem3.update).toHaveBeenCalledAfter(testySystem2.update as any);
-  //   });
+    it("calls update() on all added systems in sequence of addition", () => {
+      expect(testySystem2.update).toHaveBeenCalledAfter(testySystem1.update as any);
+      expect(testySystem3.update).toHaveBeenCalledAfter(testySystem2.update as any);
+    });
 
-  //   it("returns deltaTime of the engine", () => {
-  //     expect(testySystem1.deltaTime).toEqual(deltaTime);
-  //     expect(testySystem2.deltaTime).toEqual(deltaTime);
-  //     expect(testySystem3.deltaTime).toEqual(deltaTime);
-  //   });
-  // });
+    it("returns deltaTime of the engine", () => {
+      expect(testySystem1.deltaTime).toEqual(deltaTime);
+      expect(testySystem2.deltaTime).toEqual(deltaTime);
+      expect(testySystem3.deltaTime).toEqual(deltaTime);
+    });
+  });
 
   // // TODO: ... more cases ??
   // describe("#query", () => {
@@ -876,15 +1203,15 @@ describe(Engine, () => {
   //   });
   // });
 
-  // describe("#deltaTime", () => {
-  //   let deltaTime = 123;
+  describe("#deltaTime", () => {
+    let deltaTime = 123;
 
-  //   beforeEach(() => {
-  //     engine.update(deltaTime);
-  //   });
+    beforeEach(() => {
+      engine.update(deltaTime);
+    });
 
-  //   it("calls returns deltaTime", () => {
-  //     expect(engine.deltaTime).toEqual(deltaTime);
-  //   });
-  // });
+    it("calls returns deltaTime", () => {
+      expect(engine.deltaTime).toEqual(deltaTime);
+    });
+  });
 });

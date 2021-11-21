@@ -1,13 +1,26 @@
-import { ComponentsSchema } from "./Component";
+import Archetype from "./Archetype";
 import Engine from "./Engine";
-import { benchmarkSubject } from "./utils/benchmark";
+import { DeltaTime, EntityId } from "./types";
 
 // TODO: jest tests !!!!
 abstract class System {
   private readonly _engine: Engine;
+  view: (...componentIds: number[]) => Archetype[];
+  addComponent: <F extends readonly [] | readonly any[]>(
+    componentId: number,
+    entityId: EntityId,
+    fields: F,
+    values: { [key in keyof F]: number }
+  ) => void;
+  removeComponent: (componentId: number, entityId: EntityId) => void;
+  newEntityId: () => EntityId;
 
   constructor(engine: Engine) {
     this._engine = engine;
+    this.view = this.engine.view;
+    this.addComponent = this.engine.addComponent;
+    this.removeComponent = this.engine.removeComponent;
+    this.newEntityId = this.engine.newEntityId;
   }
 
   // TODO: init stuff, engine should run this when system right after system is added
@@ -18,8 +31,6 @@ abstract class System {
 
   // TODO: clean up before system shutdown, engine should call this before removing system
   abstract destroy(): void;
-
-  newEntityId = () => this._engine.newEntityId();
 
   log = (object: any) => {
     console.log(this.logTag(JSON.stringify(object)));

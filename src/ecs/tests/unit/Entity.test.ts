@@ -1,28 +1,28 @@
 import { context } from "../../../../tests/jestHelpers";
-import Component from "../../Component";
+// import Component from "../../Component";
 import Engine from "../../Engine";
 import Entity from "../../Entity";
 import NumberComponent from "../helpers/components/NumberComponent";
 import StringComponent from "../helpers/components/StringComponent";
 
 describe(Entity, () => {
-  let engine: Engine;
+  // let engine: Engine;
 
-  let entityId = 0;
-  let entityId2 = 1;
+  // let entityId = 0;
+  // let entityId2 = 1;
 
-  let queryCallBackFunction: jest.Mock<any, any>;
+  // let queryCallBackFunction: jest.Mock<any, any>;
 
-  let component: Component;
-  let component2: Component;
-  let component3: Component;
+  // let component: Component;
+  // let component2: Component;
+  // let component3: Component;
 
-  let entity: Entity;
+  // let entity: Entity;
 
-  beforeEach(() => {
-    engine = new Engine();
-    queryCallBackFunction = jest.fn();
-  });
+  // beforeEach(() => {
+  //   engine = new Engine();
+  //   queryCallBackFunction = jest.fn();
+  // });
 
   it("", () => {});
 

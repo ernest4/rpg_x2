@@ -1,11 +1,14 @@
 import { ComponentClass, DeltaTime, EntityId, QueryCallback, QuerySet } from "./types";
 import EntityIdPool, { EntityIdPoolParams } from "./engine/EntityIdPool";
-import Component, { ComponentSchema, ComponentsSchema } from "./Component";
 import SparseSet from "./utils/SparseSet";
 import System from "./System";
 import { isNumber } from "./utils/Number";
 import Entity from "./Entity";
 import Stats from "./utils/Stats";
+import Archetype, { Fields, Mask, SOA, Values } from "./Archetype";
+import { benchmarkSubject } from "./utils/benchmark";
+import { ComponentsSchema } from "./Component";
+import Buffer from "./utils/Buffer";
 
 // TODO: move out to own class?
 // class EntityIdAlias extends SparseSetItem {
@@ -26,16 +29,24 @@ class Engine {
   // (-> system -> update)
   // _systemUpdateFunctions: ((engine: Engine, deltaTime: DeltaTime) => void)[];
   private _systems: System[] = []; // NOTE: handle onn system to call start() and destroy()
-  // _componentLists: SparseSet<Component>[] = [];
   private _debug: boolean | undefined;
   // private _entityIdAliases: SparseSet<EntityIdAlias>;
   readonly entityIdPool: EntityIdPool = new EntityIdPool();
   private _stats: Stats;
-  components: { [key: string]: Component<any> };
-  _componentLists: any;
-  lastComponentSignatureId: number;
+  // lastComponentSignatureId: number;
+  private _archetypes: Archetype[] = [];
+  _componentsSchema: ComponentsSchema;
+  // queries: Archetype[][] = [];
+  private _queries: { [key: string]: Archetype[] } = {};
+  readonly maxEntities: number;
+  private _queriesById: Archetype[][] = [];
+  // private _addCommandsBuffer: Buffer<[EntityId, number, number[]]> = new Buffer<
+  //   [EntityId, number, number[]]
+  // >();
+  // private _queryStringToId: { [key: string]: number } = {};
 
-  constructor(debug?: boolean) {
+  constructor(componentsSchema: ComponentsSchema, maxEntities = 1e6, debug?: boolean) {
+    this.maxEntities = maxEntities;
     this._debug = debug;
     if (debug) this._stats = new Stats();
     // this._systemUpdateFunctions = [];
@@ -46,8 +57,8 @@ class Engine {
     //   removedComponent: (component: Component, oldEntityId: EntityId) => {},
     // };
 
-    // move to helper class, some "increasing number generator" ?
-    this.lastComponentSignatureId = 0;
+    // TODO: validate schema!?!
+    this._componentsSchema = componentsSchema;
   }
 
   // TODO: jests
@@ -84,41 +95,177 @@ class Engine {
 
   // removeAllSystems
 
-  // addComponent = <T extends Component>(component: T) => {
-  //   // NOTE: indexing using component class name
-  //   // @ts-ignore
-  //   const componentClassName = component.constructor.className();
-  //   let componentList = this._componentLists[componentClassName];
+  // TODO: jests...
+  // addComponent = <F extends readonly [] | readonly any[]>(
+  //   componentId: number,
+  //   entityId: EntityId,
+  //   _fields: F,
+  //   values: { [key in keyof F]: number }
+  // ) => {
+  //   const {
+  //     _addCommandsBuffer: { last, push },
+  //   } = this;
 
-  //   if (!componentList) {
-  //     componentList = new SparseSet();
-  //     this._componentLists[componentClassName] = componentList;
+  //   if (this._destroyCommandsBuffer.size() !== 0) this._destroyCommandsBuffer();
+  //   if (this._removeCommandsBuffer.size() !== 0) this._flushRemoveCommandsBuffer();
+
+  //   const [lastEntityId] = last();
+  //   if (lastEntityId === entityId) {
+  //     push([entityId, componentId, <number[]>(<any>values)]);
+  //     return;
   //   }
 
-  //   componentList.add(component);
-  //   return component;
+  //   this._flushAddCommandsBuffer();
+  //   push([entityId, componentId, <number[]>(<any>values)]);
   // };
 
-  // private defineComponent = (componentName: string, componentSchema: ComponentSchema) => {
-  //   const signatureId = this.newComponentSignatureId(); // unique increasing numbers
-  //   this.components[componentName] = new Component(signatureId, componentSchema);
+  // private _flushAddCommandsBuffer = () => {
+  //   const {
+  //     _addCommandsBuffer: { process },
+  //     addComponents,
+  //   } = this;
+
+  //   const componentIds: number[] = [];
+  //   const dataStream: number[] = [];
+  //   let entityId;
+  //   const processCallback = ([_entityId, componentId, values]: [EntityId, number, number[]]) => {
+  //     entityId = _entityId;
+  //     componentIds.push(componentId);
+  //     Archetype.addToDataStream(dataStream, componentId, values);
+  //   };
+  //   process(processCallback);
+  //   addComponents(entityId, componentIds, dataStream);
   // };
 
-  private newComponentSignatureId = () => ++this.lastComponentSignatureId;
+  // addSingleComponent = <F extends readonly [] | readonly any[]>(
+  addComponent = <F extends readonly [] | readonly any[]>(
+    componentId: number,
+    entityId: EntityId,
+    _fields: F,
+    values: { [key in keyof F]: number }
+  ) => {
+    const currentArchetype = this.getEntityArchetype(entityId);
+    if (currentArchetype?.hasComponents(componentId)) return; // exit early if component exists
 
-  // addComponent = <T extends Component>(tag: number, component: T) => {
-  //   let componentList = this._componentLists[tag];
+    const currentArchetypeMask = currentArchetype?.mask || []; // first component wont have any archetypes
+    const unionMask = this.createMaskWithComponentBitFlip(currentArchetypeMask, componentId);
+    let nextArchetype = this.getArchetype(unionMask);
+    if (!nextArchetype) {
+      nextArchetype = this.createArchetype(
+        unionMask,
+        ...(currentArchetype?.componentIds || []), // first component wont have current archetype
+        componentId
+      );
+    }
 
-  //   if (!componentList) {
-  //     componentList = new SparseSet();
-  //     this._componentLists[tag] = componentList;
+    this.changeUpEntityArchetype(
+      currentArchetype,
+      nextArchetype,
+      entityId,
+      componentId,
+      <number[]>(<any>values)
+    );
+  };
+
+  getEntityArchetype = (entityId: EntityId): Archetype | null => {
+    const { _archetypes } = this;
+    for (let i = 0, l = _archetypes.length; i < l; i++) {
+      if (_archetypes[i].hasEntity(entityId)) return _archetypes[i];
+    }
+    return null;
+  };
+
+  createMaskWithComponentBitFlip = (mask: Mask, componentId: number): Mask => {
+    const newMask = [...mask];
+    // NOTE: when component bit is missing, this will add it
+    // when it's already there, it will take it away
+    // Therefore can call this function to both add new bit and remove existing
+    newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
+    return newMask;
+  };
+
+  // createMaskWithComponentsBitFlips = (mask: Mask, componentIds: number[]): Mask => {
+  //   const newMask = [...mask];
+  //   for (let i = 0, l = componentIds.length; i < l; i++) {
+  //     const componentId = componentIds[i];
+  //     // NOTE: when component bit is missing, this will add it
+  //     // when it's already there, it will take it away
+  //     // Therefore can call this function to both add new bit and remove existing
+  //     newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
+  //   }
+  //   return newMask;
+  // };
+
+  getArchetype = (mask: Mask): Archetype | null => {
+    const { _archetypes } = this;
+    for (let i = 0, l = _archetypes.length; i < l; i++) {
+      if (_archetypes[i].maskMatches(mask)) return _archetypes[i];
+    }
+    return null;
+  };
+
+  createArchetype = (mask: Mask, ...componentIds: number[]): Archetype => {
+    const newArchetype = new Archetype(
+      mask,
+      this._componentsSchema,
+      this.maxEntities,
+      ...componentIds
+    );
+    this._archetypes.push(newArchetype);
+
+    // updating query sets
+    const { _queries } = this;
+    const queryStrings = Object.keys(_queries);
+    const newArchetypeQueryString = newArchetype.componentIds.sort().toString();
+    for (let i = 0, l = queryStrings.length; i < l; i++) {
+      const queryString = queryStrings[i];
+      if (!newArchetypeQueryString.includes(queryString)) continue;
+
+      _queries[queryString].push(newArchetype);
+    }
+
+    return newArchetype;
+  };
+
+  changeUpEntityArchetype = (
+    currentArchetype: Archetype,
+    newArchetype: Archetype,
+    entityId: EntityId,
+    newComponentId: number,
+    newComponentValues: number[]
+  ) => {
+    const oldDataStream = currentArchetype?.remove(entityId) || []; // first component wont have any archetypes
+    newArchetype.add(entityId, oldDataStream, newComponentId, newComponentValues);
+  };
+
+  // bulkChangeUpEntityArchetype = (
+  //   currentArchetype: Archetype,
+  //   newArchetype: Archetype,
+  //   entityId: EntityId,
+  //   newDataStream: number[]
+  // ) => {
+  //   const oldDataStream = currentArchetype?.remove(entityId) || []; // first component wont have any archetypes
+  //   newArchetype.bulkAdd(entityId, oldDataStream, newDataStream);
+  // };
+
+  // private addComponents = (entityId: EntityId, componentIds: number[], dataStream: number[]) => {
+  //   const currentArchetype = this.getEntityArchetype(entityId);
+  //   if (currentArchetype?.hasComponents(...componentIds)) return; // exit early if component exists
+
+  //   const currentArchetypeMask = currentArchetype?.mask || []; // first component wont have any archetypes
+  //   const unionMask = this.createMaskWithComponentsBitFlips(currentArchetypeMask, componentIds);
+  //   let nextArchetype = this.getArchetype(unionMask);
+  //   if (!nextArchetype) {
+  //     nextArchetype = this.createArchetype(
+  //       unionMask,
+  //       ...(currentArchetype?.componentIds || []), // first component wont have current archetype
+  //       ...componentIds
+  //     );
   //   }
 
-  //   componentList.add(component);
-  //   return component;
+  //   this.bulkChangeUpEntityArchetype(currentArchetype, nextArchetype, entityId, dataStream);
   // };
 
-  // addComponents = (...components: Component[]) => components.forEach(this.addComponent);
   // addComponents = (...components: Component[]) => components.forEach(this.addComponent);
 
   // TODO: sketches...
@@ -127,59 +274,40 @@ class Engine {
   //   return this.addComponent(component);
   // };
 
-  // removeComponent = (component: Component) => {
-  //   // NOTE: indexing using component class name
-  //   // @ts-ignore
-  //   const componentClassName = component.constructor.className();
-  //   const componentList = this._componentLists[componentClassName];
-  //   if (!componentList) return;
+  removeComponent = (componentId: number, entityId: EntityId, recycleEntityIdIfFree = true) => {
+    const currentArchetype = this.getEntityArchetype(entityId);
+    if (!currentArchetype?.hasComponents(componentId)) return; // exit early if doesn't exist
 
-  //   const oldEntityId = component.id;
-  //   // this._events.removedComponent(component, oldEntityId);
-  //   componentList.remove(component);
-  //   if (isNumber(oldEntityId)) this.reclaimEntityIdIfFree(oldEntityId);
-  // };
+    // if last component...
+    if (currentArchetype.componentIds.length === 1) {
+      // currentArchetype.remove(entityId);
+      currentArchetype.destroy(entityId);
+      // TODO?: entityId recycling https://skypjack.github.io/2019-05-06-ecs-baf-part-3/
+      if (recycleEntityIdIfFree) this.entityIdPool.reclaimId(entityId);
+      return;
+    }
 
-  // removeComponent = (tag: number, component: Component) => {
-  //   // NOTE: indexing using component class name
-  //   // @ts-ignore
-  //   // const componentClassName = component.constructor.className();
-  //   const componentList = this._componentLists[tag];
-  //   if (!componentList) return;
+    const differenceMask = this.createMaskWithComponentBitFlip(currentArchetype.mask, componentId);
+    let nextArchetype = this.getArchetype(differenceMask);
+    if (!nextArchetype) {
+      nextArchetype = this.createArchetype(
+        differenceMask,
+        ...currentArchetype.componentIdsWithout(componentId)
+      );
+    }
 
-  //   const oldEntityId = component.id;
-  //   // this._events.removedComponent(component, oldEntityId);
-  //   componentList.remove(component);
-  //   if (isNumber(oldEntityId)) this.reclaimEntityIdIfFree(oldEntityId);
-  // };
+    this.changeDownEntityArchetype(currentArchetype, nextArchetype, entityId);
+  };
+
+  changeDownEntityArchetype = (
+    currentArchetype: Archetype,
+    newArchetype: Archetype,
+    entityId: EntityId
+  ) => {
+    newArchetype.add(entityId, currentArchetype.remove(entityId));
+  };
 
   // removeComponents = (...components: Component[]) => components.forEach(this.removeComponent);
-
-  // removeComponentById = <T extends Component>(
-  //   entityId: EntityId,
-  //   componentClass: ComponentClass<T>
-  // ) => {
-  //   const componentList = this._componentLists[componentClass.className()];
-  //   if (!componentList) return;
-
-  //   componentList.remove(entityId);
-  //   if (isNumber(entityId)) this.reclaimEntityIdIfFree(entityId);
-  // };
-
-  // removeComponentById = (entityId: EntityId, tag: number) => {
-  //   const componentList = this._componentLists[tag];
-  //   if (!componentList) return;
-
-  //   componentList.remove(entityId);
-  //   if (isNumber(entityId)) this.reclaimEntityIdIfFree(entityId);
-  // };
-
-  // removeComponentsById = (entityId: EntityId, ...componentClasses: ComponentClass<any>[]) => {
-  //   const callback = (componentClass: ComponentClass<any>) => {
-  //     this.removeComponentById(entityId, componentClass);
-  //   };
-  //   componentClasses.forEach(callback);
-  // };
 
   // removeComponentsOfClass = <T extends Component>(componentClass: ComponentClass<T>) => {
   //   this._componentLists[componentClass.className()]?.stream(this.removeComponent);
@@ -242,6 +370,15 @@ class Engine {
   //   // return entity;
   // };
 
+  getEntity = (
+    entityId: EntityId
+  ): [components: { [componentId: number]: SOA }, entityIndex: number] | null => {
+    const archetype = this.getEntityArchetype(entityId);
+    if (!archetype) return null;
+
+    return archetype.getEntity(entityId);
+  };
+
   newEntityId = (): EntityId => this.entityIdPool.getId();
 
   // newEntityIdWithAlias = (aliasId: EntityId): EntityId | null => {
@@ -283,11 +420,25 @@ class Engine {
   //   return this.addComponent(tag, this.getOrCreateNullComponentById(entityId, componentClass, tag));
   // };
 
-  // removeEntity = (entityId: EntityId) => {
-  //   // NOTE: In EnTT this happens by iterating every single sparse set in the registry, checking if it contains the entity, and deleting it if it does.
-  //   Object.values(this._componentLists).forEach(componentList => componentList.remove(entityId));
+  // removeEntity = (entityId: EntityId): number[] | null => {
+  //   const currentArchetype = this.getEntityArchetype(entityId);
+  //   if (currentArchetype) {
+  //     const dataStream = currentArchetype.remove(entityId);
+  //     this.entityIdPool.reclaimId(entityId);
+  //     return dataStream;
+  //   }
+
   //   this.entityIdPool.reclaimId(entityId);
+  //   return null;
   // };
+
+  destroyEntity = (entityId: EntityId) => {
+    const currentArchetype = this.getEntityArchetype(entityId);
+    if (currentArchetype) {
+      currentArchetype.destroy(entityId);
+      this.entityIdPool.reclaimId(entityId);
+    }
+  };
 
   // // NOTE: fast O(1) bulk operations
   // removeAllComponents = () => {
@@ -306,194 +457,33 @@ class Engine {
     // this.updateComplete.dispatch(); // TODO: signals??
   };
 
-  // TODO: jests
-  // NOTE: most general, slowest query
-  // queryN = (callback: QueryCallback, ...queryTags: number[]) => {
-  //   const componentsLists = this._componentLists;
-  //   let shortestComponentListIndex = 0;
-  //   let shortestComponentList = componentsLists[queryTags[shortestComponentListIndex]];
-  //   if (!shortestComponentList) return;
+  view = (...componentIds: number[]): Archetype[] => {
+    const { _archetypes, _queries } = this;
+    const queryString = componentIds.sort().toString();
+    if (_queries[queryString]) return _queries[queryString];
 
-  //   let nextShortestComponentList: SparseSet<Component>;
-  //   const componentClassesLength = queryTags.length;
-  //   for (let i = 0; i < componentClassesLength; i++) {
-  //     nextShortestComponentList = componentsLists[queryTags[i]];
+    const resultArchetypes: Archetype[] = [];
+    const searchMask = this.createMaskFromComponentIds(...componentIds);
 
-  //     if (nextShortestComponentList && shortestComponentList) {
-  //       if (nextShortestComponentList.size < shortestComponentList.size) {
-  //         shortestComponentList = nextShortestComponentList;
-  //         shortestComponentListIndex = i;
-  //       }
-  //     }
-  //   }
+    for (let i = 0, l = _archetypes.length; i < l; i++) {
+      if (_archetypes[i].maskContains(searchMask)) resultArchetypes.push(_archetypes[i]);
+    }
 
-  //   let querySet: QuerySet = [];
-  //   let anotherComponent: Component;
-  //   const processComponent = component => {
-  //     for (let i = 0; i < componentClassesLength; i++) {
-  //       anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
-
-  //       if (!anotherComponent) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-  //       querySet[i] = anotherComponent;
-  //     }
-  //     callback(querySet);
-  //   };
-
-  //   shortestComponentList.stream(processComponent);
-  // };
-
-  // // TODO: jests
-  // // NOTE: faster query that assumes first QueryTag is the shortest list
-  // // This heuristic is accurate for heaviest and most predictable systems e.g.
-  // // like movement [Transform, PhysicsBody] & render [Transform, Sprite]
-  // // where PhysicsBody and Sprite are the shorter lists
-  // queryNInOrder = (callback: QueryCallback, ...queryTags: number[]) => {
-  //   const componentsLists = this._componentLists;
-
-  //   let querySet: QuerySet = [];
-  //   let anotherComponent: Component;
-  //   const componentClassesLength = queryTags.length;
-  //   const processComponent = component => {
-  //     for (let i = 1; i < componentClassesLength; i++) {
-  //       anotherComponent = componentsLists[queryTags[i]]?.get(component.id);
-
-  //       if (!anotherComponent) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-  //       querySet[i - 1] = anotherComponent;
-  //     }
-  //     callback([component, ...querySet]);
-  //   };
-
-  //   componentsLists[queryTags[0]]?.stream(processComponent);
-  // };
-
-  // // TODO: jests
-  // // NOTE: most systems query 1 to 2 components. Heavy optimization available
-  // queryTwo = <C1 extends Component, C2 extends Component>(
-  //   callback: (component1: C1, component2: C2) => void,
-  //   queryTag1: number,
-  //   queryTag2: number
-  // ) => {
-  //   const componentsLists = this._componentLists;
-  //   // NOTE: finding shortest component list
-  //   const tag1ComponentList = componentsLists[queryTag1];
-  //   if (!tag1ComponentList) return;
-  //   const tag2ComponentList = componentsLists[queryTag2];
-  //   if (!tag2ComponentList) return;
-
-  //   let tag1Component: C1;
-  //   let tag2Component: C2;
-  //   let component;
-  //   const tag1elementCount = tag1ComponentList._elementCount;
-  //   const tag2elementCount = tag2ComponentList._elementCount;
-
-  //   if (tag1elementCount < tag2elementCount) {
-  //     const tag2ComponentList_get = tag2ComponentList.get;
-  //     const denseList = tag1ComponentList._denseList;
-  //     let i = 0;
-  //     while (i < tag1elementCount) {
-  //       component = denseList[i];
-  //       tag2Component = <C2>tag2ComponentList_get(component.id);
-  //       if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-  //       callback(component, tag2Component);
-  //       i++;
-  //     }
-  //   } else {
-  //     const tag1ComponentList_get = tag1ComponentList.get;
-  //     const denseList = tag2ComponentList._denseList;
-  //     let i = 0;
-  //     while (i < tag2elementCount) {
-  //       component = denseList[i];
-  //       tag1Component = <C1>tag1ComponentList_get(component.id);
-  //       if (!tag1Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-  //       callback(tag1Component, component);
-  //       i++;
-  //     }
-  //   }
-  // };
-
-  // // TODO: jests
-  // queryTwoInOrder = <C1 extends Component, C2 extends Component>(
-  //   callback: (component1: C1, component2: C2) => void,
-  //   queryTag1: number,
-  //   queryTag2: number
-  // ) => {
-  //   const componentsLists = this._componentLists;
-  //   const tag2ComponentList = componentsLists[queryTag2];
-  //   if (!tag2ComponentList) return;
-
-  //   let tag2Component: C2;
-  //   const tag2ComponentList_get = tag2ComponentList.get;
-  //   const tag1ComponentList = componentsLists[queryTag1];
-  //   if (tag1ComponentList) {
-  //     let component;
-  //     const elementCount = tag1ComponentList._elementCount;
-  //     const denseList = tag1ComponentList._denseList;
-  //     let i = 0;
-  //     while (i < elementCount) {
-  //       component = denseList[i];
-  //       tag2Component = <C2>tag2ComponentList_get(component.id);
-  //       if (!tag2Component) return; // NOTE: soon as we discover a missing component, abandon further pointless search for that entityId !
-
-  //       callback(component, tag2Component);
-  //       i++;
-  //     }
-  //   }
-  // };
-
-  // // TODO: jests
-  // queryTwoInOrderUnchecked = <C1 extends Component, C2 extends Component>(
-  //   callback: (component1: C1, component2: C2) => void,
-  //   queryTag1: number,
-  //   queryTag2: number
-  // ) => {
-  //   const componentsLists = this._componentLists;
-  //   const tag2ComponentList = componentsLists[queryTag2];
-
-  //   const tag2ComponentList_getUnchecked = tag2ComponentList.getUnchecked;
-  //   const tag1ComponentList = componentsLists[queryTag1];
-  //   if (tag1ComponentList) {
-  //     let component;
-  //     const elementCount = tag1ComponentList._elementCount;
-  //     const denseList = tag1ComponentList._denseList;
-  //     let i = 0;
-  //     while (i < elementCount) {
-  //       component = denseList[i];
-  //       callback(component, <C2>tag2ComponentList_getUnchecked(component.id));
-  //       i++;
-  //     }
-  //   }
-  // };
-
-  // // TODO: jests
-  // // For systems that query 1 component, can't be faster than this!
-  // queryOne = <T extends Component>(callback: (component: T) => void, queryTag: number) => {
-  //   (<SparseSet<T>>(<any>this._componentLists[queryTag]))?.stream(callback);
-  // };
-
-  // TODO: jests
-  // For systems that query 1 component, can't be faster than this!
-  // queryOne = <T extends Component>(queryTag: number): [T[], number] => {
-  //   return (<SparseSet<T>>this._componentLists[queryTag]).iterable();
-  // };
-
-  // TODO: new queries + grouping
-  queryN = () => {
-    //
+    // const queryId = this.queries.push(resultArchetypes) - 1;
+    // _queryStringToId[queryString] = queryId;
+    // return queryId;
+    _queries[queryString] = resultArchetypes;
+    return resultArchetypes;
   };
 
-  queryOne = () => {
-    //
+  createMaskFromComponentIds = (...componentIds: number[]) => {
+    const newMask = [];
+    for (let i = 0, l = componentIds.length; i < l; i++) {
+      const componentId = componentIds[i];
+      newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
+    }
+    return newMask;
   };
-
-  // try to optimize for this...
-  queryGroup = () => {
-    //
-  };
-
-  // or maybe do these methods ON components?
-  // (active record pattern)
 
   get deltaTime() {
     return this._deltaTime;

@@ -1,57 +1,49 @@
 import { Engine } from "../../ecs";
+import Archetype from "../../ecs/Archetype";
+// import { Vector3 } from "../../ecs/Component";
 import System from "../../ecs/System";
-import PhysicsBody from "../components/PhysicsBody";
-import Position from "../components/Position";
-import Velocity from "../components/Velocity";
+import { Components } from "../scenes/Main";
+// import PhysicsBody from "../components/PhysicsBody";
+// import Position from "../components/Position";
+// import Velocity from "../components/Velocity";
+// import { Components } from "../scenes/Main";
 
 class Movement extends System {
+  archetypes: Archetype[];
+
   constructor(engine: Engine) {
     super(engine);
   }
 
-  start(): void {}
+  start(): void {
+    this.archetypes = this.view(Components.Velocity, Components.Position);
+  }
 
   update(): void {
-    // this.benchmarkSubject("queryTwoInOrderUnchecked", () => {
-    //   this.engine.queryTwoInOrderUnchecked(this.updateTransforms, PHYSICS_BODY, TRANSFORM);
+    // this.benchmarkSubject("archetype query", () => {
     // });
-    // this.benchmarkSubject("raw query", () => {
-    // });
+
+    const {
+      archetypes,
+      archetypes: { length },
+    } = this;
     const seconds = this.deltaTime / 1000;
 
-    // const [positions, velocities] = this.query(Position, LinearVelocity);
-    // const [{ x, y, z }, { dx, dy, dz }, count] = this.queryGroup(Position, Velocity);
-    // const [{ x: dx, y: dy, z: dz }, count] = Velocity.joins(Position);
-    // for (let i = 0; i < count; i++) {
-    //   const { x, y, z } = Position.get();
-    // x[i] += dx[i] * seconds;
-    // y[i] += dy[i] * seconds;
-    // z[i] += dz[i] * seconds;
-    // }
+    for (let j = 0; j < length; j++) {
+      const {
+        components: {
+          [Components.Position]: [x, y, z],
+          [Components.Velocity]: [dx, dy, dz],
+        },
+        elementCount,
+      } = archetypes[j];
 
-    // const [{ x, y, z }, count] = Velocity.all();
-    // for (let i = 0; i < count; i++) {
-    //   console.log(x[i]);
-    //   console.log(y[i]);
-    //   console.log(z[i]);
-    // }
-
-    const [{ x: dx, y: dy, z: dz }, { x, y, z }, count] = Velocity.group(Position).all();
-    for (let i = 0; i < count; i++) {
-      x[i] += dx[i] * seconds;
-      y[i] += dy[i] * seconds;
-      z[i] += dz[i] * seconds;
+      for (let i = 0; i < elementCount; i++) {
+        x[i] += dx[i] * seconds;
+        y[i] += dy[i] * seconds;
+        z[i] += dz[i] * seconds;
+      }
     }
-
-    // archetype query?
-    // const archetypes = this.query(Velocity, Position);
-    // for (const [{ x: dx, y: dy, z: dz }, { x, y, z }, count] of archetypes) {
-    //   for (let i = 0; i < count; i++) {
-    //     x[i] += dx[i] * seconds;
-    //     y[i] += dy[i] * seconds;
-    //     z[i] += dz[i] * seconds;
-    //   }
-    // }
   }
 
   destroy(): void {}
