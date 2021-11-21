@@ -7,6 +7,8 @@ import { Sprite } from "../components";
 import Phaser from "phaser";
 import PhaserSystem from "./abstract/PhaserSystem";
 import { LOAD_SPRITE_EVENT } from "../components/queryTags";
+import { Components } from "../scenes/Main";
+import Archetype from "../../ecs/Archetype";
 
 type LoadEvent = {
   key: string;
@@ -19,11 +21,33 @@ type LoadEvent = {
 class SpriteLoader extends PhaserSystem {
   private _loadEventsBuffer: Buffer<LoadEvent> = new Buffer<LoadEvent>();
   private _requestedTextures: { [key: string]: string } = {};
+  archetypes: Archetype[];
 
-  start(): void {}
+  start(): void {
+    this.archetypes = this.view(Components.LoadSpriteEvent)
+  }
 
   update(): void {
-    this.engine.queryOne(this.queueLoadEvents, LOAD_SPRITE_EVENT);
+    // this.engine.queryOne(this.queueLoadEvents, LOAD_SPRITE_EVENT);
+
+    const {
+      archetypes,
+      archetypes: { length },
+    } = this;
+
+    for (let j = 0; j < length; j++) {
+      const {
+        components: {
+          [Components.LoadSpriteEvent]: [...],
+        },
+        elementCount,
+      } = archetypes[j];
+
+      for (let i = 0; i < elementCount; i++) {
+        // x[i] += dx[i] * seconds;
+      }
+    }
+
     // start loading (can call this over and over, even when already loading...no harm)
     this.scene.load.start();
   }

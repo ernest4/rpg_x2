@@ -22,6 +22,7 @@ export const enum Components {
   Player,
   Sprite,
   InputEvent,
+  LoadSpriteEvent,
 }
 
 export const SCHEMA = {
@@ -33,6 +34,7 @@ export const SCHEMA = {
   [Components.Player]: [],
   [Components.Sprite]: [i32("url"), i32("frameWidth")],
   [Components.InputEvent]: [i32("type"), i32("key"), i32("targetEntityId")],
+  [Components.LoadSpriteEvent]: [...]
 } as const;
 
 export default class Main extends Phaser.Scene {
