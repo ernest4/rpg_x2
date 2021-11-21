@@ -198,17 +198,11 @@ class Engine {
 
     // if last component...
     if (currentArchetype.componentIds.length === 1) {
-      // On last component
-      if (currentArchetype.componentIds[0] === componentId) {
-        // currentArchetype.remove(entityId);
-        currentArchetype.destroy(entityId);
-        // TODO?: entityId recycling https://skypjack.github.io/2019-05-06-ecs-baf-part-3/
-        if (recycleEntityIdIfFree) this.entityIdPool.reclaimId(entityId);
-        return;
-      } else {
-        // TODO: some error case? is this possible?
-        throw Error("Removing component entity doesn't have. TODO: handle this!");
-      }
+      // currentArchetype.remove(entityId);
+      currentArchetype.destroy(entityId);
+      // TODO?: entityId recycling https://skypjack.github.io/2019-05-06-ecs-baf-part-3/
+      if (recycleEntityIdIfFree) this.entityIdPool.reclaimId(entityId);
+      return;
     }
 
     const differenceMask = this.createMaskWithComponentBitFlip(currentArchetype.mask, componentId);
@@ -344,23 +338,24 @@ class Engine {
   //   return this.addComponent(tag, this.getOrCreateNullComponentById(entityId, componentClass, tag));
   // };
 
-  removeEntity = (entityId: EntityId): number[] | null => {
-    const currentArchetype = this.getEntityArchetype(entityId);
-    if (currentArchetype) {
-      const dataStream = currentArchetype.remove(entityId);
-      this.entityIdPool.reclaimId(entityId);
-      return dataStream;
-    }
+  // removeEntity = (entityId: EntityId): number[] | null => {
+  //   const currentArchetype = this.getEntityArchetype(entityId);
+  //   if (currentArchetype) {
+  //     const dataStream = currentArchetype.remove(entityId);
+  //     this.entityIdPool.reclaimId(entityId);
+  //     return dataStream;
+  //   }
 
-    this.entityIdPool.reclaimId(entityId);
-    return null;
-  };
+  //   this.entityIdPool.reclaimId(entityId);
+  //   return null;
+  // };
 
   destroyEntity = (entityId: EntityId) => {
     const currentArchetype = this.getEntityArchetype(entityId);
-    if (currentArchetype) currentArchetype.destroy(entityId);
-
-    this.entityIdPool.reclaimId(entityId);
+    if (currentArchetype) {
+      currentArchetype.destroy(entityId);
+      this.entityIdPool.reclaimId(entityId);
+    }
   };
 
   // // NOTE: fast O(1) bulk operations

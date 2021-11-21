@@ -1024,6 +1024,55 @@ describe(Engine, () => {
   //   });
   // });
 
+  describe("#destroyEntity", () => {
+    let entityId;
+
+    beforeEach(() => {
+      entityId = engine.newEntityId();
+    });
+
+    context("when entity doesn't exist", () => {
+      it("does nothing", () => {
+        engine.destroyEntity(entityId);
+      });
+    });
+
+    context("when entity exists", () => {
+      beforeEach(() => {
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [34, 56]
+        );
+        engine.addComponent(
+          Components.component1,
+          entityId,
+          schema[Components.component1],
+          [78, 90]
+        );
+      });
+
+      it("removes the component", () => {
+        const oldArchetype = engine.getEntityArchetype(entityId);
+        expect(oldArchetype.elementCount).toEqual(1);
+
+        engine.destroyEntity(entityId);
+
+        expect(oldArchetype.elementCount).toEqual(0);
+
+        const entity0 = engine.getEntity(entityId);
+        expect(entity0).toBeNull();
+        expect(engine.getEntityArchetype(entityId)).toBeNull();
+      });
+
+      it("recycles the entityId", () => {
+        engine.destroyEntity(entityId);
+        expect(engine.newEntityId()).toEqual(entityId);
+      });
+    });
+  });
+
   // describe("#removeAllEntities", () => {
   //   beforeEach(() => {
   //     entityId = engine.newEntityId();
