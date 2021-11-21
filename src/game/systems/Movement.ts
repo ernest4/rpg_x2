@@ -27,6 +27,7 @@ class Movement extends System {
       archetypes,
       archetypes: { length },
     } = this;
+
     const seconds = this.deltaTime / 1000;
 
     for (let j = 0; j < length; j++) {

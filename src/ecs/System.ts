@@ -1,4 +1,4 @@
-import Archetype from "./Archetype";
+import Archetype, { SOA } from "./Archetype";
 import Engine from "./Engine";
 import { DeltaTime, EntityId } from "./types";
 
@@ -14,6 +14,8 @@ abstract class System {
   ) => void;
   removeComponent: (componentId: number, entityId: EntityId) => void;
   newEntityId: () => EntityId;
+  destroyEntity: (entityId: EntityId) => void;
+  getEntity: (entityId: EntityId) => [components: { [componentId: number]: SOA; }, entityIndex: number];
 
   constructor(engine: Engine) {
     this._engine = engine;
@@ -21,6 +23,8 @@ abstract class System {
     this.addComponent = this.engine.addComponent;
     this.removeComponent = this.engine.removeComponent;
     this.newEntityId = this.engine.newEntityId;
+    this.destroyEntity = this.engine.destroyEntity;
+    this.getEntity = this.engine.getEntity;
   }
 
   // TODO: init stuff, engine should run this when system right after system is added

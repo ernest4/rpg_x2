@@ -28,6 +28,13 @@ class Assets {
     return index;
   };
 
+  getResource = (resourceType: Resources, index: number) => {
+    const resource = this.manifest[resourceType][index];
+    if (resource === undefined) throw new Error(`accessing non existing index: ${index}`);
+
+    return resource;
+  };
+
   private parseManifest = ({ images, sounds }: { images: string[]; sounds: string[] }) => {
     const { manifest } = this;
     manifest[Resources.image] = images;

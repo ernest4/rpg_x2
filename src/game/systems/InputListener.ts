@@ -1,57 +1,54 @@
 import { Engine } from "../../ecs";
 import Buffer from "../../ecs/utils/Buffer";
-import InputEvent from "../components/InputEvent";
 import Phaser from "phaser";
-import { Player } from "../components";
 import PhaserSystem from "./abstract/PhaserSystem";
-import { INPUT_EVENT, PLAYER } from "../components/queryTags";
+import { Components, SCHEMA } from "../scenes/Main";
+import Archetype from "../../ecs/Archetype";
 
-export const INPUT_KEYS = {
-  UP: "UP",
-  DOWN: "DOWN",
-  LEFT: "LEFT",
-  RIGHT: "RIGHT",
-  A: "A",
-  W: "W",
-  S: "S",
-  D: "D",
-} as const;
+export enum INPUT_KEY {
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+  A,
+  W,
+  S,
+  D,
+}
 
-export type INPUT_KEY = typeof INPUT_KEYS[keyof typeof INPUT_KEYS];
-
-export const INPUT_EVENT_TYPES = {
-  KEYDOWN: "keydown",
-  KEYUP: "keyup",
-} as const;
-
-export type INPUT_EVENT_TYPE = typeof INPUT_EVENT_TYPES[keyof typeof INPUT_EVENT_TYPES];
+export enum INPUT_EVENT_TYPE {
+  KEYDOWN,
+  KEYUP,
+}
 
 type InputEventObject = [INPUT_EVENT_TYPE, INPUT_KEY];
 
 const DEFAULT_INPUTS: InputEventObject[] = [
-  [INPUT_EVENT_TYPES.KEYDOWN, INPUT_KEYS.UP],
-  [INPUT_EVENT_TYPES.KEYDOWN, INPUT_KEYS.DOWN],
-  [INPUT_EVENT_TYPES.KEYDOWN, INPUT_KEYS.LEFT],
-  [INPUT_EVENT_TYPES.KEYDOWN, INPUT_KEYS.RIGHT],
-  [INPUT_EVENT_TYPES.KEYDOWN, INPUT_KEYS.A],
-  [INPUT_EVENT_TYPES.KEYDOWN, INPUT_KEYS.W],
-  [INPUT_EVENT_TYPES.KEYDOWN, INPUT_KEYS.S],
-  [INPUT_EVENT_TYPES.KEYDOWN, INPUT_KEYS.D],
+  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.UP],
+  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.DOWN],
+  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.LEFT],
+  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.RIGHT],
+  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.A],
+  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.W],
+  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.S],
+  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.D],
 
-  [INPUT_EVENT_TYPES.KEYUP, INPUT_KEYS.UP],
-  [INPUT_EVENT_TYPES.KEYUP, INPUT_KEYS.DOWN],
-  [INPUT_EVENT_TYPES.KEYUP, INPUT_KEYS.LEFT],
-  [INPUT_EVENT_TYPES.KEYUP, INPUT_KEYS.RIGHT],
-  [INPUT_EVENT_TYPES.KEYUP, INPUT_KEYS.A],
-  [INPUT_EVENT_TYPES.KEYUP, INPUT_KEYS.W],
-  [INPUT_EVENT_TYPES.KEYUP, INPUT_KEYS.S],
-  [INPUT_EVENT_TYPES.KEYUP, INPUT_KEYS.D],
+  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.UP],
+  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.DOWN],
+  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.LEFT],
+  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.RIGHT],
+  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.A],
+  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.W],
+  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.S],
+  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.D],
 ];
 
 // TODO: jests
 class InputListener extends PhaserSystem {
   private _inputs: InputEventObject[];
   private _inputsBuffer: Buffer<InputEventObject> = new Buffer<InputEventObject>();
+  playerArchetypes: Archetype[];
+  inputEventArchetypes: Archetype[];
 
   constructor(engine: Engine, scene: Phaser.Scene, inputs: InputEventObject[] = DEFAULT_INPUTS) {
     super(engine, scene);
@@ -60,11 +57,13 @@ class InputListener extends PhaserSystem {
 
   start(): void {
     this.registerInputCallbacks();
+    this.inputEventArchetypes = this.view(Components.InputEvent);
+    this.playerArchetypes = this.view(Components.Player);
   }
 
   update(): void {
-    this.engine.removeComponentsOfTag(INPUT_EVENT);
-    this.engine.queryOne(this.createInputEvents, PLAYER);
+    this.destroyInputEvents();
+    this.createInputEvents();
   }
 
   destroy(): void {}
@@ -77,13 +76,41 @@ class InputListener extends PhaserSystem {
     );
   };
 
-  private createInputEvents = ({ entityId: playerEntityId }: Player) => {
-    this._inputsBuffer.process(([type, key]) => {
-      this.engine.addComponent(
-        INPUT_EVENT,
-        new InputEvent(this.newEntityId(), type, key, playerEntityId)
-      );
-    });
+  private destroyInputEvents = () => {
+    const {
+      inputEventArchetypes: archetypes,
+      inputEventArchetypes: { length },
+      destroyEntity,
+    } = this;
+
+    for (let j = 0; j < length; j++) {
+      const { entityIdDenseList, elementCount } = archetypes[j];
+      for (let i = 0; i < elementCount; i++) destroyEntity(entityIdDenseList[i]);
+    }
+  };
+
+  private createInputEvents = () => {
+    const {
+      playerArchetypes: archetypes,
+      playerArchetypes: { length },
+    } = this;
+
+    for (let j = 0; j < length; j++) {
+      const { entityIdDenseList, elementCount } = archetypes[j];
+
+      for (let i = 0; i < elementCount; i++) {
+        const playerEntityId = entityIdDenseList[i];
+
+        this._inputsBuffer.process(([type, key]) => {
+          this.addComponent(
+            Components.InputEvent,
+            this.newEntityId(),
+            SCHEMA[Components.InputEvent],
+            [type, key, playerEntityId]
+          );
+        });
+      }
+    }
   };
 }
 
