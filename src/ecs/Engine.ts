@@ -40,9 +40,9 @@ class Engine {
   private _queries: { [key: string]: Archetype[] } = {};
   readonly maxEntities: number;
   private _queriesById: Archetype[][] = [];
-  private _addCommandsBuffer: Buffer<[EntityId, number, number[]]> = new Buffer<
-    [EntityId, number, number[]]
-  >();
+  // private _addCommandsBuffer: Buffer<[EntityId, number, number[]]> = new Buffer<
+  //   [EntityId, number, number[]]
+  // >();
   // private _queryStringToId: { [key: string]: number } = {};
 
   constructor(componentsSchema: ComponentsSchema, maxEntities = 1e6, debug?: boolean) {
@@ -96,45 +96,49 @@ class Engine {
   // removeAllSystems
 
   // TODO: jests...
-  addComponent = <F extends readonly [] | readonly any[]>(
-    componentId: number,
-    entityId: EntityId,
-    _fields: F,
-    values: { [key in keyof F]: number }
-  ) => {
-    const {
-      _addCommandsBuffer: { last, push, process },
-      addComponents,
-    } = this;
-
-    // TODO: check destroyEntity as well ?!?
-    if (this._removeCommandsBuffer.size() !== 0) {
-      this._flushRemoveCommandsBuffer();
-    }
-
-    const [lastEntityId] = last();
-    if (lastEntityId === entityId) {
-      push([entityId, componentId, <number[]>(<any>values)]);
-      return;
-    }
-
-    this._flushAddCommandsBuffer();
-    push([entityId, componentId, <number[]>(<any>values)]);
-  };
-
-  private _flushAddCommandsBuffer = () => {
-    const componentIds: number[] = [];
-    const dataStream: number[] = [];
-    const processCallback = ([entityId, componentId, values]: [EntityId, number, number[]]) => {
-      componentIds.push(componentId);
-      Archetype.addToDataStream(dataStream, componentId, values);
-    };
-    process(processCallback);
-    addComponents(entityId, componentIds, dataStream);
-  };
-
   // addComponent = <F extends readonly [] | readonly any[]>(
-  addSingleComponent = <F extends readonly [] | readonly any[]>(
+  //   componentId: number,
+  //   entityId: EntityId,
+  //   _fields: F,
+  //   values: { [key in keyof F]: number }
+  // ) => {
+  //   const {
+  //     _addCommandsBuffer: { last, push },
+  //   } = this;
+
+  //   if (this._destroyCommandsBuffer.size() !== 0) this._destroyCommandsBuffer();
+  //   if (this._removeCommandsBuffer.size() !== 0) this._flushRemoveCommandsBuffer();
+
+  //   const [lastEntityId] = last();
+  //   if (lastEntityId === entityId) {
+  //     push([entityId, componentId, <number[]>(<any>values)]);
+  //     return;
+  //   }
+
+  //   this._flushAddCommandsBuffer();
+  //   push([entityId, componentId, <number[]>(<any>values)]);
+  // };
+
+  // private _flushAddCommandsBuffer = () => {
+  //   const {
+  //     _addCommandsBuffer: { process },
+  //     addComponents,
+  //   } = this;
+
+  //   const componentIds: number[] = [];
+  //   const dataStream: number[] = [];
+  //   let entityId;
+  //   const processCallback = ([_entityId, componentId, values]: [EntityId, number, number[]]) => {
+  //     entityId = _entityId;
+  //     componentIds.push(componentId);
+  //     Archetype.addToDataStream(dataStream, componentId, values);
+  //   };
+  //   process(processCallback);
+  //   addComponents(entityId, componentIds, dataStream);
+  // };
+
+  // addSingleComponent = <F extends readonly [] | readonly any[]>(
+  addComponent = <F extends readonly [] | readonly any[]>(
     componentId: number,
     entityId: EntityId,
     _fields: F,
@@ -180,17 +184,17 @@ class Engine {
     return newMask;
   };
 
-  createMaskWithComponentsBitFlips = (mask: Mask, componentIds: number[]): Mask => {
-    const newMask = [...mask];
-    for (let i = 0, l = componentIds.length; i < l; i++) {
-      const componentId = componentIds[i];
-      // NOTE: when component bit is missing, this will add it
-      // when it's already there, it will take it away
-      // Therefore can call this function to both add new bit and remove existing
-      newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
-    }
-    return newMask;
-  };
+  // createMaskWithComponentsBitFlips = (mask: Mask, componentIds: number[]): Mask => {
+  //   const newMask = [...mask];
+  //   for (let i = 0, l = componentIds.length; i < l; i++) {
+  //     const componentId = componentIds[i];
+  //     // NOTE: when component bit is missing, this will add it
+  //     // when it's already there, it will take it away
+  //     // Therefore can call this function to both add new bit and remove existing
+  //     newMask[~~(componentId / 32)] ^= 1 << componentId % 32;
+  //   }
+  //   return newMask;
+  // };
 
   getArchetype = (mask: Mask): Archetype | null => {
     const { _archetypes } = this;
@@ -234,33 +238,33 @@ class Engine {
     newArchetype.add(entityId, oldDataStream, newComponentId, newComponentValues);
   };
 
-  bulkChangeUpEntityArchetype = (
-    currentArchetype: Archetype,
-    newArchetype: Archetype,
-    entityId: EntityId,
-    newDataStream: number[]
-  ) => {
-    const oldDataStream = currentArchetype?.remove(entityId) || []; // first component wont have any archetypes
-    newArchetype.bulkAdd(entityId, oldDataStream, newDataStream);
-  };
+  // bulkChangeUpEntityArchetype = (
+  //   currentArchetype: Archetype,
+  //   newArchetype: Archetype,
+  //   entityId: EntityId,
+  //   newDataStream: number[]
+  // ) => {
+  //   const oldDataStream = currentArchetype?.remove(entityId) || []; // first component wont have any archetypes
+  //   newArchetype.bulkAdd(entityId, oldDataStream, newDataStream);
+  // };
 
-  private addComponents = (entityId: EntityId, componentIds: number[], dataStream: number[]) => {
-    const currentArchetype = this.getEntityArchetype(entityId);
-    if (currentArchetype?.hasComponents(...componentIds)) return; // exit early if component exists
+  // private addComponents = (entityId: EntityId, componentIds: number[], dataStream: number[]) => {
+  //   const currentArchetype = this.getEntityArchetype(entityId);
+  //   if (currentArchetype?.hasComponents(...componentIds)) return; // exit early if component exists
 
-    const currentArchetypeMask = currentArchetype?.mask || []; // first component wont have any archetypes
-    const unionMask = this.createMaskWithComponentsBitFlips(currentArchetypeMask, componentIds);
-    let nextArchetype = this.getArchetype(unionMask);
-    if (!nextArchetype) {
-      nextArchetype = this.createArchetype(
-        unionMask,
-        ...(currentArchetype?.componentIds || []), // first component wont have current archetype
-        ...componentIds
-      );
-    }
+  //   const currentArchetypeMask = currentArchetype?.mask || []; // first component wont have any archetypes
+  //   const unionMask = this.createMaskWithComponentsBitFlips(currentArchetypeMask, componentIds);
+  //   let nextArchetype = this.getArchetype(unionMask);
+  //   if (!nextArchetype) {
+  //     nextArchetype = this.createArchetype(
+  //       unionMask,
+  //       ...(currentArchetype?.componentIds || []), // first component wont have current archetype
+  //       ...componentIds
+  //     );
+  //   }
 
-    this.bulkChangeUpEntityArchetype(currentArchetype, nextArchetype, entityId, dataStream);
-  };
+  //   this.bulkChangeUpEntityArchetype(currentArchetype, nextArchetype, entityId, dataStream);
+  // };
 
   // addComponents = (...components: Component[]) => components.forEach(this.addComponent);
 
