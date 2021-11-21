@@ -472,27 +472,19 @@ describe(Engine, () => {
       });
 
       context("when last component is removed", () => {
-        //
-        // context("when no other component has the same entity Id", () => {
-        //   it("reclaims the id", () => {
-        //     expect(engine.newEntityId()).toEqual(component.id);
-        //   });
-        // });
-        // context("when another component has the same entity Id", () => {
-        //   beforeEach(() => {
-        //     engine.newEntityId();
-        //     engine.newEntityId();
-        //     engine.newEntityId();
-        //     entityId = engine.newEntityId();
-        //     component = new NumberComponent(entityId);
-        //     engine.addComponent(component);
-        //     engine.addComponent(new StringComponent(component.id));
-        //     engine.removeComponent(component);
-        //   });
-        //   it("does not reclaim the id", () => {
-        //     expect(engine.newEntityId()).not.toEqual(component.id);
-        //   });
-        // });
+        it("recycles the id", () => {
+          engine.removeComponent(Components.component0, entityId);
+          engine.removeComponent(Components.component1, entityId);
+          expect(engine.newEntityId()).toEqual(entityId);
+        });
+
+        context("when recycleEntityIdIfFree is false", () => {
+          it("does not recycle the id", () => {
+            engine.removeComponent(Components.component0, entityId);
+            engine.removeComponent(Components.component1, entityId, false);
+            expect(engine.newEntityId()).not.toEqual(entityId);
+          });
+        });
       });
     });
   });

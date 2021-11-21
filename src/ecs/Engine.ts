@@ -192,7 +192,7 @@ class Engine {
   //   return this.addComponent(component);
   // };
 
-  removeComponent = (componentId: number, entityId: EntityId) => {
+  removeComponent = (componentId: number, entityId: EntityId, recycleEntityIdIfFree = true) => {
     const currentArchetype = this.getEntityArchetype(entityId);
     if (!currentArchetype?.hasComponents(componentId)) return; // exit early if doesn't exist
 
@@ -202,7 +202,8 @@ class Engine {
       if (currentArchetype.componentIds[0] === componentId) {
         // currentArchetype.remove(entityId);
         currentArchetype.destroy(entityId);
-        this.entityIdPool.reclaimId(entityId);
+        // TODO?: entityId recycling https://skypjack.github.io/2019-05-06-ecs-baf-part-3/
+        if (recycleEntityIdIfFree) this.entityIdPool.reclaimId(entityId);
         return;
       } else {
         // TODO: some error case? is this possible?
@@ -343,20 +344,23 @@ class Engine {
   //   return this.addComponent(tag, this.getOrCreateNullComponentById(entityId, componentClass, tag));
   // };
 
-  removeEntity = (entityId: EntityId) => {
+  removeEntity = (entityId: EntityId): number[] | null => {
     const currentArchetype = this.getEntityArchetype(entityId);
     if (currentArchetype) {
-      currentArchetype.remove(entityId);
+      const dataStream = currentArchetype.remove(entityId);
       this.entityIdPool.reclaimId(entityId);
+      return dataStream;
     }
+
+    this.entityIdPool.reclaimId(entityId);
+    return null;
   };
 
   destroyEntity = (entityId: EntityId) => {
     const currentArchetype = this.getEntityArchetype(entityId);
-    if (currentArchetype) {
-      currentArchetype.destroy(entityId);
-      this.entityIdPool.reclaimId(entityId);
-    }
+    if (currentArchetype) currentArchetype.destroy(entityId);
+
+    this.entityIdPool.reclaimId(entityId);
   };
 
   // // NOTE: fast O(1) bulk operations

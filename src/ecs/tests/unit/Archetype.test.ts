@@ -364,6 +364,7 @@ describe(Archetype, () => {
         expect(dx[entity]).toEqual(333);
         expect(dy[entity]).toEqual(444);
         expect(u[entity]).toEqual(777);
+        
         expect(v[entity]).toEqual(888);
         expect(t[entity]).toEqual(999);
       });

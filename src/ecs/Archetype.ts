@@ -187,7 +187,6 @@ class Archetype {
   //   this.elementCount++;
   // };
 
-  // TODO: jests !!!
   remove = (entityId: EntityId): number[] => {
     // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
@@ -223,7 +222,6 @@ class Archetype {
     return dataStream;
   };
 
-  // TODO: jests !!!
   destroy = (entityId: EntityId): void => {
     // if (!this.hasEntity(entityId)) return; // TODO: is this needed?
 
