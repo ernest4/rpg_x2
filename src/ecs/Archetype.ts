@@ -168,6 +168,57 @@ class Archetype {
     this.elementCount++;
   };
 
+  // TODO: jests...
+  bulkAdd = (
+    entityId: EntityId,
+    oldComponentsDataStream: number[],
+    newComponentsDataStream: number[]
+  ) => {
+    const { elementCount, entityIdDenseList, _sparseEntityIdList, components } = this;
+    entityIdDenseList[elementCount] = entityId;
+
+    // old components
+    for (let i = 0, l = oldComponentsDataStream.length; i < l; ) {
+      const componentId = oldComponentsDataStream[i];
+      const valuesCount = oldComponentsDataStream[i + 1];
+      const value0 = i + 2;
+      const soa = components[componentId];
+
+      if (soa) {
+        // if component is part of this archetype..
+        for (let k = value0, ll = value0 + valuesCount; k < ll; k++) {
+          const zeroIndexed = k - value0;
+          const newValue = oldComponentsDataStream[k];
+          soa[zeroIndexed][elementCount] = newValue;
+        }
+      }
+
+      i += 1 + 1 + valuesCount;
+    }
+
+    // new components
+    for (let i = 0, l = newComponentsDataStream.length; i < l; ) {
+      const componentId = newComponentsDataStream[i];
+      const valuesCount = newComponentsDataStream[i + 1];
+      const value0 = i + 2;
+      const soa = components[componentId];
+
+      if (soa) {
+        // if component is part of this archetype..
+        for (let k = value0, ll = value0 + valuesCount; k < ll; k++) {
+          const zeroIndexed = k - value0;
+          const newValue = newComponentsDataStream[k];
+          soa[zeroIndexed][elementCount] = newValue;
+        }
+      }
+
+      i += 1 + 1 + valuesCount;
+    }
+
+    _sparseEntityIdList[entityId] = elementCount;
+    this.elementCount++;
+  };
+
   // // TODO: jests !!!
   // add = (entityId: EntityId, componentIds: ComponentIds, fields: Fields, values: Values): void => {
   //   // if (this.hasEntity(entityId)) return; // TODO: is this needed?
@@ -219,6 +270,23 @@ class Archetype {
     }
 
     this.elementCount--;
+    return dataStream;
+  };
+
+  // TODO: jests...
+  static addToDataStream = (
+    dataStream = [],
+    componentId: number,
+    componentData: number[]
+  ): number[] => {
+    dataStream.push(componentId);
+    const valuesCount = componentData.length;
+    dataStream.push(valuesCount);
+
+    for (let k = 0, l = valuesCount; k < l; k++) {
+      dataStream.push(componentData[k]);
+    }
+
     return dataStream;
   };
 

@@ -1,4 +1,4 @@
-// TODO: specs
+// TODO: jests
 class Buffer<T> {
   private _buffer1: T[];
   private _buffer2: T[];
@@ -15,9 +15,23 @@ class Buffer<T> {
   push = (item: T) => this._activeBuffer.push(item);
 
   process = (callback: (item: T) => void) => {
+    const { _secondaryBuffer } = this;
     this.swap();
-    this.each(callback);
+    // this.each(callback);
+    // Inlining...
+    for (let i = 0, l = _secondaryBuffer.length; i < l; i++) {
+      callback(_secondaryBuffer[i]);
+    }
     this.flush();
+  };
+
+  last = () => {
+    const {
+      _activeBuffer,
+      _activeBuffer: { length },
+    } = this;
+
+    return _activeBuffer[length - 1];
   };
 
   swap = () => {
@@ -36,7 +50,7 @@ class Buffer<T> {
 
   size = () => this._activeBuffer.length;
 
-  each = (callback: (item: T) => void) => this._secondaryBuffer.forEach(callback);
+  // each = (callback: (item: T) => void) => this._secondaryBuffer.forEach(callback);
 }
 
 export default Buffer;
