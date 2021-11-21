@@ -3,6 +3,7 @@ import { assetsPath } from "../../utils/environment";
 import { Engine } from "../../ecs";
 import { Components, SCHEMA } from "../scenes/Main";
 import { NullVector3 } from "../../ecs/Component";
+import Assets, { Resources } from "../Assets";
 
 // TODO: jests
 class Manager extends System {
@@ -23,6 +24,14 @@ class Manager extends System {
         0,
       ]);
       this.addComponent(Components.Velocity, entityId, SCHEMA[Components.Velocity], NullVector3);
+      this.addComponent(Components.Rotation, entityId, SCHEMA[Components.Rotation], [0]);
+      this.addComponent(Components.AngularVelocity, entityId, SCHEMA[Components.AngularVelocity], [
+        0,
+      ]);
+      this.addComponent(Components.Sprite, entityId, SCHEMA[Components.Sprite], [
+        Assets.getIndex(Resources.image, "unit_T.png"),
+        32,
+      ]);
       // this.addComponent(Components.Sprite, entityId, SCHEMA[Components.Sprite], [
       //   assetsPath("images/unit_T.png"),
       //   32,

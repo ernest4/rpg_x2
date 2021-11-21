@@ -34,6 +34,8 @@ class Movement extends System {
         components: {
           [Components.Position]: [x, y, z],
           [Components.Velocity]: [dx, dy, dz],
+          [Components.Rotation]: [rz],
+          [Components.AngularVelocity]: [az],
         },
         elementCount,
       } = archetypes[j];
@@ -42,6 +44,9 @@ class Movement extends System {
         x[i] += dx[i] * seconds;
         y[i] += dy[i] * seconds;
         z[i] += dz[i] * seconds;
+
+        const newRz = rz[i] + az[i] * seconds;
+        z[i] += 360 < newRz ? newRz - 360 : newRz;
       }
     }
   }

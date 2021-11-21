@@ -9,13 +9,15 @@ import Movement from "../systems/Movement";
 import FpsCounter from "../../utils/FpsCounter";
 import { DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import { i32, Vector3f } from "../../ecs/Component";
+import { f32, i32, Vector3f } from "../../ecs/Component";
 // import FpsCounter from "./utils/FpsCounter";
 
 // TODO: move this to own file?
 export const enum Components {
   Position,
   Velocity,
+  Rotation,
+  AngularVelocity,
   Speed,
   Player,
   Sprite,
@@ -24,6 +26,8 @@ export const enum Components {
 export const SCHEMA = {
   [Components.Position]: Vector3f,
   [Components.Velocity]: Vector3f,
+  [Components.Rotation]: [f32("rz")],
+  [Components.AngularVelocity]: [f32("az")],
   [Components.Speed]: [i32("speed")],
   [Components.Player]: [],
   [Components.Sprite]: [i32("url"), i32("frameWidth")],

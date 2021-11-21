@@ -1,0 +1,14 @@
+{
+  "images": [
+    "block_T.png",
+    "bump_map_example_pixel.png",
+    "bump_map_example.png",
+    "grass_T.png",
+    "item_T.png",
+    "unit_T.png",
+    "water_T.png"
+  ],
+  "sounds": [
+    "We+Are+Already+Dead+instrumental.mp3"
+  ]
+}
