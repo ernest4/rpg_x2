@@ -1,14 +1,12 @@
 import { Engine } from "../../ecs";
 import System from "../../ecs/System";
-import { EntityId, QuerySet } from "../../ecs/types";
-import LoadSpriteEvent from "../components/LoadSpriteEvent";
+import { EntityId } from "../../ecs/types";
 import Buffer from "../../ecs/utils/Buffer";
-import { Sprite } from "../components";
 import Phaser from "phaser";
 import PhaserSystem from "./abstract/PhaserSystem";
-import { LOAD_SPRITE_EVENT } from "../components/queryTags";
 import { Components } from "../scenes/Main";
 import Archetype from "../../ecs/Archetype";
+import Assets, { Resources } from "../Assets";
 
 type LoadEvent = {
   key: string;
@@ -24,7 +22,7 @@ class SpriteLoader extends PhaserSystem {
   archetypes: Archetype[];
 
   start(): void {
-    this.archetypes = this.view(Components.LoadSpriteEvent)
+    this.archetypes = this.view(Components.LoadSpriteEvent);
   }
 
   update(): void {
@@ -38,13 +36,38 @@ class SpriteLoader extends PhaserSystem {
     for (let j = 0; j < length; j++) {
       const {
         components: {
-          [Components.LoadSpriteEvent]: [...],
+          [Components.LoadSpriteEvent]: [
+            urlIndex,
+            frameWidth,
+            frameHeight,
+            startFrame,
+            endFrame,
+            margin,
+            spacing,
+            targetEntityId,
+          ],
         },
+        entityIdDenseList,
         elementCount,
       } = archetypes[j];
 
       for (let i = 0; i < elementCount; i++) {
-        // x[i] += dx[i] * seconds;
+        const url = Assets.getResource(Resources.image, urlIndex[i]);
+        // NOTE: don't re-request to load something loading/loaded already
+        if (this.isTextureLoading(url) || this.isTextureLoaded(url)) continue;
+
+        // texture not loaded or loading, request one now.
+        const frameConfig = {
+          frameWidth: frameWidth[i],
+          frameHeight: frameHeight[i],
+          startFrame: startFrame[i],
+          endFrame: endFrame[i],
+          margin: margin[i],
+          spacing: spacing[i],
+        };
+        this.queueTextureLoad(url, frameConfig, targetEntityId[i]);
+
+        this.destroyEntity(entityIdDenseList[i]);
       }
     }
 
@@ -54,14 +77,14 @@ class SpriteLoader extends PhaserSystem {
 
   destroy(): void {}
 
-  private queueLoadEvents = ({ url, frameConfig, targetEntityId, id }: LoadSpriteEvent) => {
-    this.engine.removeComponentById(id, LOAD_SPRITE_EVENT);
-    // NOTE: don't re-request to load something loading/loaded already
-    if (this.isTextureLoading(url) || this.isTextureLoaded(url)) return;
+  // private queueLoadEvents = ({ url, frameConfig, targetEntityId, id }: LoadSpriteEvent) => {
+  //   this.engine.removeComponentById(id, LOAD_SPRITE_EVENT);
+  //   // NOTE: don't re-request to load something loading/loaded already
+  //   if (this.isTextureLoading(url) || this.isTextureLoaded(url)) return;
 
-    // texture not loaded or loading, request one now.
-    this.queueTextureLoad(url, frameConfig, targetEntityId);
-  };
+  //   // texture not loaded or loading, request one now.
+  //   this.queueTextureLoad(url, frameConfig, targetEntityId);
+  // };
 
   private isTextureLoading = (url: string) => {
     return this._requestedTextures[url] && this.isPhaserTextureMissing(url);

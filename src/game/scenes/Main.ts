@@ -34,7 +34,16 @@ export const SCHEMA = {
   [Components.Player]: [],
   [Components.Sprite]: [i32("url"), i32("frameWidth")],
   [Components.InputEvent]: [i32("type"), i32("key"), i32("targetEntityId")],
-  [Components.LoadSpriteEvent]: [...]
+  [Components.LoadSpriteEvent]: [
+    i32("url"),
+    i32("frameWidth"),
+    i32("frameHeight"),
+    i32("startFrame"),
+    i32("endFrame"),
+    i32("margin"),
+    i32("spacing"),
+    i32("targetEntityId"),
+  ],
 } as const;
 
 export default class Main extends Phaser.Scene {
