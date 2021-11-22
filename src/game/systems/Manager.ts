@@ -28,9 +28,11 @@ class Manager extends System {
       this.addComponent(Components.AngularVelocity, entityId, SCHEMA[Components.AngularVelocity], [
         0,
       ]);
+      this.addComponent(Components.Scale, entityId, SCHEMA[Components.Scale], [1, 1, 1]);
       this.addComponent(Components.Sprite, entityId, SCHEMA[Components.Sprite], [
         Assets.getIndex(Resources.image, "unit_T.png"),
         32,
+        -1,
       ]);
       // this.addComponent(Components.Sprite, entityId, SCHEMA[Components.Sprite], [
       //   assetsPath("images/unit_T.png"),

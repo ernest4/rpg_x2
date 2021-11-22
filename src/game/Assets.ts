@@ -3,6 +3,7 @@ import { assetsPath } from "../utils/environment";
 export enum Resources {
   image,
   sound,
+  phaserSprite,
 }
 
 class Assets {
@@ -28,17 +29,24 @@ class Assets {
     return index;
   };
 
-  getResource = (resourceType: Resources, index: number) => {
+  getResource = (resourceType: Resources, index: number): any => {
     const resource = this.manifest[resourceType][index];
     if (resource === undefined) throw new Error(`accessing non existing index: ${index}`);
 
     return resource;
   };
 
+  putResource = (resourceType: Resources, resource: any): number => {
+    const index = this.manifest[resourceType].push(resource);
+    // this.indexes[resourceType][index] = index;
+    return index;
+  };
+
   private parseManifest = ({ images, sounds }: { images: string[]; sounds: string[] }) => {
     const { manifest } = this;
     manifest[Resources.image] = images;
     manifest[Resources.sound] = sounds;
+    manifest[Resources.phaserSprite] = [];
   };
 
   private buildIndexes = () => {

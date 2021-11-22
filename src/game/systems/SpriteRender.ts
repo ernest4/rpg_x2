@@ -1,142 +1,133 @@
-import { QuerySet } from "../../ecs/types";
+import Archetype from "../../ecs/Archetype";
 import { benchmarkSubject } from "../../ecs/utils/benchmark";
-import LoadSpriteEvent from "../components/LoadSpriteEvent";
-import { LOAD_SPRITE_EVENT, PLAYER, SPRITE, TRANSFORM } from "../components/queryTags";
-import Sprite from "../components/Sprite";
-import Transform from "../components/Transform";
+import Assets, { Resources } from "../Assets";
+import { Components, SCHEMA } from "../scenes/Main";
 import PhaserSystem, { __MISSING } from "./abstract/PhaserSystem";
 
 // TODO: jests
 
+type SpriteData = [
+  url: number,
+  frameWidth: number,
+  frameHeight: number,
+  startFrame: number,
+  endFrame: number,
+  margin: number,
+  spacing: number,
+  targetEntityId: number
+];
+
 class SpriteRender extends PhaserSystem {
-  private _a: any;
-  _aX: number[];
-  _aY: number[];
-  _aZ: number[];
+  archetypes: Archetype[];
 
   start(): void {
-    this._a = Array.from(Array(300000).keys());
-    this._aX = Array.from(Array(300000).keys());
-    this._aY = Array.from(Array(300000).keys());
-    this._aZ = Array.from(Array(300000).keys());
+    this.archetypes = this.view(
+      Components.Sprite,
+      Components.Position,
+      Components.Rotation,
+      Components.Scale
+    );
   }
 
   update(): void {
     // this.benchmarkSubject("query two in order", () => {
     // });
-    this.benchmarkSubject("array component while", () => {
-      const _a = this._a;
-      const a_length = this._a.length;
-      let i = 0;
-      const this_engine_getComponentById = this.engine.getComponentById;
-      let transformPosition;
-      while (i < a_length) {
-        if (50 < i && i < 29000) {
-          //
-          // this.updateSprites(
-          // this.engine.getComponentById(500, SPRITE);
-          transformPosition = this_engine_getComponentById<Transform>(i, TRANSFORM).position;
-          transformPosition.x = i;
-          transformPosition.y = i;
-          transformPosition.z = i;
-          // this.engine.getComponentById(500, PLAYER);
-          // );
-        }
-        i++;
-      }
-    });
-    this.benchmarkSubject("array component direct access, no get", () => {
-      let i = 0;
-      const transformComponentList = this.engine._componentLists[TRANSFORM];
-      if (!transformComponentList) return;
-      const elementCount = transformComponentList._elementCount;
-      const denseList = transformComponentList._denseList;
-      let transformPosition;
-      while (i < elementCount) {
-        if (50 < i && i < 29000) {
-          //
-          // this.updateSprites(
-          // this.engine.getComponentById(500, SPRITE);
-          transformPosition = (<Transform>denseList[i]).position;
-          transformPosition.x = i;
-          transformPosition.y = i;
-          transformPosition.z = i;
-          // this.engine.getComponentById(500, PLAYER);
-          // );
-        }
-        i++;
-      }
-    });
-    this.benchmarkSubject("array component direct access, no get, stream", () => {
-      let i = 0;
-      const transformComponentList = this.engine._componentLists[TRANSFORM];
-      if (!transformComponentList) return;
-      const callback = ({position}) => {
-        position.x = i;
-        position.y = i;
-        position.z = i;
-        i++;
-      }
-      // @ts-ignore
-      transformComponentList.stream(callback);
-    });
-    this.benchmarkSubject("array raw while", () => {
-      const _aX = this._aX;
-      const _aY = this._aY;
-      const _aZ = this._aZ;
-      const aX_length = this._aX.length;
-      let i = 0;
-      while (i < aX_length) {
-        if (50 < i && i < 29000) {
-          _aX[i] && (_aX[i] = i);
-          _aY[i] && (_aY[i] = i);
-          _aZ[i] && (_aZ[i] = i);
-        }
-        i++;
-      }
-    });
+    // this.engine.queryTwoInOrder(this.updateSprites, SPRITE, TRANSFORM);
 
-    this.benchmarkSubject("queryTwoInOrder", () => {
-      this.engine.queryTwoInOrder(this.updateSprites, SPRITE, TRANSFORM);
-    });
-    this.benchmarkSubject("queryTwoInOrderUnchecked", () => {
-      this.engine.queryTwoInOrderUnchecked(this.updateSprites, SPRITE, TRANSFORM);
-    });
+    const {
+      archetypes,
+      archetypes: { length },
+    } = this;
+
+    for (let j = 0; j < length; j++) {
+      const {
+        components: {
+          [Components.Sprite]: [urlIndex, frameWidth, _phaserSpriteIndex],
+          [Components.Position]: [x, y, z],
+          [Components.Rotation]: [rz],
+          [Components.Scale]: [sx, sy, sz],
+        },
+        entityIdDenseList,
+        elementCount,
+      } = archetypes[j];
+
+      for (let i = 0; i < elementCount; i++) {
+        // x[i] += dx[i] * seconds;
+
+        // TODO: store phaser sprites in Assets ?!?
+        let phaserSpriteIndex = _phaserSpriteIndex[i];
+        let phaserSprite = Assets.getResource(Resources.phaserSprite, phaserSpriteIndex);
+        const url = Assets.getResource(Resources.image, urlIndex[i]);
+        const sprite: SpriteData = [
+          urlIndex[i],
+          frameWidth[i],
+          frameWidth[i],
+          0,
+          0,
+          0,
+          0,
+          entityIdDenseList[i],
+        ];
+
+        if (!(phaserSprite && phaserSprite.texture.key !== __MISSING)) {
+          if (this.isPhaserTexturePresent(url)) {
+            [phaserSprite, phaserSpriteIndex] = this.replacePhaserSprite(url);
+            _phaserSpriteIndex[i] = phaserSpriteIndex;
+          } else return this.initLoad(sprite);
+        }
+
+        phaserSprite.x = x[i];
+        phaserSprite.y = y[i];
+        phaserSprite.angle = rz[i];
+        phaserSprite.scaleX = sx[i];
+        phaserSprite.scaleY = sy[i];
+      }
+    }
   }
 
   destroy(): void {}
 
-  private updateSprites = (sprite: Sprite, { position, rotation, scale }: Transform) => {
-    let { phaserSprite } = sprite;
+  // private updateSprites = (sprite: Sprite, { position, rotation, scale }: Transform) => {
+  //   let { phaserSprite } = sprite;
 
-    // inline: this.phaserSpriteReady()
-    if (!(phaserSprite && phaserSprite.texture.key !== __MISSING)) {
-      if (this.isPhaserTexturePresent(sprite.url)) {
-        phaserSprite = this.replacePhaserSprite(sprite);
-      } else return this.initLoad(sprite);
-    }
+  //   // inline: this.phaserSpriteReady()
+  //   if (!(phaserSprite && phaserSprite.texture.key !== __MISSING)) {
+  //     if (this.isPhaserTexturePresent(sprite.url)) {
+  //       phaserSprite = this.replacePhaserSprite(sprite);
+  //     } else return this.initLoad(sprite);
+  //   }
 
-    phaserSprite.x = position.x;
-    phaserSprite.y = position.y;
-    phaserSprite.angle = rotation.z;
-    phaserSprite.scaleX = scale.x;
-    phaserSprite.scaleY = scale.y;
-  };
+  //   phaserSprite.x = position.x;
+  //   phaserSprite.y = position.y;
+  //   phaserSprite.angle = rotation.z;
+  //   phaserSprite.scaleX = scale.x;
+  //   phaserSprite.scaleY = scale.y;
+  // };
 
   // private phaserSpriteReady = (phaserSprite: Phaser.GameObjects.Sprite) => {
   //   return phaserSprite && phaserSprite.texture.key !== __MISSING;
   // };
 
-  private replacePhaserSprite = (sprite: Sprite) => {
-    const newPhaserSprite = this.scene.add.sprite(0, 0, sprite.url);
-    sprite.phaserSprite = newPhaserSprite;
-    return newPhaserSprite;
+  private replacePhaserSprite = (url: string): [Phaser.GameObjects.Sprite, number] => {
+    const newPhaserSprite = this.scene.add.sprite(0, 0, url);
+    // sprite.phaserSprite = newPhaserSprite;
+    const index = Assets.putResource(Resources.phaserSprite, newPhaserSprite);
+    return [newPhaserSprite, index];
   };
 
-  private initLoad = (sprite: Sprite) => {
-    this.engine.addComponent(
-      LOAD_SPRITE_EVENT,
-      new LoadSpriteEvent(this.newEntityId(), sprite.url, sprite.frameConfig, sprite.entityId)
+  // private initLoad = (sprite: Sprite) => {
+  //   this.engine.addComponent(
+  //     LOAD_SPRITE_EVENT,
+  //     new LoadSpriteEvent(this.newEntityId(), sprite.url, sprite.frameConfig, sprite.entityId)
+  //   );
+  // };
+
+  private initLoad = (sprite: SpriteData) => {
+    this.addComponent(
+      Components.LoadSpriteEvent,
+      this.newEntityId(),
+      SCHEMA[Components.LoadSpriteEvent],
+      sprite
     );
   };
 }
