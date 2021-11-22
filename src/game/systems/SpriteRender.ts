@@ -1,5 +1,6 @@
 import Archetype from "../../ecs/Archetype";
 import { benchmarkSubject } from "../../ecs/utils/benchmark";
+import { assetsPath } from "../../utils/environment";
 import Assets, { Resources } from "../Assets";
 import { Components, SCHEMA } from "../scenes/Main";
 import PhaserSystem, { __MISSING } from "./abstract/PhaserSystem";
@@ -52,12 +53,10 @@ class SpriteRender extends PhaserSystem {
       } = archetypes[j];
 
       for (let i = 0; i < elementCount; i++) {
-        // x[i] += dx[i] * seconds;
-
-        // TODO: store phaser sprites in Assets ?!?
         let phaserSpriteIndex = _phaserSpriteIndex[i];
+        console.log(phaserSpriteIndex);
         let phaserSprite = Assets.getResource(Resources.phaserSprite, phaserSpriteIndex);
-        const url = Assets.getResource(Resources.image, urlIndex[i]);
+        const url = assetsPath(`images/${Assets.getResource(Resources.image, urlIndex[i])}`);
         const sprite: SpriteData = [
           urlIndex[i],
           frameWidth[i],

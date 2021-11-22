@@ -10,6 +10,7 @@ import FpsCounter from "../../utils/FpsCounter";
 import { DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
 import { f32, i32, Vector3f } from "../../ecs/Component";
+import Assets from "../Assets";
 // import FpsCounter from "./utils/FpsCounter";
 
 // TODO: move this to own file?
@@ -64,6 +65,9 @@ export default class Main extends Phaser.Scene {
   // preload() {}
 
   create(data) {
+    // while (true) {
+    //   if (Assets.ready()) break;
+    // }
     this.initECS();
     this.fpsCounter = new FpsCounter(); // if DEVELOPMENT ?
   }

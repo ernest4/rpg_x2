@@ -7,6 +7,7 @@ import PhaserSystem from "./abstract/PhaserSystem";
 import { Components } from "../scenes/Main";
 import Archetype from "../../ecs/Archetype";
 import Assets, { Resources } from "../Assets";
+import { assetsPath } from "../../utils/environment";
 
 type LoadEvent = {
   key: string;
@@ -52,7 +53,8 @@ class SpriteLoader extends PhaserSystem {
       } = archetypes[j];
 
       for (let i = 0; i < elementCount; i++) {
-        const url = Assets.getResource(Resources.image, urlIndex[i]);
+        // const url = Assets.getResource(Resources.image, urlIndex[i]);
+        const url = assetsPath(`images/${Assets.getResource(Resources.image, urlIndex[i])}`);
         // NOTE: don't re-request to load something loading/loaded already
         if (this.isTextureLoading(url) || this.isTextureLoaded(url)) continue;
 

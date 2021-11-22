@@ -16,7 +16,12 @@ class Movement extends System {
   }
 
   start(): void {
-    this.archetypes = this.view(Components.Velocity, Components.Position);
+    this.archetypes = this.view(
+      Components.Velocity,
+      Components.Position,
+      Components.Rotation,
+      Components.AngularVelocity
+    );
   }
 
   update(): void {

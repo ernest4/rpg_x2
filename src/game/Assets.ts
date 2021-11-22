@@ -11,15 +11,30 @@ class Assets {
   private indexes: { [resourceName: string]: number }[] = [];
 
   constructor(manifestPath: string) {
-    // TODO: chunk manifest into manifest pieces later when the time comes?
-    fetch(`${location.origin}${manifestPath}`)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data); // TODO: remove after testing
-        // this.manifest = data;
-        this.parseManifest(data);
-        this.buildIndexes();
-      });
+    // TODO: fix async loading...
+    // // TODO: chunk manifest into manifest pieces later when the time comes?
+    // fetch(`${location.origin}${manifestPath}`)
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     this.parseManifest(data);
+    //     this.buildIndexes();
+    //   });
+
+    // TESTING with sync data:
+    const data = {
+      images: [
+        "block_T.png",
+        "bump_map_example_pixel.png",
+        "bump_map_example.png",
+        "grass_T.png",
+        "item_T.png",
+        "unit_T.png",
+        "water_T.png",
+      ],
+      sounds: ["We+Are+Already+Dead+instrumental.mp3"],
+    };
+    this.parseManifest(data);
+    this.buildIndexes();
   }
 
   getIndex = (resourceType: Resources, resource: string): number => {
@@ -30,6 +45,11 @@ class Assets {
   };
 
   getResource = (resourceType: Resources, index: number): any => {
+    if (index === -1) return null;
+    if (index === undefined) return null; // TODO: deal with this better??!
+
+    // console.log(resourceType);
+    // console.log(index);
     const resource = this.manifest[resourceType][index];
     if (resource === undefined) throw new Error(`accessing non existing index: ${index}`);
 
@@ -56,7 +76,7 @@ class Assets {
       const index = {};
       const resource = manifest[i];
       for (let k = 0, ll = resource.length; k < ll; k++) {
-        index[resource[i]] = i;
+        index[resource[k]] = k;
       }
       indexes[i] = index;
     }
