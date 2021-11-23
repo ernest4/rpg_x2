@@ -1,7 +1,7 @@
 import { Engine } from "../../ecs";
 import Archetype, { SOA } from "../../ecs/Archetype";
 import System from "../../ecs/System";
-import { Components } from "../scenes/Main";
+import { Components } from "../components";
 import { INPUT_EVENT_TYPE, INPUT_KEY } from "./InputListener";
 
 // TODO: jests

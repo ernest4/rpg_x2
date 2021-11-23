@@ -7,49 +7,13 @@ import SpriteLoader from "../systems/SpriteLoader";
 import Phaser from "phaser";
 import Movement from "../systems/Movement";
 import FpsCounter from "../../utils/FpsCounter";
-import { DEVELOPMENT } from "../../utils/environment";
+import { assetsPath, DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import { f32, i32, Vector3f } from "../../ecs/Component";
 import Assets from "../Assets";
+import { SCHEMA } from "../components";
 // import FpsCounter from "./utils/FpsCounter";
 
 const MAX_ENTITIES = 1e6;
-
-// TODO: move this to own file?
-export const enum Components {
-  Position,
-  Velocity,
-  Rotation,
-  AngularVelocity,
-  Scale,
-  Speed,
-  Player,
-  Sprite,
-  InputEvent,
-  LoadSpriteEvent,
-}
-
-export const SCHEMA = {
-  [Components.Position]: Vector3f,
-  [Components.Velocity]: Vector3f,
-  [Components.Rotation]: [f32("rz")],
-  [Components.AngularVelocity]: [f32("az")],
-  [Components.Scale]: Vector3f,
-  [Components.Speed]: [i32("speed")],
-  [Components.Player]: [],
-  [Components.Sprite]: [i32("url"), i32("frameWidth"), i32("phaserSprite")],
-  [Components.InputEvent]: [i32("type"), i32("key"), i32("targetEntityId")],
-  [Components.LoadSpriteEvent]: [
-    i32("url"),
-    i32("frameWidth"),
-    i32("frameHeight"),
-    i32("startFrame"),
-    i32("endFrame"),
-    i32("margin"),
-    i32("spacing"),
-    i32("targetEntityId"),
-  ],
-} as const;
 
 export default class Main extends Phaser.Scene {
   // dudeQuads!: any[];
@@ -58,18 +22,19 @@ export default class Main extends Phaser.Scene {
   // fpsCounter!: FpsCounter;
   private _engine!: Engine;
   fpsCounter: FpsCounter;
+  ecsAssets: Assets;
 
   constructor(config) {
     super(config);
   }
 
   // init(data) {}
-  // preload() {}
+  preload() {
+    this.load.json("manifest", assetsPath("manifest.json"));
+  }
 
   create(data) {
-    // while (true) {
-    //   if (Assets.ready()) break;
-    // }
+    this.ecsAssets = new Assets(this.cache.json.get("manifest"));
     this.initECS();
     this.fpsCounter = new FpsCounter(); // if DEVELOPMENT ?
   }
@@ -83,7 +48,7 @@ export default class Main extends Phaser.Scene {
     this._engine = new Engine(SCHEMA, MAX_ENTITIES, DEVELOPMENT);
     // TODO: test all systems.
     this._engine.addSystems(
-      new Manager(this._engine),
+      new Manager(this._engine, this.ecsAssets),
 
       // TODO: clean up and add back SERIALIZATION. Serialization will detect Sprite/Sounds etc and remove them, creating loadEvents for them...
       // TODO: get rid of this after applying it to serialization
@@ -104,8 +69,8 @@ export default class Main extends Phaser.Scene {
       // this.cameras.main.setBackgroundColor(0xffffff);
 
       // new AssetLoader(this._engine), // TODO: async load in sprites / textures /sounds etc
-      new SpriteLoader(this._engine, this), // TODO: refactor into asset loader?
-      new SpriteRender(this._engine, this) // NOTE: always last
+      new SpriteLoader(this._engine, this, this.ecsAssets), // TODO: refactor into asset loader?
+      new SpriteRender(this._engine, this, this.ecsAssets) // NOTE: always last
     );
 
     // new Serialization(this._engine, this));

@@ -1,7 +1,7 @@
 import { Engine } from "../../ecs";
 import Archetype from "../../ecs/Archetype";
 import System from "../../ecs/System";
-import { Components } from "../scenes/Main";
+import { Components } from "../components";
 
 class Movement extends System {
   archetypes: Archetype[];
@@ -44,7 +44,7 @@ class Movement extends System {
         z[i] += dz[i] * seconds;
 
         const newRz = rz[i] + az[i] * seconds;
-        z[i] += 360 < newRz ? newRz - 360 : newRz;
+        rz[i] += 360 < newRz ? newRz - 360 : newRz;
       }
     }
   }

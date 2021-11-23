@@ -1,27 +1,40 @@
-// import DragEvent from "./DragEvent";
-import { Vector2f, Vector3f } from "../../ecs/Component";
-// import InputEvent from "./InputEvent";
-// // import Interactive from "./Interactive";
-// import InteractiveEvent from "./InteractiveEvent_legacy";
-// // import PhysicsBody from "./PhysicsBody";
-// import Player from "./Player";
-// import Sprite from "./Sprite";
+import { f32, i32, Vector3f } from "../../ecs/Component";
 
-// import Transform from "./Transform";
+export const enum Components {
+  Position,
+  Velocity,
+  Rotation,
+  AngularVelocity,
+  Scale,
+  Speed,
+  Player,
+  Sprite,
+  InputEvent,
+  LoadSpriteEvent,
+  Hitpoints,
+  Name,
+}
 
-// export default {
-//   [Components.Velocity]: new Component(Components.Velocity, Vector3f),
-//   [Components.Position]: new Component(Components.Position, Vector3f),
-// };
-
-// export const schema = {
-//   // // DragEvent,
-//   // InputEvent,
-//   // // Interactive,
-//   // InteractiveEvent,
-//   // // PhysicsBody,
-//   // Player,
-//   // Sprite,
-//   // // Transform,
-//   Velocity: new Component(Vector2i),
-// };
+export const SCHEMA = {
+  [Components.Position]: Vector3f,
+  [Components.Velocity]: Vector3f,
+  [Components.Rotation]: [f32("rz")],
+  [Components.AngularVelocity]: [f32("az")],
+  [Components.Scale]: Vector3f,
+  [Components.Speed]: [i32("speed")],
+  [Components.Player]: [],
+  [Components.Sprite]: [i32("url"), i32("frameWidth"), i32("phaserSprite")],
+  [Components.InputEvent]: [i32("type"), i32("key"), i32("targetEntityId")],
+  [Components.LoadSpriteEvent]: [
+    i32("url"),
+    i32("frameWidth"),
+    i32("frameHeight"),
+    i32("startFrame"),
+    i32("endFrame"),
+    i32("margin"),
+    i32("spacing"),
+    i32("targetEntityId"),
+  ],
+  [Components.Hitpoints]: [i32("hitpoints")],
+  [Components.Name]: [i32("name")],
+} as const;

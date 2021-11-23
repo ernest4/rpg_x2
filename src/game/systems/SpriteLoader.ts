@@ -1,13 +1,12 @@
 import { Engine } from "../../ecs";
-import System from "../../ecs/System";
 import { EntityId } from "../../ecs/types";
 import Buffer from "../../ecs/utils/Buffer";
-import Phaser from "phaser";
+import Phaser, { Scene } from "phaser";
 import PhaserSystem from "./abstract/PhaserSystem";
-import { Components } from "../scenes/Main";
 import Archetype from "../../ecs/Archetype";
 import Assets, { Resources } from "../Assets";
 import { assetsPath } from "../../utils/environment";
+import { Components } from "../components";
 
 type LoadEvent = {
   key: string;
@@ -21,6 +20,12 @@ class SpriteLoader extends PhaserSystem {
   private _loadEventsBuffer: Buffer<LoadEvent> = new Buffer<LoadEvent>();
   private _requestedTextures: { [key: string]: string } = {};
   archetypes: Archetype[];
+  assets: Assets;
+
+  constructor(engine: Engine, scene: Scene, assets: Assets) {
+    super(engine, scene);
+    this.assets = assets;
+  }
 
   start(): void {
     this.archetypes = this.view(Components.LoadSpriteEvent);
@@ -53,8 +58,7 @@ class SpriteLoader extends PhaserSystem {
       } = archetypes[j];
 
       for (let i = 0; i < elementCount; i++) {
-        // const url = Assets.getResource(Resources.image, urlIndex[i]);
-        const url = assetsPath(`images/${Assets.getResource(Resources.image, urlIndex[i])}`);
+        const url = assetsPath(`images/${this.assets.getResource(Resources.image, urlIndex[i])}`);
         // NOTE: don't re-request to load something loading/loaded already
         if (this.isTextureLoading(url) || this.isTextureLoaded(url)) continue;
 

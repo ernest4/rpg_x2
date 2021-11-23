@@ -1,14 +1,17 @@
 import System from "../../ecs/System";
 import { assetsPath } from "../../utils/environment";
 import { Engine } from "../../ecs";
-import { Components, SCHEMA } from "../scenes/Main";
 import { NullVector3 } from "../../ecs/Component";
 import Assets, { Resources } from "../Assets";
+import { Components, SCHEMA } from "../components";
 
 // TODO: jests
 class Manager extends System {
-  constructor(engine: Engine) {
+  assets: Assets;
+
+  constructor(engine: Engine, assets: Assets) {
     super(engine);
+    this.assets = assets;
   }
 
   start(): void {
@@ -30,7 +33,7 @@ class Manager extends System {
       ]);
       this.addComponent(Components.Scale, entityId, SCHEMA[Components.Scale], [1, 1, 1]);
       this.addComponent(Components.Sprite, entityId, SCHEMA[Components.Sprite], [
-        Assets.getIndex(Resources.image, "unit_T.png"),
+        this.assets.getIndex(Resources.image, "unit_T.png"),
         32,
         -1,
       ]);

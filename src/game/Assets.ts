@@ -5,34 +5,41 @@ export enum Resources {
   sound,
 }
 
+type Manifest = { images: string[]; sounds: string[] };
+
 class Assets {
   private manifest: string[][] = [];
   private indexes: { [resourceName: string]: number }[] = [];
 
-  constructor(manifestPath: string) {
-    // TODO: fix async loading...
-    // // TODO: chunk manifest into manifest pieces later when the time comes?
-    // fetch(`${location.origin}${manifestPath}`)
-    //   .then(response => response.json())
-    //   .then(data => {
-    //     this.parseManifest(data);
-    //     this.buildIndexes();
-    //   });
+  // constructor(manifestPath: string) {
+  //   // TODO: fix async loading...
+  //   // // TODO: chunk manifest into manifest pieces later when the time comes?
+  //   // fetch(`${location.origin}${manifestPath}`)
+  //   //   .then(response => response.json())
+  //   //   .then(data => {
+  //   //     this.parseManifest(data);
+  //   //     this.buildIndexes();
+  //   //   });
 
-    // TESTING with sync data:
-    const data = {
-      images: [
-        "block_T.png",
-        "bump_map_example_pixel.png",
-        "bump_map_example.png",
-        "grass_T.png",
-        "item_T.png",
-        "unit_T.png",
-        "water_T.png",
-      ],
-      sounds: ["We+Are+Already+Dead+instrumental.mp3"],
-    };
-    this.parseManifest(data);
+  //   // TESTING with sync data:
+  //   const data = {
+  //     images: [
+  //       "block_T.png",
+  //       "bump_map_example_pixel.png",
+  //       "bump_map_example.png",
+  //       "grass_T.png",
+  //       "item_T.png",
+  //       "unit_T.png",
+  //       "water_T.png",
+  //     ],
+  //     sounds: ["We+Are+Already+Dead+instrumental.mp3"],
+  //   };
+  //   this.parseManifest(data);
+  //   this.buildIndexes();
+  // }
+
+  constructor(manifest: Manifest) {
+    this.parseManifest(manifest);
     this.buildIndexes();
   }
 
@@ -46,10 +53,6 @@ class Assets {
   getResource = (resourceType: Resources, index: number): any => {
     if (index === -1) return null;
 
-    // if (index === undefined) return null; //  TODO: deal with this better??!
-
-    // console.log(resourceType);
-    // console.log(index);
     const resource = this.manifest[resourceType][index];
     if (resource === undefined) throw new Error(`accessing non existing index: ${index}`);
 
@@ -62,7 +65,7 @@ class Assets {
     return index;
   };
 
-  private parseManifest = ({ images, sounds }: { images: string[]; sounds: string[] }) => {
+  private parseManifest = ({ images, sounds }: Manifest) => {
     const { manifest } = this;
     manifest[Resources.image] = images;
     manifest[Resources.sound] = sounds;
@@ -83,4 +86,5 @@ class Assets {
 }
 
 // Singleton
-export default new Assets(assetsPath("manifest.json"));
+// export default new Assets(assetsPath("manifest.json"));
+export default Assets;

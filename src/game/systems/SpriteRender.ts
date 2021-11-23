@@ -1,8 +1,10 @@
-import Archetype, { Archetypes } from "../../ecs/Archetype";
+import { Scene } from "phaser";
+import { Engine } from "../../ecs";
+import { Archetypes } from "../../ecs/Archetype";
 import { benchmarkSubject } from "../../ecs/utils/benchmark";
 import { assetsPath } from "../../utils/environment";
 import Assets, { Resources } from "../Assets";
-import { Components, SCHEMA } from "../scenes/Main";
+import { Components, SCHEMA } from "../components";
 import PhaserSystem, { __MISSING } from "./abstract/PhaserSystem";
 
 // TODO: jests
@@ -23,6 +25,12 @@ const urls = [];
 
 class SpriteRender extends PhaserSystem {
   archetypes: Archetypes;
+  assets: Assets;
+
+  constructor(engine: Engine, scene: Scene, assets: Assets) {
+    super(engine, scene);
+    this.assets = assets;
+  }
 
   start(): void {
     this.archetypes = this.view(
@@ -59,7 +67,7 @@ class SpriteRender extends PhaserSystem {
           const urlIndexValue = urlIndex[i];
           let url = urls[urlIndexValue];
           if (!url) {
-            url = assetsPath(`images/${Assets.getResource(Resources.image, urlIndexValue)}`);
+            url = assetsPath(`images/${this.assets.getResource(Resources.image, urlIndexValue)}`);
             urls[urlIndexValue] = url;
           }
           if (this.isPhaserTexturePresent(url)) {

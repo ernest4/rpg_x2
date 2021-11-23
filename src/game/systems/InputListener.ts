@@ -2,8 +2,8 @@ import { Engine } from "../../ecs";
 import Buffer from "../../ecs/utils/Buffer";
 import Phaser from "phaser";
 import PhaserSystem from "./abstract/PhaserSystem";
-import { Components, SCHEMA } from "../scenes/Main";
 import Archetype from "../../ecs/Archetype";
+import { Components, SCHEMA } from "../components";
 
 export enum INPUT_KEY {
   UP,
