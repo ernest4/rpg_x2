@@ -15,10 +15,10 @@ class Buffer<T> {
   push = (item: T) => this._activeBuffer.push(item);
 
   process = (callback: (item: T) => void) => {
-    const { _secondaryBuffer } = this;
     this.swap();
     // this.each(callback);
     // Inlining...
+    const { _secondaryBuffer } = this;
     for (let i = 0, l = _secondaryBuffer.length; i < l; i++) {
       callback(_secondaryBuffer[i]);
     }
