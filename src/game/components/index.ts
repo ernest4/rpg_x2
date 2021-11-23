@@ -1,5 +1,5 @@
 // import DragEvent from "./DragEvent";
-import Component, { Vector2f, Vector3f } from "../../ecs/Component";
+import { Vector2f, Vector3f } from "../../ecs/Component";
 // import InputEvent from "./InputEvent";
 // // import Interactive from "./Interactive";
 // import InteractiveEvent from "./InteractiveEvent_legacy";

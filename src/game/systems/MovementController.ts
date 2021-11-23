@@ -17,8 +17,6 @@ class MovementController extends System {
   }
 
   update(): void {
-    // this.engine.queryOne(this.filterInputEvents, INPUT_EVENT);
-
     const {
       archetypes,
       archetypes: { length },
@@ -90,70 +88,6 @@ class MovementController extends System {
         break;
     }
   };
-
-  // private filterInputEvents = (inputEvent: InputEvent) => {
-  //   this.engine.withComponents(
-  //     components => this.applyInputEvent(inputEvent, ...(components as [PhysicsBody, Speed])),
-  //     inputEvent.targetEntityId,
-  //     PHYSICS_BODY,
-  //     SPEED
-  //   );
-  // };
-
-  // private applyInputEvent = (
-  //   { type, key }: InputEvent,
-  //   physicsBody: PhysicsBody,
-  //   { speed }: Speed
-  // ) => {
-  //   switch (key) {
-  //     case "A":
-  //       if (type === INPUT_EVENT_TYPE.KEYUP && physicsBody.linearVelocity.x < 0) {
-  //         physicsBody.linearVelocity.x = 0;
-  //         break;
-  //       }
-
-  //       if (type === INPUT_EVENT_TYPE.KEYDOWN) physicsBody.linearVelocity.x = -speed;
-  //       break;
-  //     case "D":
-  //       if (type === INPUT_EVENT_TYPE.KEYUP && 0 < physicsBody.linearVelocity.x) {
-  //         physicsBody.linearVelocity.x = 0;
-  //         break;
-  //       }
-
-  //       if (type === INPUT_EVENT_TYPE.KEYDOWN) physicsBody.linearVelocity.x = speed;
-  //       break;
-  //     case "W":
-  //       if (type === INPUT_EVENT_TYPE.KEYUP && physicsBody.linearVelocity.y < 0) {
-  //         physicsBody.linearVelocity.y = 0;
-  //         break;
-  //       }
-
-  //       if (type === INPUT_EVENT_TYPE.KEYDOWN) physicsBody.linearVelocity.y = -speed;
-  //       break;
-  //     case "S":
-  //       if (type === INPUT_EVENT_TYPE.KEYUP && 0 < physicsBody.linearVelocity.y) {
-  //         physicsBody.linearVelocity.y = 0;
-  //         break;
-  //       }
-
-  //       if (type === INPUT_EVENT_TYPE.KEYDOWN) physicsBody.linearVelocity.y = speed;
-  //       break;
-  //   }
-  // };
-
-  // private applyKeyToVelocity = (
-  //   physicsBody: PhysicsBody,
-  //   axis: "x" | "y",
-  //   type: INPUT_EVENT_TYPES,
-  //   value: number
-  // ) => {
-  //   if (type === INPUT_EVENT_TYPES.KEYUP && physicsBody.linearVelocity.x < 0) {
-  //     physicsBody.linearVelocity[axis] = 0;
-  //     return;
-  //   }
-
-  //   if (type === INPUT_EVENT_TYPES.KEYDOWN) physicsBody.linearVelocity.x = -speed;
-  // };
 }
 
 export default MovementController;

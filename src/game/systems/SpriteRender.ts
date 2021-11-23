@@ -50,9 +50,9 @@ class SpriteRender extends PhaserSystem {
       const {
         components: {
           [Components.Sprite]: [urlIndex, frameWidth, _phaserSpriteIndex],
-          [Components.Position]: [x, y, z],
+          [Components.Position]: [x, y],
           [Components.Rotation]: [rz],
-          [Components.Scale]: [sx, sy, sz],
+          [Components.Scale]: [sx, sy],
         },
         entityIdDenseList,
         elementCount,
@@ -61,30 +61,30 @@ class SpriteRender extends PhaserSystem {
       for (let i = 0; i < elementCount; i++) {
         let phaserSpriteIndex = _phaserSpriteIndex[i];
         let phaserSprite = phaserSprites[phaserSpriteIndex];
-        const urlIndexValue = urlIndex[i];
-        let url = urls[urlIndexValue];
-        if (!url) {
-          urls[urlIndexValue] = assetsPath(
-            `images/${Assets.getResource(Resources.image, urlIndexValue)}`
-          );
-          url = urls[urlIndexValue];
-        }
-        const sprite: SpriteData = [
-          urlIndexValue,
-          frameWidth[i],
-          frameWidth[i],
-          0,
-          0,
-          0,
-          0,
-          entityIdDenseList[i],
-        ];
 
         if (!(phaserSprite && phaserSprite.texture.key !== __MISSING)) {
+          const urlIndexValue = urlIndex[i];
+          let url = urls[urlIndexValue];
+          if (!url) {
+            url = assetsPath(`images/${Assets.getResource(Resources.image, urlIndexValue)}`);
+            urls[urlIndexValue] = url;
+          }
           if (this.isPhaserTexturePresent(url)) {
             [phaserSprite, phaserSpriteIndex] = this.replacePhaserSprite(url);
             _phaserSpriteIndex[i] = phaserSpriteIndex;
-          } else return this.initLoad(sprite);
+          } else {
+            const sprite: SpriteData = [
+              urlIndexValue,
+              frameWidth[i],
+              frameWidth[i],
+              0,
+              0,
+              0,
+              0,
+              entityIdDenseList[i],
+            ];
+            return this.initLoad(sprite);
+          }
         }
 
         phaserSprite.x = x[i];
