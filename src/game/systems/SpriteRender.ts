@@ -1,4 +1,4 @@
-import Archetype from "../../ecs/Archetype";
+import Archetype, { Archetypes } from "../../ecs/Archetype";
 import { benchmarkSubject } from "../../ecs/utils/benchmark";
 import { assetsPath } from "../../utils/environment";
 import Assets, { Resources } from "../Assets";
@@ -22,8 +22,7 @@ const phaserSprites = [];
 const urls = [];
 
 class SpriteRender extends PhaserSystem {
-  archetypes: Archetype[];
-  // phaserSprites: any[];
+  archetypes: Archetypes;
 
   start(): void {
     this.archetypes = this.view(
@@ -32,15 +31,9 @@ class SpriteRender extends PhaserSystem {
       Components.Rotation,
       Components.Scale
     );
-
-    // this.phaserSprites = [];
   }
 
   update(): void {
-    // this.benchmarkSubject("query two in order", () => {
-    // });
-    // this.engine.queryTwoInOrder(this.updateSprites, SPRITE, TRANSFORM);
-
     const {
       archetypes,
       archetypes: { length },
@@ -83,7 +76,8 @@ class SpriteRender extends PhaserSystem {
               0,
               entityIdDenseList[i],
             ];
-            return this.initLoad(sprite);
+            this.initLoad(sprite);
+            return;
           }
         }
 

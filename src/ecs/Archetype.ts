@@ -1,6 +1,8 @@
 import { ComponentsSchema } from "./Component";
 import { EntityId } from "./types";
 
+export type Archetypes = Archetype[];
+
 export type Mask = number[];
 type ComponentIds = number[];
 export type Fields = string[];
