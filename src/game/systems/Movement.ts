@@ -25,36 +25,36 @@ class Movement extends System {
   }
 
   update(): void {
-    // this.benchmarkSubject("archetype query", () => {
-    // });
-
     const {
       archetypes,
       archetypes: { length },
     } = this;
 
-    const seconds = this.deltaTime / 1000;
+    // this.benchmarkSubject("archetype query", () => {
+      const seconds = this.deltaTime / 1000;
 
-    for (let j = 0; j < length; j++) {
-      const {
-        components: {
-          [Components.Position]: [x, y, z],
-          [Components.Velocity]: [dx, dy, dz],
-          [Components.Rotation]: [rz],
-          [Components.AngularVelocity]: [az],
-        },
-        elementCount,
-      } = archetypes[j];
+      
+      for (let j = 0; j < length; j++) {
+        const {
+          components: {
+            [Components.Position]: [x, y, z],
+            [Components.Velocity]: [dx, dy, dz],
+            [Components.Rotation]: [rz],
+            [Components.AngularVelocity]: [az],
+          },
+          elementCount,
+        } = archetypes[j];
+        
+        for (let i = 0; i < elementCount; i++) {
+          x[i] += dx[i] * seconds;
+          y[i] += dy[i] * seconds;
+          z[i] += dz[i] * seconds;
 
-      for (let i = 0; i < elementCount; i++) {
-        x[i] += dx[i] * seconds;
-        y[i] += dy[i] * seconds;
-        z[i] += dz[i] * seconds;
-
-        const newRz = rz[i] + az[i] * seconds;
-        z[i] += 360 < newRz ? newRz - 360 : newRz;
+          const newRz = rz[i] + az[i] * seconds;
+          z[i] += 360 < newRz ? newRz - 360 : newRz;
+        }
       }
-    }
+    // });
   }
 
   destroy(): void {}

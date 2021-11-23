@@ -46,7 +46,8 @@ class Assets {
 
   getResource = (resourceType: Resources, index: number): any => {
     if (index === -1) return null;
-    if (index === undefined) return null; // TODO: deal with this better??!
+
+    // if (index === undefined) return null; //  TODO: deal with this better??!
 
     // console.log(resourceType);
     // console.log(index);
@@ -57,7 +58,7 @@ class Assets {
   };
 
   putResource = (resourceType: Resources, resource: any): number => {
-    const index = this.manifest[resourceType].push(resource);
+    const index = this.manifest[resourceType].push(resource) - 1;
     // this.indexes[resourceType][index] = index;
     return index;
   };

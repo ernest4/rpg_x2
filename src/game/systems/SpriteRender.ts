@@ -54,7 +54,6 @@ class SpriteRender extends PhaserSystem {
 
       for (let i = 0; i < elementCount; i++) {
         let phaserSpriteIndex = _phaserSpriteIndex[i];
-        console.log(phaserSpriteIndex);
         let phaserSprite = Assets.getResource(Resources.phaserSprite, phaserSpriteIndex);
         const url = assetsPath(`images/${Assets.getResource(Resources.image, urlIndex[i])}`);
         const sprite: SpriteData = [

@@ -13,6 +13,8 @@ import { f32, i32, Vector3f } from "../../ecs/Component";
 import Assets from "../Assets";
 // import FpsCounter from "./utils/FpsCounter";
 
+const MAX_ENTITIES = 1e6;
+
 // TODO: move this to own file?
 export const enum Components {
   Position,
@@ -78,7 +80,7 @@ export default class Main extends Phaser.Scene {
   }
 
   private initECS = () => {
-    this._engine = new Engine(SCHEMA, DEVELOPMENT);
+    this._engine = new Engine(SCHEMA, MAX_ENTITIES, DEVELOPMENT);
     // TODO: test all systems.
     this._engine.addSystems(
       new Manager(this._engine),
