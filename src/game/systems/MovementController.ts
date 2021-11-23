@@ -57,36 +57,36 @@ class MovementController extends System {
   ) => {
     switch (key) {
       case INPUT_KEY.A:
-        if (type === INPUT_EVENT_TYPE.KEYUP && dx[entity] < 0) {
+        if (type === INPUT_EVENT_TYPE.keyup && dx[entity] < 0) {
           dx[entity] = 0;
           break;
         }
 
-        if (type === INPUT_EVENT_TYPE.KEYDOWN) dx[entity] = -speed;
+        if (type === INPUT_EVENT_TYPE.keydown) dx[entity] = -speed;
         break;
       case INPUT_KEY.D:
-        if (type === INPUT_EVENT_TYPE.KEYUP && 0 < dx[entity]) {
+        if (type === INPUT_EVENT_TYPE.keyup && 0 < dx[entity]) {
           dx[entity] = 0;
           break;
         }
 
-        if (type === INPUT_EVENT_TYPE.KEYDOWN) dx[entity] = speed;
+        if (type === INPUT_EVENT_TYPE.keydown) dx[entity] = speed;
         break;
       case INPUT_KEY.W:
-        if (type === INPUT_EVENT_TYPE.KEYUP && dy[entity] < 0) {
+        if (type === INPUT_EVENT_TYPE.keyup && dy[entity] < 0) {
           dy[entity] = 0;
           break;
         }
 
-        if (type === INPUT_EVENT_TYPE.KEYDOWN) dy[entity] = -speed;
+        if (type === INPUT_EVENT_TYPE.keydown) dy[entity] = -speed;
         break;
       case INPUT_KEY.S:
-        if (type === INPUT_EVENT_TYPE.KEYUP && 0 < dy[entity]) {
+        if (type === INPUT_EVENT_TYPE.keyup && 0 < dy[entity]) {
           dy[entity] = 0;
           break;
         }
 
-        if (type === INPUT_EVENT_TYPE.KEYDOWN) dy[entity] = speed;
+        if (type === INPUT_EVENT_TYPE.keydown) dy[entity] = speed;
         break;
     }
   };

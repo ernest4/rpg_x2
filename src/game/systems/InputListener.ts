@@ -17,30 +17,30 @@ export enum INPUT_KEY {
 }
 
 export enum INPUT_EVENT_TYPE {
-  KEYDOWN,
-  KEYUP,
+  keydown,
+  keyup,
 }
 
 type InputEventObject = [INPUT_EVENT_TYPE, INPUT_KEY];
 
 const DEFAULT_INPUTS: InputEventObject[] = [
-  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.UP],
-  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.DOWN],
-  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.LEFT],
-  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.RIGHT],
-  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.A],
-  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.W],
-  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.S],
-  [INPUT_EVENT_TYPE.KEYDOWN, INPUT_KEY.D],
+  [INPUT_EVENT_TYPE.keydown, INPUT_KEY.UP],
+  [INPUT_EVENT_TYPE.keydown, INPUT_KEY.DOWN],
+  [INPUT_EVENT_TYPE.keydown, INPUT_KEY.LEFT],
+  [INPUT_EVENT_TYPE.keydown, INPUT_KEY.RIGHT],
+  [INPUT_EVENT_TYPE.keydown, INPUT_KEY.A],
+  [INPUT_EVENT_TYPE.keydown, INPUT_KEY.W],
+  [INPUT_EVENT_TYPE.keydown, INPUT_KEY.S],
+  [INPUT_EVENT_TYPE.keydown, INPUT_KEY.D],
 
-  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.UP],
-  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.DOWN],
-  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.LEFT],
-  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.RIGHT],
-  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.A],
-  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.W],
-  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.S],
-  [INPUT_EVENT_TYPE.KEYUP, INPUT_KEY.D],
+  [INPUT_EVENT_TYPE.keyup, INPUT_KEY.UP],
+  [INPUT_EVENT_TYPE.keyup, INPUT_KEY.DOWN],
+  [INPUT_EVENT_TYPE.keyup, INPUT_KEY.LEFT],
+  [INPUT_EVENT_TYPE.keyup, INPUT_KEY.RIGHT],
+  [INPUT_EVENT_TYPE.keyup, INPUT_KEY.A],
+  [INPUT_EVENT_TYPE.keyup, INPUT_KEY.W],
+  [INPUT_EVENT_TYPE.keyup, INPUT_KEY.S],
+  [INPUT_EVENT_TYPE.keyup, INPUT_KEY.D],
 ];
 
 // TODO: jests
@@ -71,7 +71,7 @@ class InputListener extends PhaserSystem {
   private registerInputCallbacks = () => this._inputs.forEach(this.registerInputCallback);
 
   private registerInputCallback = ([type, key]: InputEventObject) => {
-    this.scene.input.keyboard.on(`${type}-${key}`, (e: any) =>
+    this.scene.input.keyboard.on(`${INPUT_EVENT_TYPE[type]}-${INPUT_KEY[key]}`, (e: any) =>
       this._inputsBuffer.push([type, key])
     );
   };
