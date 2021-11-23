@@ -18,8 +18,12 @@ type SpriteData = [
   targetEntityId: number
 ];
 
+const phaserSprites = [];
+const urls = [];
+
 class SpriteRender extends PhaserSystem {
   archetypes: Archetype[];
+  // phaserSprites: any[];
 
   start(): void {
     this.archetypes = this.view(
@@ -28,6 +32,8 @@ class SpriteRender extends PhaserSystem {
       Components.Rotation,
       Components.Scale
     );
+
+    // this.phaserSprites = [];
   }
 
   update(): void {
@@ -54,10 +60,17 @@ class SpriteRender extends PhaserSystem {
 
       for (let i = 0; i < elementCount; i++) {
         let phaserSpriteIndex = _phaserSpriteIndex[i];
-        let phaserSprite = Assets.getResource(Resources.phaserSprite, phaserSpriteIndex);
-        const url = assetsPath(`images/${Assets.getResource(Resources.image, urlIndex[i])}`);
+        let phaserSprite = phaserSprites[phaserSpriteIndex];
+        const urlIndexValue = urlIndex[i];
+        let url = urls[urlIndexValue];
+        if (!url) {
+          urls[urlIndexValue] = assetsPath(
+            `images/${Assets.getResource(Resources.image, urlIndexValue)}`
+          );
+          url = urls[urlIndexValue];
+        }
         const sprite: SpriteData = [
-          urlIndex[i],
+          urlIndexValue,
           frameWidth[i],
           frameWidth[i],
           0,
@@ -85,40 +98,11 @@ class SpriteRender extends PhaserSystem {
 
   destroy(): void {}
 
-  // private updateSprites = (sprite: Sprite, { position, rotation, scale }: Transform) => {
-  //   let { phaserSprite } = sprite;
-
-  //   // inline: this.phaserSpriteReady()
-  //   if (!(phaserSprite && phaserSprite.texture.key !== __MISSING)) {
-  //     if (this.isPhaserTexturePresent(sprite.url)) {
-  //       phaserSprite = this.replacePhaserSprite(sprite);
-  //     } else return this.initLoad(sprite);
-  //   }
-
-  //   phaserSprite.x = position.x;
-  //   phaserSprite.y = position.y;
-  //   phaserSprite.angle = rotation.z;
-  //   phaserSprite.scaleX = scale.x;
-  //   phaserSprite.scaleY = scale.y;
-  // };
-
-  // private phaserSpriteReady = (phaserSprite: Phaser.GameObjects.Sprite) => {
-  //   return phaserSprite && phaserSprite.texture.key !== __MISSING;
-  // };
-
   private replacePhaserSprite = (url: string): [Phaser.GameObjects.Sprite, number] => {
     const newPhaserSprite = this.scene.add.sprite(0, 0, url);
-    // sprite.phaserSprite = newPhaserSprite;
-    const index = Assets.putResource(Resources.phaserSprite, newPhaserSprite);
+    const index = phaserSprites.push(newPhaserSprite) - 1;
     return [newPhaserSprite, index];
   };
-
-  // private initLoad = (sprite: Sprite) => {
-  //   this.engine.addComponent(
-  //     LOAD_SPRITE_EVENT,
-  //     new LoadSpriteEvent(this.newEntityId(), sprite.url, sprite.frameConfig, sprite.entityId)
-  //   );
-  // };
 
   private initLoad = (sprite: SpriteData) => {
     this.addComponent(

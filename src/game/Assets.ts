@@ -3,7 +3,6 @@ import { assetsPath } from "../utils/environment";
 export enum Resources {
   image,
   sound,
-  phaserSprite,
 }
 
 class Assets {
@@ -67,7 +66,6 @@ class Assets {
     const { manifest } = this;
     manifest[Resources.image] = images;
     manifest[Resources.sound] = sounds;
-    manifest[Resources.phaserSprite] = [];
   };
 
   private buildIndexes = () => {
