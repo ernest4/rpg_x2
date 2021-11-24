@@ -39,6 +39,9 @@ class MovementController extends System {
           entity,
         ] = this.getEntity(targetEntityId[i]);
 
+        if (!velocities) continue;
+        // if (!speed) continue;
+
         this.applyInputEvent(type[i], key[i], velocities, speed[entity], entity);
       }
     }

@@ -122,7 +122,7 @@ class SceneEditor extends System {
     // NOTE: call order is important here !!
     // this.processAddList(entityId);
     this.processUpdateList(entityId);
-    // this.processRemoveList(entityId);
+    this.processRemoveList(entityId);
   };
 
   // private processAddList = (entityId: EntityId) => {
@@ -164,26 +164,30 @@ class SceneEditor extends System {
     store.dispatch(sceneEditorActions.setCurrentEntityComponentsUpdateHash({}));
   };
 
-  // private processRemoveList = (entityId: EntityId) => {
-  //   const sceneEditorStore = store.getState().sceneEditor as any;
-  //   const components = this.engine.getAllComponentsOfId(entityId);
-  //   const currentEntityComponentsRemoveList = sceneEditorStore.currentEntityComponentsRemoveList;
+  private processRemoveList = (entityId: EntityId) => {
+    const sceneEditorStore = store.getState().sceneEditor as any;
+    // const components = this.engine.getAllComponentsOfId(entityId);
+    const currentEntityComponentsRemoveList = sceneEditorStore.currentEntityComponentsRemoveList;
 
-  //   if (currentEntityComponentsRemoveList?.length === 0) return;
+    if (currentEntityComponentsRemoveList?.length === 0) return;
 
-  //   components.forEach((component: Component) => {
-  //     if (
-  //       !currentEntityComponentsRemoveList.some(
-  //         (componentToRemoveName: string) => componentToRemoveName === component.constructor.name
-  //       )
-  //     )
-  //       return;
+    currentEntityComponentsRemoveList.forEach((componentId: number) =>
+      this.removeComponent(componentId, entityId)
+    );
 
-  //     this.engine.removeComponent(component);
-  //   });
+    // components.forEach((component: Component) => {
+    //   if (
+    //     !currentEntityComponentsRemoveList.some(
+    //       (componentToRemoveName: string) => componentToRemoveName === component.constructor.name
+    //     )
+    //   )
+    //     return;
 
-  //   store.dispatch(sceneEditorActions.setCurrentEntityComponentsRemoveList([]));
-  // };
+    //   this.engine.removeComponent(component);
+    // });
+
+    store.dispatch(sceneEditorActions.setCurrentEntityComponentsRemoveList([]));
+  };
 
   // private attachInteractiveToAllSprites = (querySet: QuerySet) => {
   //   const [sprite] = querySet as [Sprite];

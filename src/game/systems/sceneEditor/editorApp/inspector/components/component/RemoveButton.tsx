@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import * as sceneEditorActions from "../../../../store/actions/sceneEditor";
 
-const RemoveButton = ({ component }: any) => {
+const RemoveButton = ({ componentId }: { componentId: number }) => {
   const dispatch = useDispatch();
 
   const componentsRemoveList = useSelector(
@@ -14,7 +14,7 @@ const RemoveButton = ({ component }: any) => {
 
     dispatch(
       sceneEditorActions.setCurrentEntityComponentsRemoveList([
-        ...new Set([...componentsRemoveList, component.constructor.name]), // NOTE: Set is for easy way to get unique values
+        ...new Set([...componentsRemoveList, componentId]), // NOTE: Set is for easy way to get unique values
       ])
     );
   };

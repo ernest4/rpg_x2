@@ -53,7 +53,7 @@ const Component = ({
     <div>
       <div className="flex justify-between pb-4 border-b-2">
         <Title title={componentsEnum[entityComponentId]} />
-        {/* <RemoveButton component={entityComponent} /> */}
+        <RemoveButton {...{ componentId: entityComponentId }} />
       </div>
       <HorizontalSpace />
       <div>
