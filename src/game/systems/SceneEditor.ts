@@ -2,16 +2,9 @@ import System from "../../ecs/System";
 import initSceneEditorReactApp from "./sceneEditor/index"; // NOTE: importing this will run the editor app
 import store from "./sceneEditor/store";
 import * as sceneEditorActions from "./sceneEditor/store/actions/sceneEditor";
-import { EntityId, QuerySet } from "../../ecs/types";
+import { EntityId } from "../../ecs/types";
 import { Components, SCHEMA } from "../components";
-// import InteractiveEvent from "../components/InteractiveEvent_legacy";
-// import Sprite from "../components/Sprite";
-// import Interactive from "../components/Interactive";
-// import DragEvent from "../components/DragEvent";
-// import Transform from "../components/Transform";
-// import SerializeEvent from "../components/SerializeEvent";
 // import { isNumber } from "../../ecs/utils/Number";
-// import * as availableComponents from "../components";
 
 // const NON_EDITOR_COMPONENTS = [DragEvent, InputEvent, InteractiveEvent].map(({ name }) => name);
 
@@ -28,12 +21,15 @@ class SceneEditor extends System {
     // store.dispatch(sceneEditorActions.setAvailableComponentsList(permittedEditorComponents));
     store.dispatch(sceneEditorActions.setComponentsSchema(SCHEMA));
     store.dispatch(sceneEditorActions.setComponentsEnum(Components));
+
+    // TODO: remove (testing)
+    store.dispatch(sceneEditorActions.setCurrentEntityId(1));
   }
 
   update(): void {
     // this.createEntity();
     // this.removeCurrentEntity();
-    // this.cloneEntity();
+    // this.cloneCurrentEntity();
     // this.pullCurrentEntityComponentsFromRedux();
     // // later on, should print all entities in the scene for editor to select, without just relying
     // // on Sprite entities. Probably will need to Tag all entities with some recognizable name then....
@@ -77,7 +73,7 @@ class SceneEditor extends System {
   //   store.dispatch(sceneEditorActions.setCurrentEntityComponents([]));
   // };
 
-  // private cloneEntity = () => {
+  // private cloneCurrentEntity = () => {
   //   const originalEntityId = (store.getState().sceneEditor as any).currentEntityId;
   //   const cloneEntity = (store.getState().sceneEditor as any).cloneEntity;
 
@@ -243,9 +239,9 @@ class SceneEditor extends System {
   };
 
   private streamCurrentEntityComponentsToRedux = () => {
-    // const currentEntityId = (store.getState().sceneEditor as any).currentEntityId;
+    const currentEntityId = (store.getState().sceneEditor as any).currentEntityId;
     // if (isNumber(currentEntityId)) this.pushEntityComponentsToRedux(currentEntityId);
-    const currentEntityId = 1;
+    // const currentEntityId = 1;
     this.pushEntityComponentsToRedux(currentEntityId);
   };
 

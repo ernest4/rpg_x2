@@ -63,8 +63,7 @@ const Component = ({
               <HorizontalSpace />
               <div className="flex justify-between">
                 <div className="w-max">{componentsSchema[entityComponentId][key]}</div>
-                {/* <Value {...{ componentName: entityComponent.constructor.name, property, value }} /> */}
-                {value}
+                <Value {...{ componentId: entityComponentId, propertyIndex: key, value }} />
               </div>
             </div>
           );

@@ -12,157 +12,157 @@ export default Value;
 // TODO: figure out how to push changes to redux and sync them to game...
 
 const getValueEditor = ({ value, ...props }: any) => {
-  if (value._values) return VectorEditor({ value, ...props });
-  if (typeof value === "boolean") return BooleanEditor({ value, ...props });
-  if (typeof value === "string") return StringEditor({ value, ...props });
+  // if (value._values) return VectorEditor({ value, ...props });
+  // if (typeof value === "boolean") return BooleanEditor({ value, ...props });
+  // if (typeof value === "string") return StringEditor({ value, ...props });
   if (!isNaN(value)) return NumberEditor({ value, ...props });
 
-  return JSON.stringify(value); // unknown / ref / catch all
+  // return JSON.stringify(value); // unknown / ref / catch all
 };
 
-const VectorEditor = ({
-  componentName,
-  property,
-  value: {
-    _values: { 0: x, 1: y, 2: z },
-  },
-}: {
-  componentName: string;
-  property: string;
-  value: any;
-}) => {
-  const dispatch = useDispatch();
+// const VectorEditor = ({
+//   componentName,
+//   property,
+//   value: {
+//     _values: { 0: x, 1: y, 2: z },
+//   },
+// }: {
+//   componentName: string;
+//   property: string;
+//   value: any;
+// }) => {
+//   const dispatch = useDispatch();
 
-  const currentEntityComponentsUpdateHash = useSelector(
-    (state: any) => state.sceneEditor.currentEntityComponentsUpdateHash
-  );
+//   const currentEntityComponentsUpdateHash = useSelector(
+//     (state: any) => state.sceneEditor.currentEntityComponentsUpdateHash
+//   );
 
-  const onChange = ({ target: { value, name } }: any) => {
-    if (!currentEntityComponentsUpdateHash) return;
-    if (value === "") return;
+//   const onChange = ({ target: { value, name } }: any) => {
+//     if (!currentEntityComponentsUpdateHash) return;
+//     if (value === "") return;
 
-    const currentComponent = currentEntityComponentsUpdateHash[componentName];
+//     const currentComponent = currentEntityComponentsUpdateHash[componentName];
 
-    dispatch(
-      sceneEditorActions.setCurrentEntityComponentsUpdateHash({
-        ...currentEntityComponentsUpdateHash,
-        [componentName]: { ...currentComponent, [`${property}.${name}`]: parseFloat(value) },
-      })
-    );
-  };
+//     dispatch(
+//       sceneEditorActions.setCurrentEntityComponentsUpdateHash({
+//         ...currentEntityComponentsUpdateHash,
+//         [componentName]: { ...currentComponent, [`${property}.${name}`]: parseFloat(value) },
+//       })
+//     );
+//   };
 
-  return (
-    <div>
-      <div className="flex pb-1">
-        <div className="pr-4">x</div>
-        <input
-          type="number"
-          value={x}
-          name="x"
-          className="rounded p-1 bg-gray-700"
-          onChange={onChange}
-        />
-      </div>
-      <div className="flex pb-1">
-        <div className="pr-4">y</div>
-        <input
-          type="number"
-          value={y}
-          name="y"
-          className="rounded p-1 bg-gray-700"
-          onChange={onChange}
-        />
-      </div>
-      <div className="flex pb-1">
-        <div className="pr-4">z</div>
-        <input
-          type="number"
-          value={z}
-          name="z"
-          className="rounded p-1 bg-gray-700"
-          onChange={onChange}
-        />
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div>
+//       <div className="flex pb-1">
+//         <div className="pr-4">x</div>
+//         <input
+//           type="number"
+//           value={x}
+//           name="x"
+//           className="rounded p-1 bg-gray-700"
+//           onChange={onChange}
+//         />
+//       </div>
+//       <div className="flex pb-1">
+//         <div className="pr-4">y</div>
+//         <input
+//           type="number"
+//           value={y}
+//           name="y"
+//           className="rounded p-1 bg-gray-700"
+//           onChange={onChange}
+//         />
+//       </div>
+//       <div className="flex pb-1">
+//         <div className="pr-4">z</div>
+//         <input
+//           type="number"
+//           value={z}
+//           name="z"
+//           className="rounded p-1 bg-gray-700"
+//           onChange={onChange}
+//         />
+//       </div>
+//     </div>
+//   );
+// };
 
-const BooleanEditor = ({
-  componentName,
-  property,
-  value,
-}: {
-  componentName: string;
-  property: string;
-  value: boolean;
-}) => {
-  const dispatch = useDispatch();
+// const BooleanEditor = ({
+//   componentName,
+//   property,
+//   value,
+// }: {
+//   componentName: string;
+//   property: string;
+//   value: boolean;
+// }) => {
+//   const dispatch = useDispatch();
 
-  const currentEntityComponentsUpdateHash = useSelector(
-    (state: any) => state.sceneEditor.currentEntityComponentsUpdateHash
-  );
+//   const currentEntityComponentsUpdateHash = useSelector(
+//     (state: any) => state.sceneEditor.currentEntityComponentsUpdateHash
+//   );
 
-  const onChange = ({ target: { value } }: any) => {
-    if (!currentEntityComponentsUpdateHash) return;
+//   const onChange = ({ target: { value } }: any) => {
+//     if (!currentEntityComponentsUpdateHash) return;
 
-    const currentComponent = currentEntityComponentsUpdateHash[componentName];
+//     const currentComponent = currentEntityComponentsUpdateHash[componentName];
 
-    dispatch(
-      sceneEditorActions.setCurrentEntityComponentsUpdateHash({
-        ...currentEntityComponentsUpdateHash,
-        [componentName]: { ...currentComponent, [property]: value === "true" },
-      })
-    );
-  };
+//     dispatch(
+//       sceneEditorActions.setCurrentEntityComponentsUpdateHash({
+//         ...currentEntityComponentsUpdateHash,
+//         [componentName]: { ...currentComponent, [property]: value === "true" },
+//       })
+//     );
+//   };
 
-  return (
-    <select value={value.toString()} onChange={onChange} className="rounded p-1 bg-gray-700">
-      <option value="true">true</option>
-      <option value="false">false</option>
-    </select>
-  );
-};
+//   return (
+//     <select value={value.toString()} onChange={onChange} className="rounded p-1 bg-gray-700">
+//       <option value="true">true</option>
+//       <option value="false">false</option>
+//     </select>
+//   );
+// };
 
-const StringEditor = ({
-  componentName,
-  property,
-  value,
-}: {
-  componentName: string;
-  property: string;
-  value: string;
-}) => {
-  const dispatch = useDispatch();
+// const StringEditor = ({
+//   componentName,
+//   property,
+//   value,
+// }: {
+//   componentName: string;
+//   property: string;
+//   value: string;
+// }) => {
+//   const dispatch = useDispatch();
 
-  const currentEntityComponentsUpdateHash = useSelector(
-    (state: any) => state.sceneEditor.currentEntityComponentsUpdateHash
-  );
+//   const currentEntityComponentsUpdateHash = useSelector(
+//     (state: any) => state.sceneEditor.currentEntityComponentsUpdateHash
+//   );
 
-  const onChange = ({ target: { value } }: any) => {
-    if (!currentEntityComponentsUpdateHash) return;
+//   const onChange = ({ target: { value } }: any) => {
+//     if (!currentEntityComponentsUpdateHash) return;
 
-    const currentComponent = currentEntityComponentsUpdateHash[componentName];
+//     const currentComponent = currentEntityComponentsUpdateHash[componentName];
 
-    dispatch(
-      sceneEditorActions.setCurrentEntityComponentsUpdateHash({
-        ...currentEntityComponentsUpdateHash,
-        [componentName]: { ...currentComponent, [property]: value },
-      })
-    );
-  };
+//     dispatch(
+//       sceneEditorActions.setCurrentEntityComponentsUpdateHash({
+//         ...currentEntityComponentsUpdateHash,
+//         [componentName]: { ...currentComponent, [property]: value },
+//       })
+//     );
+//   };
 
-  return (
-    <input type="text" value={value} className="rounded p-1 bg-gray-700" onChange={onChange} />
-  );
-};
+//   return (
+//     <input type="text" value={value} className="rounded p-1 bg-gray-700" onChange={onChange} />
+//   );
+// };
 
 const NumberEditor = ({
-  componentName,
-  property,
+  componentId,
+  propertyIndex,
   value,
 }: {
-  componentName: string;
-  property: string;
+  componentId: number;
+  propertyIndex: number;
   value: number;
 }) => {
   const dispatch = useDispatch();
@@ -175,12 +175,15 @@ const NumberEditor = ({
     if (!currentEntityComponentsUpdateHash) return;
     if (value === "") return;
 
-    const currentComponent = currentEntityComponentsUpdateHash[componentName];
+    const currentComponent = currentEntityComponentsUpdateHash[componentId];
+    const newComponentValues = [...currentComponent];
+    newComponentValues[propertyIndex] = value;
 
     dispatch(
       sceneEditorActions.setCurrentEntityComponentsUpdateHash({
         ...currentEntityComponentsUpdateHash,
-        [componentName]: { ...currentComponent, [property]: parseFloat(value) },
+        // [componentId]: [...currentComponent, [property]: parseFloat(value) ],
+        [componentId]: newComponentValues,
       })
     );
   };
