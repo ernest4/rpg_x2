@@ -175,9 +175,9 @@ const NumberEditor = ({
     if (!currentEntityComponentsUpdateHash) return;
     if (value === "") return;
 
-    const currentComponent = currentEntityComponentsUpdateHash[componentId];
+    const currentComponent = currentEntityComponentsUpdateHash[componentId] || [];
     const newComponentValues = [...currentComponent];
-    newComponentValues[propertyIndex] = value;
+    newComponentValues[propertyIndex] = parseFloat(value); // TODO: int vs float ?!? seems like not needed because Integer array buffers will just cast down the floats for us :)
 
     dispatch(
       sceneEditorActions.setCurrentEntityComponentsUpdateHash({

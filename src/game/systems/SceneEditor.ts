@@ -4,6 +4,7 @@ import store from "./sceneEditor/store";
 import * as sceneEditorActions from "./sceneEditor/store/actions/sceneEditor";
 import { EntityId } from "../../ecs/types";
 import { Components, SCHEMA } from "../components";
+import { isNumber } from "../../ecs/utils/Number";
 // import { isNumber } from "../../ecs/utils/Number";
 
 // const NON_EDITOR_COMPONENTS = [DragEvent, InputEvent, InteractiveEvent].map(({ name }) => name);
@@ -30,7 +31,7 @@ class SceneEditor extends System {
     // this.createEntity();
     // this.removeCurrentEntity();
     // this.cloneCurrentEntity();
-    // this.pullCurrentEntityComponentsFromRedux();
+    this.pullCurrentEntityComponentsFromRedux();
     // // later on, should print all entities in the scene for editor to select, without just relying
     // // on Sprite entities. Probably will need to Tag all entities with some recognizable name then....
     // this.engine.query(this.attachInteractiveToAllSprites, Sprite);
@@ -112,17 +113,17 @@ class SceneEditor extends System {
   //   store.dispatch(sceneEditorActions.setCurrentEntityComponents([components]));
   // };
 
-  // private pullCurrentEntityComponentsFromRedux = () => {
-  //   const currentEntityId = (store.getState().sceneEditor as any).currentEntityId;
-  //   if (isNumber(currentEntityId)) this.pullEntityComponentsFromRedux(currentEntityId);
-  // };
+  private pullCurrentEntityComponentsFromRedux = () => {
+    const currentEntityId = (store.getState().sceneEditor as any).currentEntityId;
+    if (isNumber(currentEntityId)) this.pullEntityComponentsFromRedux(currentEntityId);
+  };
 
-  // private pullEntityComponentsFromRedux = (entityId: EntityId) => {
-  //   // NOTE: call order is important here !!
-  //   this.processAddList(entityId);
-  //   this.processUpdateList(entityId);
-  //   this.processRemoveList(entityId);
-  // };
+  private pullEntityComponentsFromRedux = (entityId: EntityId) => {
+    // NOTE: call order is important here !!
+    // this.processAddList(entityId);
+    this.processUpdateList(entityId);
+    // this.processRemoveList(entityId);
+  };
 
   // private processAddList = (entityId: EntityId) => {
   //   const sceneEditorStore = store.getState().sceneEditor as any;
@@ -140,30 +141,28 @@ class SceneEditor extends System {
   //   store.dispatch(sceneEditorActions.setCurrentEntityComponentsAddList([]));
   // };
 
-  // private processUpdateList = (entityId: EntityId) => {
-  //   const sceneEditorStore = store.getState().sceneEditor as any;
-  //   const currentEntityComponentsUpdateHash = sceneEditorStore.currentEntityComponentsUpdateHash;
+  private processUpdateList = (entityId: EntityId) => {
+    const sceneEditorStore = store.getState().sceneEditor as any;
+    const currentEntityComponentsUpdateHash = sceneEditorStore.currentEntityComponentsUpdateHash;
 
-  //   if (!currentEntityComponentsUpdateHash) return;
+    if (!currentEntityComponentsUpdateHash) return;
 
-  //   Object.entries(currentEntityComponentsUpdateHash).forEach(
-  //     ([componentName, componentProperties]: [string, any]) => {
-  //       const componentClass = (availableComponents as any)[componentName];
-  //       const component = this.engine.getComponentById(componentClass, entityId);
+    const [components, entity] = this.getEntity(entityId);
+    if (!components) return; // TODO: is this needed?
 
-  //       if (!component) return;
+    Object.entries(currentEntityComponentsUpdateHash).forEach(
+      ([componentId, componentValues]: [string, any]) => {
+        for (let i = 0, l = componentValues.length; i < l; i++) {
+          const value = componentValues[i];
+          if (value === undefined) continue;
 
-  //       Object.entries(componentProperties).forEach(([property, value]: [string, any]) => {
-  //         if (property.indexOf(".") === -1) return ((component as any)[property] = value);
+          components[componentId][i][entity] = value;
+        }
+      }
+    );
 
-  //         const [propertyVector, propertyVectorAxis] = property.split(".");
-  //         (component as any)[propertyVector][propertyVectorAxis] = value;
-  //       });
-  //     }
-  //   );
-
-  //   store.dispatch(sceneEditorActions.setCurrentEntityComponentsUpdateHash({}));
-  // };
+    store.dispatch(sceneEditorActions.setCurrentEntityComponentsUpdateHash({}));
+  };
 
   // private processRemoveList = (entityId: EntityId) => {
   //   const sceneEditorStore = store.getState().sceneEditor as any;
@@ -240,9 +239,9 @@ class SceneEditor extends System {
 
   private streamCurrentEntityComponentsToRedux = () => {
     const currentEntityId = (store.getState().sceneEditor as any).currentEntityId;
-    // if (isNumber(currentEntityId)) this.pushEntityComponentsToRedux(currentEntityId);
+    if (isNumber(currentEntityId)) this.pushEntityComponentsToRedux(currentEntityId);
     // const currentEntityId = 1;
-    this.pushEntityComponentsToRedux(currentEntityId);
+    // this.pushEntityComponentsToRedux(currentEntityId);
   };
 
   // private serialize = () => {
