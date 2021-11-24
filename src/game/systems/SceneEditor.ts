@@ -244,7 +244,7 @@ class SceneEditor extends System {
   private streamCurrentEntityComponentsToRedux = () => {
     // const currentEntityId = (store.getState().sceneEditor as any).currentEntityId;
     // if (isNumber(currentEntityId)) this.pushEntityComponentsToRedux(currentEntityId);
-    const currentEntityId = 0;
+    const currentEntityId = 1;
     this.pushEntityComponentsToRedux(currentEntityId);
   };
 

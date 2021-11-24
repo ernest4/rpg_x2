@@ -57,7 +57,7 @@ const Component = ({ entityComponent }: { entityComponent: number[] }) => {
               <div className="flex justify-between">
                 {/* <div className="w-max">{property}</div> */}
                 {/* <Value {...{ componentName: entityComponent.constructor.name, property, value }} /> */}
-                value
+                {value}
               </div>
             </div>
           );
