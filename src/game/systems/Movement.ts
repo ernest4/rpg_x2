@@ -44,7 +44,7 @@ class Movement extends System {
         z[i] += dz[i] * seconds;
 
         const newRz = rz[i] + az[i] * seconds;
-        rz[i] += 360 < newRz ? newRz - 360 : newRz;
+        rz[i] = 360 < newRz ? newRz - 360 : newRz;
       }
     }
   }

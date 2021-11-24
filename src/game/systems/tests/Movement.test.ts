@@ -20,22 +20,19 @@ describe(Movement, () => {
   describe("#addSystem", () => {
     beforeEach(() => {
       let entityId = engine.newEntityId();
-      // let transform = new Transform(entityId, { x: 5, y: 6, z: 0 });
-      // let physicsBody = new PhysicsBody(entityId, { x: 100, y: 100, z: 0 }, { x: 0, y: 0, z: 100 });
-      // engine.addComponents(transform, physicsBody);
-      engine.addComponent(Components.Position, entityId, SCHEMA[Components.Position], [5, 6, 0]);
+      engine.addComponent(Components.Position, entityId, SCHEMA[Components.Position], [5, 6, 1]);
       engine.addComponent(
         Components.Velocity,
         entityId,
         SCHEMA[Components.Velocity],
-        [100, 100, 0]
+        [100, 100, 50]
       );
       engine.addComponent(Components.Rotation, entityId, SCHEMA[Components.Rotation], [0]);
       engine.addComponent(
         Components.AngularVelocity,
         entityId,
         SCHEMA[Components.AngularVelocity],
-        [100]
+        [200]
       );
       engine.update(deltaTime);
     });
@@ -53,16 +50,16 @@ describe(Movement, () => {
 
       expect(x[entity]).toEqual(105);
       expect(y[entity]).toEqual(106);
-      expect(z[entity]).toEqual(100);
-      expect(rz[entity]).toEqual(0);
+      expect(z[entity]).toEqual(51);
+      expect(rz[entity]).toEqual(200);
 
       deltaTime = 2000;
       engine.update(deltaTime);
 
       expect(x[entity]).toEqual(305);
       expect(y[entity]).toEqual(306);
-      expect(z[entity]).toEqual(300);
-      expect(rz[entity]).toEqual(200); // buggy? check the movement system..
+      expect(z[entity]).toEqual(151);
+      expect(rz[entity]).toEqual(240);
     });
   });
 });
