@@ -11,6 +11,7 @@ import { assetsPath, DEVELOPMENT } from "../../utils/environment";
 import { Engine } from "../../ecs";
 import Assets from "../Assets";
 import { SCHEMA } from "../components";
+import Rotation from "../systems/Rotation";
 // import FpsCounter from "./utils/FpsCounter";
 
 const MAX_ENTITIES = 1e6;
@@ -64,6 +65,7 @@ export default class Main extends Phaser.Scene {
       new InputListener(this._engine, this),
       new MovementController(this._engine),
       new Movement(this._engine),
+      new Rotation(this._engine),
 
       // TODO: once you have camera
       // this.cameras.main.setBackgroundColor(0xffffff);

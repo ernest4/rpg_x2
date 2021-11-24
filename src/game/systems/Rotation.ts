@@ -3,7 +3,7 @@ import Archetype from "../../ecs/Archetype";
 import System from "../../ecs/System";
 import { Components } from "../components";
 
-class Movement extends System {
+class Rotation extends System {
   archetypes: Archetype[];
 
   constructor(engine: Engine) {
@@ -11,7 +11,7 @@ class Movement extends System {
   }
 
   start(): void {
-    this.archetypes = this.view(Components.Velocity, Components.Position);
+    this.archetypes = this.view(Components.Rotation, Components.AngularVelocity);
   }
 
   update(): void {
@@ -25,16 +25,15 @@ class Movement extends System {
     for (let j = 0; j < length; j++) {
       const {
         components: {
-          [Components.Position]: [x, y, z],
-          [Components.Velocity]: [dx, dy, dz],
+          [Components.Rotation]: [rz],
+          [Components.AngularVelocity]: [az],
         },
         elementCount,
       } = archetypes[j];
 
       for (let i = 0; i < elementCount; i++) {
-        x[i] += dx[i] * seconds;
-        y[i] += dy[i] * seconds;
-        z[i] += dz[i] * seconds;
+        const newRz = rz[i] + az[i] * seconds;
+        rz[i] = 360 < newRz ? newRz - 360 : newRz;
       }
     }
   }
@@ -42,4 +41,4 @@ class Movement extends System {
   destroy(): void {}
 }
 
-export default Movement;
+export default Rotation;

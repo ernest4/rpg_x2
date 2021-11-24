@@ -1,11 +1,11 @@
 import { context } from "../../../../tests/jestHelpers";
 import { Engine } from "../../../ecs";
 import { Components, SCHEMA } from "../../components";
-import Movement from "../Movement";
+import Rotation from "../Rotation";
 
-describe(Movement, () => {
+describe(Rotation, () => {
   let engine: Engine;
-  let described_class: Movement;
+  let described_class: Rotation;
 
   let entityId = 0;
 
@@ -13,19 +13,19 @@ describe(Movement, () => {
 
   beforeEach(() => {
     engine = new Engine(SCHEMA);
-    described_class = new Movement(engine);
+    described_class = new Rotation(engine);
     engine.addSystem(described_class);
   });
 
   describe("#addSystem", () => {
     beforeEach(() => {
       let entityId = engine.newEntityId();
-      engine.addComponent(Components.Position, entityId, SCHEMA[Components.Position], [5, 6, 1]);
+      engine.addComponent(Components.Rotation, entityId, SCHEMA[Components.Rotation], [0]);
       engine.addComponent(
-        Components.Velocity,
+        Components.AngularVelocity,
         entityId,
-        SCHEMA[Components.Velocity],
-        [100, 100, 50]
+        SCHEMA[Components.AngularVelocity],
+        [200]
       );
       engine.update(deltaTime);
     });
@@ -33,22 +33,18 @@ describe(Movement, () => {
     it("updates transforms & rotation based on velocity & angularVelocity", () => {
       const [
         {
-          [Components.Position]: [x, y, z],
-          [Components.Velocity]: [dx, dy, dz],
+          [Components.Rotation]: [rz],
+          [Components.AngularVelocity]: [az],
         },
         entity,
       ] = engine.getEntity(entityId);
 
-      expect(x[entity]).toEqual(105);
-      expect(y[entity]).toEqual(106);
-      expect(z[entity]).toEqual(51);
+      expect(rz[entity]).toEqual(200);
 
       deltaTime = 2000;
       engine.update(deltaTime);
 
-      expect(x[entity]).toEqual(305);
-      expect(y[entity]).toEqual(306);
-      expect(z[entity]).toEqual(151);
+      expect(rz[entity]).toEqual(240);
     });
   });
 });
