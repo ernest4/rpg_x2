@@ -13,11 +13,8 @@ const Inspector = () => {
   const currentEntityId = useSelector((state: any) => state.sceneEditor.currentEntityId);
 
   return (
-    <div
-      className="bg-gray-600 flex flex-col w-96 overflow-y-scroll"
-      style={STYLE}
-    >
-      <CreateEntityButton />
+    <div className="bg-gray-600 flex flex-col w-96 overflow-y-scroll" style={STYLE}>
+      {/* <CreateEntityButton /> */}
       <HorizontalSpace />
       <div className="p-4 bg-gray-500 text-white rounded sticky top-0 border-b-2">
         <div className="flex justify-between">
@@ -28,7 +25,7 @@ const Inspector = () => {
       </div>
       <Components />
       <HorizontalSpace />
-      <AddComponentButton />
+      {/* <AddComponentButton /> */}
       <HorizontalSpace />
     </div>
   );

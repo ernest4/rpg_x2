@@ -1,4 +1,9 @@
 import { DeltaTime } from "../../ecs/types";
+import FpsCounter from "../../utils/FpsCounter";
+import { assetsPath, DEVELOPMENT } from "../../utils/environment";
+import { Engine } from "../../ecs";
+import Assets from "../Assets";
+import { SCHEMA } from "../components";
 import InputListener from "../systems/InputListener";
 import Manager from "../systems/Manager";
 import SpriteRender from "../systems/SpriteRender";
@@ -6,12 +11,8 @@ import MovementController from "../systems/MovementController";
 import SpriteLoader from "../systems/SpriteLoader";
 import Phaser from "phaser";
 import Movement from "../systems/Movement";
-import FpsCounter from "../../utils/FpsCounter";
-import { assetsPath, DEVELOPMENT } from "../../utils/environment";
-import { Engine } from "../../ecs";
-import Assets from "../Assets";
-import { SCHEMA } from "../components";
 import Rotation from "../systems/Rotation";
+import SceneEditor from "../systems/SceneEditor";
 // import FpsCounter from "./utils/FpsCounter";
 
 const MAX_ENTITIES = 1e6;
@@ -74,6 +75,13 @@ export default class Main extends Phaser.Scene {
       new SpriteLoader(this._engine, this, this.ecsAssets), // TODO: refactor into asset loader?
       new SpriteRender(this._engine, this, this.ecsAssets) // NOTE: always last
     );
+
+    if (DEVELOPMENT) {
+      this._engine.addSystems(
+        //
+        new SceneEditor(this._engine)
+      );
+    }
 
     // new Serialization(this._engine, this));
     // if (DEVELOPMENT) new SceneEditor(this._engine),

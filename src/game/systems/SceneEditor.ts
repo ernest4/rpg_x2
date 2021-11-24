@@ -3,6 +3,7 @@ import initSceneEditorReactApp from "./sceneEditor/index"; // NOTE: importing th
 import store from "./sceneEditor/store";
 import * as sceneEditorActions from "./sceneEditor/store/actions/sceneEditor";
 import { EntityId, QuerySet } from "../../ecs/types";
+import { SCHEMA } from "../components";
 // import InteractiveEvent from "../components/InteractiveEvent_legacy";
 // import Sprite from "../components/Sprite";
 // import Interactive from "../components/Interactive";
@@ -11,14 +12,12 @@ import { EntityId, QuerySet } from "../../ecs/types";
 // import SerializeEvent from "../components/SerializeEvent";
 // import { isNumber } from "../../ecs/utils/Number";
 // import * as availableComponents from "../components";
-import Component from "../../ecs/Component";
 
 // const NON_EDITOR_COMPONENTS = [DragEvent, InputEvent, InteractiveEvent].map(({ name }) => name);
 
 class SceneEditor extends System {
   start(): void {
-    // initSceneEditor();
-
+    initSceneEditorReactApp();
     // const permittedEditorComponents = Object.keys(availableComponents).filter(
     //   availableComponentName => {
     //     return !NON_EDITOR_COMPONENTS.some(
@@ -26,8 +25,8 @@ class SceneEditor extends System {
     //     );
     //   }
     // );
-
     // store.dispatch(sceneEditorActions.setAvailableComponentsList(permittedEditorComponents));
+    store.dispatch(sceneEditorActions.setComponentsSchema(SCHEMA));
   }
 
   update(): void {
@@ -40,7 +39,7 @@ class SceneEditor extends System {
     // this.engine.query(this.attachInteractiveToAllSprites, Sprite);
     // this.engine.query(this.pushInteractiveEntityToRedux, InteractiveEvent);
     // this.engine.query(this.pushDragEntityToRedux, DragEvent);
-    // this.streamCurrentEntityComponentsToRedux();
+    this.streamCurrentEntityComponentsToRedux();
     // this.serialize();
   }
 
@@ -230,10 +229,24 @@ class SceneEditor extends System {
   //   store.dispatch(sceneEditorActions.setCurrentEntityComponents(components));
   // };
 
-  // private streamCurrentEntityComponentsToRedux = () => {
-  //   const currentEntityId = (store.getState().sceneEditor as any).currentEntityId;
-  //   if (isNumber(currentEntityId)) this.pushEntityComponentsToRedux(currentEntityId);
-  // };
+  private pushEntityComponentsToRedux = (entityId: EntityId) => {
+    // const components = this.engine.getAllComponentsOfId(entityId);
+    // const [components, entity] = this.getEntity(entityId);
+    const [entityComponents, entity] = this.getEntity(entityId);
+    const components = [];
+    Object.entries(entityComponents).forEach(([componentId, arrayBuffers]) => {
+      const values = arrayBuffers.map(arrayBuffer => arrayBuffer[entity]);
+      components.push(values);
+    });
+    store.dispatch(sceneEditorActions.setCurrentEntityComponents(components));
+  };
+
+  private streamCurrentEntityComponentsToRedux = () => {
+    // const currentEntityId = (store.getState().sceneEditor as any).currentEntityId;
+    // if (isNumber(currentEntityId)) this.pushEntityComponentsToRedux(currentEntityId);
+    const currentEntityId = 0;
+    this.pushEntityComponentsToRedux(currentEntityId);
+  };
 
   // private serialize = () => {
   //   const serialize = (store.getState().sceneEditor as any).serialize;

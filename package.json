@@ -8,7 +8,7 @@
     "start": "node dist/server/index.js",
     "dev:start": "yarn dev && yarn start",
     "dev": "yarn build-css && concurrently --prefix \"[{name}]\" --names \"SERVER,CLIENT\" -c \"bgYellow.bold,bgGreen.bold\" \"yarn dev-server\" \"yarn dev-client\"",
-    "dev-server": "tsc-watch --noClear -b ./src/server/tsconfig.json --onSuccess \"node --enable-source-maps ./dist/server/index.js\"",
+    "dev-server": "tsc-watch --noClear -b ./server/tsconfig.json --onSuccess \"node --enable-source-maps ./dist/server/index.js\"",
     "dev-client": "cross-env TS_NODE_PROJECT=\"tsconfig-for-webpack-config.json\" webpack serve",
     "build:start": "yarn build && yarn start",
     "build:server:start": "yarn build:server && yarn start",

@@ -38,3 +38,9 @@ export const SCHEMA = {
   [Components.Hitpoints]: [i32("hitpoints")],
   [Components.Name]: [i32("name")],
 } as const;
+
+// TODO: for scene editor
+// export const COMPONENT_NAMES = {};
+// Object.keys(SCHEMA).forEach(componentId => {
+//   COMPONENT_NAMES[componentId] = Components[componentId]; // Doesnt work...
+// });

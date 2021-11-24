@@ -11,7 +11,7 @@ const editorRootElement = document.createElement("div");
 editorRootElement.id = EDITOR_ROOT_ID;
 document.body.appendChild(editorRootElement);
 
-const initSceneEditor = () =>
+const initSceneEditorReactApp = () =>
   ReactDOM.render(
     <StrictMode>
       <Provider store={store}>
@@ -21,4 +21,4 @@ const initSceneEditor = () =>
     document.getElementById(EDITOR_ROOT_ID)
   );
 
-export default initSceneEditor;
+export default initSceneEditorReactApp;

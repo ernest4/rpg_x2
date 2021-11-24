@@ -3,7 +3,7 @@
 // const tertiary = "#ebb321";
 
 module.exports = {
-  purge: [],
+  purge: ["./src/**/*.html", "./src/**/*.js"],
   // theme: {
   //   extend: {},
   //   backgroundColor: theme => ({

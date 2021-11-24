@@ -111,7 +111,6 @@ const config: Configuration = {
       __RPG_X2_VERSION__: JSON.stringify(__RPG_X2_VERSION__),
     }),
   ],
-  externals: { react: "React", "react-dom": "ReactDOM" },
 };
 
 export default config;
