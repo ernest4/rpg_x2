@@ -39,23 +39,30 @@ import Value from "./component/Value";
 //   );
 // };
 
-const Component = ({ entityComponent }: { entityComponent: number[] }) => {
-  // const componentsSchema = useSelector((state: any) => state.sceneEditor.componentsSchema);
+const Component = ({
+  entityComponentId,
+  entityComponentValues,
+}: {
+  entityComponentId: number;
+  entityComponentValues: number[];
+}) => {
+  const componentsSchema = useSelector((state: any) => state.sceneEditor.componentsSchema);
+  const componentsEnum = useSelector((state: any) => state.sceneEditor.componentsEnum);
 
   return (
     <div>
       <div className="flex justify-between pb-4 border-b-2">
-        {/* <Title title={entityComponent.constructor.name} /> */}
+        <Title title={componentsEnum[entityComponentId]} />
         {/* <RemoveButton component={entityComponent} /> */}
       </div>
       <HorizontalSpace />
       <div>
-        {entityComponent.map((value, key) => {
+        {entityComponentValues.map((value, key) => {
           return (
             <div key={key}>
               <HorizontalSpace />
               <div className="flex justify-between">
-                {/* <div className="w-max">{property}</div> */}
+                <div className="w-max">{componentsSchema[entityComponentId][key]}</div>
                 {/* <Value {...{ componentName: entityComponent.constructor.name, property, value }} /> */}
                 {value}
               </div>

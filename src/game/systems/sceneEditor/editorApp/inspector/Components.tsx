@@ -35,16 +35,18 @@ const Components = () => {
 
   return (
     <div>
-      {entityComponents.map((entityComponent: number[], key: number) => {
-        return (
-          <div key={key}>
-            <HorizontalSpace />
-            <Container>
-              <Component {...{ entityComponent }} />
-            </Container>
-          </div>
-        );
-      })}
+      {entityComponents.map(
+        ([entityComponentId, entityComponentValues]: [number, number[]], key: number) => {
+          return (
+            <div key={key}>
+              <HorizontalSpace />
+              <Container>
+                <Component {...{ entityComponentId, entityComponentValues }} />
+              </Container>
+            </div>
+          );
+        }
+      )}
     </div>
   );
 };

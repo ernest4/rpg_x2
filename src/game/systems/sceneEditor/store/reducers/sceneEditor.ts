@@ -5,6 +5,7 @@ import produce from "immer";
 const initialState = {
   test: "",
   componentsSchema: {},
+  componentsEnum: {},
   currentEntityId: null,
   currentEntityComponents: [],
   currentEntityComponentsUpdateHash: {},
@@ -31,6 +32,9 @@ const sceneEditorReducer = handleActions(
     }),
     SET_COMPONENTS_SCHEMA: produce((state, action) => {
       state.componentsSchema = action.payload;
+    }),
+    SET_COMPONENTS_ENUM: produce((state, action) => {
+      state.componentsEnum = action.payload;
     }),
     SET_CURRENT_ENTITY_ID: produce((state, action) => {
       state.currentEntityId = action.payload;

@@ -1,6 +1,6 @@
 import { f32, i32, Vector3f } from "../../ecs/Component";
 
-export const enum Components {
+export enum Components {
   Position,
   Velocity,
   Rotation,

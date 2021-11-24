@@ -3,7 +3,7 @@ import initSceneEditorReactApp from "./sceneEditor/index"; // NOTE: importing th
 import store from "./sceneEditor/store";
 import * as sceneEditorActions from "./sceneEditor/store/actions/sceneEditor";
 import { EntityId, QuerySet } from "../../ecs/types";
-import { SCHEMA } from "../components";
+import { Components, SCHEMA } from "../components";
 // import InteractiveEvent from "../components/InteractiveEvent_legacy";
 // import Sprite from "../components/Sprite";
 // import Interactive from "../components/Interactive";
@@ -27,6 +27,7 @@ class SceneEditor extends System {
     // );
     // store.dispatch(sceneEditorActions.setAvailableComponentsList(permittedEditorComponents));
     store.dispatch(sceneEditorActions.setComponentsSchema(SCHEMA));
+    store.dispatch(sceneEditorActions.setComponentsEnum(Components));
   }
 
   update(): void {
@@ -233,10 +234,10 @@ class SceneEditor extends System {
     // const components = this.engine.getAllComponentsOfId(entityId);
     // const [components, entity] = this.getEntity(entityId);
     const [entityComponents, entity] = this.getEntity(entityId);
-    const components = [];
+    const components: [number, number[]][] = [];
     Object.entries(entityComponents).forEach(([componentId, arrayBuffers]) => {
       const values = arrayBuffers.map(arrayBuffer => arrayBuffer[entity]);
-      components.push(values);
+      components.push([parseInt(componentId), values]);
     });
     store.dispatch(sceneEditorActions.setCurrentEntityComponents(components));
   };
