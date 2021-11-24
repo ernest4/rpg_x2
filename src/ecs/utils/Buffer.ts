@@ -1,4 +1,3 @@
-// TODO: jests
 class Buffer<T> {
   private _buffer1: T[];
   private _buffer2: T[];
@@ -16,32 +15,23 @@ class Buffer<T> {
 
   process = (callback: (item: T) => void) => {
     this.swap();
-    // this.each(callback);
-    // Inlining...
     const { _secondaryBuffer } = this;
     for (let i = 0, l = _secondaryBuffer.length; i < l; i++) {
       callback(_secondaryBuffer[i]);
     }
-    this.flush();
+    this.flushSecondary();
   };
 
-  last = () => {
+  last = (): T | null => {
     const {
       _activeBuffer,
       _activeBuffer: { length },
     } = this;
 
+    if (length === 0) return null;
+
     return _activeBuffer[length - 1];
   };
-
-  swap = () => {
-    // TODO: is this really safe? Probably. JS is single threaded...
-    const temp = this._activeBuffer;
-    this._activeBuffer = this._secondaryBuffer;
-    this._secondaryBuffer = temp;
-  };
-
-  flush = () => (this._secondaryBuffer = []);
 
   flushAll = () => {
     this._activeBuffer = [];
@@ -50,7 +40,14 @@ class Buffer<T> {
 
   size = () => this._activeBuffer.length;
 
-  // each = (callback: (item: T) => void) => this._secondaryBuffer.forEach(callback);
+  private swap = () => {
+    // TODO: is this really safe? Probably. JS is single threaded...
+    const temp = this._activeBuffer;
+    this._activeBuffer = this._secondaryBuffer;
+    this._secondaryBuffer = temp;
+  };
+
+  private flushSecondary = () => (this._secondaryBuffer = []);
 }
 
 export default Buffer;
