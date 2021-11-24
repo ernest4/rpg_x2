@@ -75,11 +75,8 @@ const config: Configuration = {
         test: /\.css$/,
         use: [
           MiniCssExtractPlugin.loader,
-          {
-            loader: "css-loader",
-            options: { importLoaders: 1, modules: true, sourceMap: __RPG_X2_DEVELOPMENT__ },
-          },
-          { loader: "postcss-loader", options: { sourceMap: __RPG_X2_DEVELOPMENT__ } },
+          { loader: "css-loader", options: { importLoaders: 1 } },
+          "postcss-loader",
         ],
       },
       // {
