@@ -39,8 +39,6 @@ class SpriteRender extends PhaserSystem {
       Components.Rotation,
       Components.Scale
     );
-
-    console.log("0,2,4,7")
   }
 
   update(): void {
@@ -48,9 +46,6 @@ class SpriteRender extends PhaserSystem {
       archetypes,
       archetypes: { length },
     } = this;
-
-    // console.log(length);
-    // console.log(this.engine._archetypes.length);
 
     for (let j = 0; j < length; j++) {
       const {
