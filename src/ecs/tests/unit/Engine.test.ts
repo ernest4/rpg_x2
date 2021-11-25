@@ -22,13 +22,13 @@ const enum Components {
 
 let component0 = Vector2f;
 let component1 = [f32("dx"), f32("dy")];
-let component2 = [f32("u"), i32("v"), i32("t")];
-let component3 = [i32("t")];
+let component2 = [i32("t")];
+let component3 = [f32("u"), i32("v"), i32("t")];
 
 let schema = {
   [Components.component0]: component0,
   [Components.component1]: component1,
-  // [Components.component2]: component2,
+  [Components.component2]: component2,
   // [Components.component3]: component3,
 };
 
@@ -305,6 +305,61 @@ describe(Engine, () => {
       });
     });
 
+    context("when there are views", () => {
+      let archetypes0;
+      let archetypes1;
+      let archetypes2;
+      let archetypes3;
+
+      beforeEach(() => {
+        archetypes0 = engine.view(Components.component0);
+        archetypes1 = engine.view(Components.component0, Components.component1);
+        archetypes2 = engine.view(
+          Components.component0,
+          Components.component1,
+          Components.component2
+        );
+        archetypes3 = engine.view(Components.component0, Components.component2);
+      });
+
+      it("updates relevant archetype views", () => {
+        expect(archetypes0.length).toEqual(0);
+        expect(archetypes1.length).toEqual(0);
+        expect(archetypes2.length).toEqual(0);
+        expect(archetypes3.length).toEqual(0);
+
+        engine.addComponent(
+          Components.component0,
+          entityId,
+          schema[Components.component0],
+          [34, 56]
+        );
+        engine.addComponent(
+          Components.component1,
+          entityId,
+          schema[Components.component1],
+          [78, 90]
+        );
+
+        expect(archetypes0.length).toEqual(2);
+        expect(archetypes1.length).toEqual(1);
+        expect(archetypes2.length).toEqual(0);
+        expect(archetypes3.length).toEqual(0);
+
+        engine.addComponent(
+          Components.component2,
+          entityId,
+          schema[Components.component2],
+          [357]
+        );
+
+        expect(archetypes0.length).toEqual(3);
+        expect(archetypes1.length).toEqual(2);
+        expect(archetypes2.length).toEqual(1);
+        expect(archetypes3.length).toEqual(1);
+      });
+    });
+
     context("when component already exists", () => {
       beforeEach(() => {
         engine.addComponent(
@@ -420,6 +475,7 @@ describe(Engine, () => {
           schema[Components.component1],
           [78, 90]
         );
+        engine.addComponent(Components.component2, entityId, schema[Components.component2], [357]);
       });
 
       it("removes the component", () => {
@@ -427,6 +483,7 @@ describe(Engine, () => {
           {
             [Components.component0]: [old_x, old_y],
             [Components.component1]: [old_dx, old_dy],
+            [Components.component2]: [old_t],
           },
           old_entity,
         ] = engine.getEntity(entityId);
@@ -435,9 +492,14 @@ describe(Engine, () => {
         expect(old_y[old_entity]).toEqual(56);
         expect(old_dx[old_entity]).toEqual(78);
         expect(old_dy[old_entity]).toEqual(90);
+        expect(old_t[old_entity]).toEqual(357);
 
         const oldArchetype = engine.getEntityArchetype(entityId);
-        expect(oldArchetype.componentIds).toEqual([Components.component0, Components.component1]);
+        expect(oldArchetype.componentIds).toEqual([
+          Components.component0,
+          Components.component1,
+          Components.component2,
+        ]);
         expect(oldArchetype.elementCount).toEqual(1);
 
         engine.removeComponent(Components.component0, entityId);
@@ -448,6 +510,7 @@ describe(Engine, () => {
           {
             [Components.component0]: comp0,
             [Components.component1]: [dx, dy],
+            [Components.component2]: [t],
           },
           entity,
         ] = engine.getEntity(entityId);
@@ -455,33 +518,43 @@ describe(Engine, () => {
         expect(comp0).toBeUndefined();
         expect(dx[entity]).toEqual(78);
         expect(dy[entity]).toEqual(90);
+        expect(t[old_entity]).toEqual(357);
 
         const currentArchetype = engine.getEntityArchetype(entityId);
-        expect(currentArchetype.componentIds).toEqual([Components.component1]);
+        expect(currentArchetype.componentIds).toEqual([
+          Components.component1,
+          Components.component2,
+        ]);
         expect(currentArchetype.elementCount).toEqual(1);
       });
 
       it("changes archetypes", () => {
         const archetype2 = engine.getEntityArchetype(entityId);
-        expect(archetype2.componentIds).toEqual([Components.component0, Components.component1]);
+        expect(archetype2.componentIds).toEqual([
+          Components.component0,
+          Components.component1,
+          Components.component2,
+        ]);
 
         engine.removeComponent(Components.component1, entityId);
 
         const archetype1 = engine.getEntityArchetype(entityId);
-        expect(archetype1.componentIds).toEqual([Components.component0]);
+        expect(archetype1.componentIds).toEqual([Components.component0, Components.component2]);
       });
 
       context("when last component is removed", () => {
         it("recycles the id", () => {
           engine.removeComponent(Components.component0, entityId);
           engine.removeComponent(Components.component1, entityId);
+          engine.removeComponent(Components.component2, entityId);
           expect(engine.newEntityId()).toEqual(entityId);
         });
 
         context("when recycleEntityIdIfFree is false", () => {
           it("does not recycle the id", () => {
             engine.removeComponent(Components.component0, entityId);
-            engine.removeComponent(Components.component1, entityId, false);
+            engine.removeComponent(Components.component1, entityId);
+            engine.removeComponent(Components.component2, entityId, false);
             expect(engine.newEntityId()).not.toEqual(entityId);
           });
         });

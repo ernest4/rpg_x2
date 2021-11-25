@@ -216,10 +216,17 @@ class Engine {
     // updating query sets
     const { _queries } = this;
     const queryStrings = Object.keys(_queries);
-    const newArchetypeQueryString = newArchetype.componentIds.sort().toString();
+    const newArchetypeQueryString = newArchetype.componentIds.toString();
     for (let i = 0, l = queryStrings.length; i < l; i++) {
       const queryString = queryStrings[i];
-      if (!newArchetypeQueryString.includes(queryString)) continue;
+      const queryStringNumbers = queryString.split(",");
+      let k;
+      let ll;
+      for (k = 0, ll = queryStringNumbers.length; k < ll; k++) {
+        if (!newArchetypeQueryString.includes(queryStringNumbers[k])) break;
+      }
+
+      if (k !== ll) continue;
 
       _queries[queryString].push(newArchetype);
     }

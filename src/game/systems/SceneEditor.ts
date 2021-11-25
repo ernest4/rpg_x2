@@ -166,25 +166,12 @@ class SceneEditor extends System {
 
   private processRemoveList = (entityId: EntityId) => {
     const sceneEditorStore = store.getState().sceneEditor as any;
-    // const components = this.engine.getAllComponentsOfId(entityId);
     const currentEntityComponentsRemoveList = sceneEditorStore.currentEntityComponentsRemoveList;
-
     if (currentEntityComponentsRemoveList?.length === 0) return;
 
     currentEntityComponentsRemoveList.forEach((componentId: number) =>
       this.removeComponent(componentId, entityId)
     );
-
-    // components.forEach((component: Component) => {
-    //   if (
-    //     !currentEntityComponentsRemoveList.some(
-    //       (componentToRemoveName: string) => componentToRemoveName === component.constructor.name
-    //     )
-    //   )
-    //     return;
-
-    //   this.engine.removeComponent(component);
-    // });
 
     store.dispatch(sceneEditorActions.setCurrentEntityComponentsRemoveList([]));
   };
