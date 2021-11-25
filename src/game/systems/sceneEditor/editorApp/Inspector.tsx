@@ -25,7 +25,7 @@ const Inspector = () => {
       </div>
       <Components />
       <HorizontalSpace />
-      {/* <AddComponentButton /> */}
+      <AddComponentButton />
       <HorizontalSpace />
     </div>
   );

@@ -12,6 +12,9 @@ import { isNumber } from "../../ecs/utils/Number";
 class SceneEditor extends System {
   start(): void {
     initSceneEditorReactApp();
+    store.dispatch(sceneEditorActions.setComponentsSchema(SCHEMA));
+    store.dispatch(sceneEditorActions.setComponentsEnum(Components));
+
     // const permittedEditorComponents = Object.keys(availableComponents).filter(
     //   availableComponentName => {
     //     return !NON_EDITOR_COMPONENTS.some(
@@ -19,9 +22,17 @@ class SceneEditor extends System {
     //     );
     //   }
     // );
-    // store.dispatch(sceneEditorActions.setAvailableComponentsList(permittedEditorComponents));
-    store.dispatch(sceneEditorActions.setComponentsSchema(SCHEMA));
-    store.dispatch(sceneEditorActions.setComponentsEnum(Components));
+    const permittedEditorComponents = Object.keys(SCHEMA)
+      .filter(componentId => {
+        // return !NON_EDITOR_COMPONENTS.some(
+        //   nonEditorComponentName => nonEditorComponentName === availableComponentId
+        // );
+        const componentName = Components[componentId];
+        return !componentName.includes("Event");
+      })
+      .map(componentId => parseInt(componentId));
+
+    store.dispatch(sceneEditorActions.setAvailableComponentsList(permittedEditorComponents));
 
     // TODO: remove (testing)
     store.dispatch(sceneEditorActions.setCurrentEntityId(1));
