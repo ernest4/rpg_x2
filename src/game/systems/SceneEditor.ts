@@ -131,7 +131,7 @@ class SceneEditor extends System {
 
   private pullEntityComponentsFromRedux = (entityId: EntityId) => {
     // NOTE: call order is important here !!
-    // this.processAddList(entityId);
+    this.processAddList(entityId);
     this.processUpdateList(entityId);
     this.processRemoveList(entityId);
   };
@@ -151,6 +151,29 @@ class SceneEditor extends System {
 
   //   store.dispatch(sceneEditorActions.setCurrentEntityComponentsAddList([]));
   // };
+
+  private processAddList = (entityId: EntityId) => {
+    const sceneEditorStore = store.getState().sceneEditor as any;
+    // const components = this.engine.getAllComponentsOfId(entityId);
+    const currentEntityComponentsAddList = sceneEditorStore.currentEntityComponentsAddList;
+
+    if (currentEntityComponentsAddList?.length === 0) return;
+
+    currentEntityComponentsAddList.forEach((componentId: number) => {
+      const values = new Array(SCHEMA[componentId].length).fill(0);
+      // for (let i = 0, l = SCHEMA[componentId].length; i < l; i++) {
+      //   values.push(0);
+      // }
+      this.addComponent(componentId, entityId, SCHEMA[componentId], values);
+    });
+    // currentEntityComponentsAddList.forEach((componentToAddName: string) => {
+    //   if (components.some(({ constructor: { name } }) => componentToAddName === name)) return;
+
+    //   this.engine.addComponent(new (availableComponents as any)[componentToAddName](entityId));
+    // });
+
+    store.dispatch(sceneEditorActions.setCurrentEntityComponentsAddList([]));
+  };
 
   private processUpdateList = (entityId: EntityId) => {
     const sceneEditorStore = store.getState().sceneEditor as any;
