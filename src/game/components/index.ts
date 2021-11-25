@@ -1,4 +1,4 @@
-import { f32, i32, Vector3f } from "../../ecs/Component";
+import { f32, i32, string, Vector3f } from "../../ecs/Component";
 
 export enum Components {
   Position,
@@ -36,7 +36,7 @@ export const SCHEMA = {
     i32("targetEntityId"),
   ],
   [Components.Hitpoints]: [i32("hitpoints")],
-  [Components.Name]: [i32("name")],
+  [Components.Name]: [string("name")],
 } as const;
 
 // TODO: for scene editor

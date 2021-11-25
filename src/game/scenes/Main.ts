@@ -15,7 +15,7 @@ import Rotation from "../systems/Rotation";
 import SceneEditor from "../systems/SceneEditor";
 // import FpsCounter from "./utils/FpsCounter";
 
-const MAX_ENTITIES = 1e6;
+const MAX_ENTITIES = 1e5;
 
 export default class Main extends Phaser.Scene {
   // dudeQuads!: any[];

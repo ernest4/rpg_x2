@@ -17,7 +17,7 @@ const TYPE_TO_ARRAY = {
   i32: Int32Array,
 };
 
-const MAX_SPARSE_ENTITIES = 1e6;
+const MAX_SPARSE_ENTITIES = 1e5;
 const TOMBSTONE_ENTITY = MAX_SPARSE_ENTITIES - 1;
 // this is optimized version of sparseSet...
 class Archetype {
@@ -59,8 +59,8 @@ class Archetype {
       const valuesCount = componentSchema.length;
       dataStream.push(valuesCount);
       for (let k = 0; k < valuesCount; k++) {
-        const [field, type] = componentSchema[k].split("_");
-        const denseList = new TYPE_TO_ARRAY[type](maxEntities); // denseList per field
+        const [subtype, field, numericType] = componentSchema[k].split("_");
+        const denseList = new TYPE_TO_ARRAY[numericType](maxEntities); // denseList per field
         soa[k] = denseList;
         this.denseLists.push(denseList); // caching
         dataStream.push(denseList);

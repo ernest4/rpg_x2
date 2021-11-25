@@ -7,8 +7,9 @@ import SignatureIdGenerator from "./component/SignatureIdGenerator";
 //   f32,
 //   i32,
 // }
-export const i32 = <T extends string>(field: T) => `${field}_i32` as const;
-export const f32 = <T extends string>(field: T) => `${field}_f32` as const;
+export const i32 = <T extends string>(field: T) => `_${field}_i32` as const;
+export const f32 = <T extends string>(field: T) => `_${field}_f32` as const;
+export const string = <T extends string>(field: T) => `string_${field}_i32` as const;
 
 export const Vector2i = [i32("x"), i32("y")] as const;
 export const Vector2f = [f32("x"), f32("y")] as const;
